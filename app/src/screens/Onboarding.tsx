@@ -146,7 +146,7 @@ export function Onboarding({ p0, s }: { p0: Profile; s: AppState }) {
           <p className="lead">{t('Dá para mudar depois. A maioria escolhe Treinador.')}</p>
           <div className="tone-pick col">
             {(Object.keys(toneLabel()) as Tone[]).map((tn) => (
-              <button key={tn} type="button" className={`tone tone-${tn} ${p.tone === tn ? 'on' : ''}`} onClick={() => upd({ tone: tn })}>
+              <button key={tn} type="button" aria-pressed={p.tone === tn} className={`tone tone-${tn} ${p.tone === tn ? 'on' : ''}`} onClick={() => upd({ tone: tn })}>
                 <b>{toneLabel()[tn].name}</b>
                 <small>{toneLabel()[tn].desc}</small>
                 <em>

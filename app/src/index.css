@@ -3739,3 +3739,41 @@ input[type='range'] {
   display: inline-flex;
   align-items: center;
 }
+
+/* escolha do nível de dureza: seleção bem visível (corrige o destaque que não aparecia no cadastro) */
+.tone {
+  position: relative;
+  transition: border-color 0.15s, background 0.15s, transform 0.12s;
+}
+.tone:active {
+  transform: scale(0.98);
+}
+.tone-pick .tone.on,
+.tone-pick.col .tone.on {
+  border-color: var(--yel-2);
+  background: var(--red-soft);
+  box-shadow: 0 10px 24px -14px var(--glow);
+}
+.tone-pick .tone.tone-sargento.on,
+.tone-pick.col .tone.tone-sargento.on {
+  border-color: var(--bad);
+  background: var(--bad-soft);
+}
+.tone.on::after {
+  content: '✓';
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--yel-2);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+.tone.tone-sargento.on::after {
+  background: var(--bad);
+}
