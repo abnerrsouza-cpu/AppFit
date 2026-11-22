@@ -6,6 +6,7 @@ import {
   type DailyLog,
   type Tone,
   cycleInfo,
+  defaultCustom,
   streak,
   today,
   workoutFor,
@@ -160,6 +161,7 @@ export function dailySchedule(s: AppState, d = new Date()): Nudge[] {
   const late = `${String(Math.min(23, ch + 1)).padStart(2, '0')}:${String(cm).padStart(2, '0')}`
   add('checkin_atrasado', late)
   if (d.getDay() === 0) add('semanal', '10:00')
+  for (const c of s.custom ?? defaultCustom()) if (c.on && c.text.trim()) list.push({ moment: 'geral', time: c.time, title: 'Recado seu', body: c.text })
   return list.sort((a, b) => a.time.localeCompare(b.time))
 }
 

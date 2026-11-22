@@ -78,6 +78,74 @@ export interface AppState {
   weekly: Record<string, WeeklyLog>
   checks: Record<string, Record<string, boolean>> // tarefas do dia marcadas
   theme: 'dark' | 'light'
+  custom?: CustomNudge[] // cobranças escritas pelo próprio usuário
+  projeto?: Projeto
+}
+
+export interface CustomNudge {
+  id: string
+  time: string
+  text: string
+  on: boolean
+}
+
+export interface Promise_ {
+  id: string
+  text: string
+  date: string
+  status: 'aberta' | 'cumprida' | 'quebrada'
+}
+export interface Vent {
+  id: string
+  date: string
+  mood: string
+  text: string
+}
+export interface Goal {
+  id: string
+  emoji: string
+  title: string
+  due: string
+  done: boolean
+}
+export interface Vision {
+  result: string
+  feeling: string
+  why: string
+  photoId?: string
+  targetDate: string
+}
+export interface GalleryPhoto {
+  id: string
+  photoId: string
+  caption: string
+  date: string
+}
+export interface Projeto {
+  promises: Promise_[]
+  vents: Vent[]
+  goals: Goal[]
+  vision: Vision
+  photos: GalleryPhoto[]
+}
+
+export function blankProjeto(startDate: string, cycleDays: number): Projeto {
+  return {
+    promises: [],
+    vents: [],
+    goals: [],
+    vision: { result: '', feeling: '', why: '', targetDate: ymd(addDays(parseYmd(startDate), cycleDays)) },
+    photos: [],
+  }
+}
+
+export const defaultCustom = (): CustomNudge[] => [{ id: 'bora-filho', time: '20:00', text: 'Treinou hoje? Bora, filho!', on: true }]
+
+export function getProjeto(s: AppState): Projeto {
+  return s.projeto ?? blankProjeto(s.profile.startDate, s.profile.cycleDays)
+}
+export function setProjeto(fn: (p: Projeto) => Projeto) {
+  setState((s) => ({ ...s, projeto: fn(getProjeto(s)) }))
 }
 
 // ---------- datas ----------
@@ -215,7 +283,31 @@ function demoState(): AppState {
     }
   }
 
-  return { demo: true, onboarded: true, profile, daily, weekly, checks: {}, theme: 'light' }
+  const projeto: Projeto = {
+    promises: [
+      { id: 'p1', text: 'Não vou pedir delivery no fim de semana.', date: ymd(addDays(now, -10)), status: 'cumprida' },
+      { id: 'p2', text: 'Vou treinar mesmo nos dias sem vontade.', date: ymd(addDays(now, -6)), status: 'aberta' },
+      { id: 'p3', text: 'Dormir antes da meia-noite de segunda a sexta.', date: ymd(addDays(now, -3)), status: 'quebrada' },
+    ],
+    vents: [
+      { id: 'v1', date: ymd(addDays(now, -2)), mood: '😤', text: 'Hoje bateu a vontade de largar tudo. Fui treinar com raiva e saí melhor.' },
+      { id: 'v2', date: ymd(addDays(now, -8)), mood: '🙂', text: 'Primeira vez que a calça antiga fechou. Pequeno, mas eu vi.' },
+    ],
+    goals: [
+      { id: 'g1', emoji: '⚖️', title: 'Chegar a 80 kg', due: ymd(addDays(start, 90)), done: false },
+      { id: 'g2', emoji: '🏃', title: 'Correr 5 km sem parar', due: ymd(addDays(now, 30)), done: false },
+      { id: 'g3', emoji: '🏋️', title: 'Supino com 80 kg', due: ymd(addDays(now, 45)), done: false },
+      { id: 'g4', emoji: '🥗', title: '30 dias sem refrigerante', due: ymd(addDays(now, -5)), done: true },
+    ],
+    vision: {
+      result: 'Abdômen aparecendo, 80 kg e ombro largo.',
+      feeling: 'Confiante para tirar a camisa na praia sem pensar duas vezes.',
+      why: 'Quero ser exemplo em casa e parar de fugir de foto.',
+      targetDate: ymd(addDays(start, 90)),
+    },
+    photos: [],
+  }
+  return { demo: true, onboarded: true, profile, daily, weekly, checks: {}, theme: 'light', custom: defaultCustom(), projeto }
 }
 
 // ---------- persistência ----------
@@ -261,6 +353,7 @@ export function resetToBlank() {
     weekly: {},
     checks: {},
     theme: state.theme,
+    custom: defaultCustom(),
   }))
 }
 

@@ -8,6 +8,7 @@ import { Evolution } from './screens/Evolution'
 import { Menu } from './screens/Menu'
 import { News } from './screens/News'
 import { Onboarding } from './screens/Onboarding'
+import { Projeto } from './screens/Projeto'
 import { Today } from './screens/Today'
 import { resetToBlank, today, useAppState } from './store'
 
@@ -50,6 +51,7 @@ export default function App() {
       {tab === 'evolucao' && <Evolution s={s} />}
       {tab === 'cobrancas' && <Alerts s={s} onBack={() => setTab('inicio')} />}
       {tab === 'noticias' && <News />}
+      {tab === 'projeto' && <Projeto s={s} />}
       {tab === 'menu' && <Menu s={s} />}
       <BottomNav tab={tab} onTab={setTab} dots={{}} />
     </div>

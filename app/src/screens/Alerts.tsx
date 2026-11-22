@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Icon } from '../components/Icon'
 import { enableNotifications, notifyStatus, show } from '../notify'
 import { dailySchedule, toneLabel } from '../psych'
-import { type AppState, type Tone, setState } from '../store'
+import { type AppState, type CustomNudge, type Tone, defaultCustom, newId, setState } from '../store'
 
 const TONE_EMOJI: Record<Tone, string> = { parceiro: '🤝', treinador: '📣', sargento: '🪖' }
 
@@ -88,11 +88,74 @@ export function Alerts({ s, onBack }: { s: AppState; onBack: () => void }) {
         )}
       </div>
 
-      {status === 'granted' && (
-        <button type="button" className="ghost-btn" onClick={() => show(next?.title ?? 'Teste', next?.body ?? 'Funcionando.')}>
-          <Icon name="bell" size={18} /> Testar notificação
-        </button>
-      )}
+      <MyNudges s={s} canSend={status === 'granted'} />
     </div>
+  )
+}
+
+function MyNudges({ s, canSend }: { s: AppState; canSend: boolean }) {
+  const list = s.custom ?? defaultCustom()
+  const [text, setText] = useState('')
+  const [time, setTime] = useState('19:00')
+  const [sent, setSent] = useState<string | null>(null)
+  const save = (l: CustomNudge[]) => setState((st) => ({ ...st, custom: l }))
+
+  const send = async (n: CustomNudge) => {
+    const ok = await show('Recado seu', n.text)
+    setSent(ok ? n.id : 'erro')
+    setTimeout(() => setSent(null), 2500)
+  }
+
+  return (
+    <section className="card block mine">
+      <div className="block-h">
+        <h2>Suas cobranças</h2>
+        <span className="soft-chip">todo dia</span>
+      </div>
+      <p className="hint">Escreva do seu jeito. Elas chegam como notificação no horário.</p>
+      <ul className="mine-list">
+        {list.map((n) => (
+          <li key={n.id} className={n.on ? '' : 'off'}>
+            <input
+              id={`cn-t-${n.id}`}
+              type="time"
+              value={n.time}
+              onChange={(e) => save(list.map((x) => (x.id === n.id ? { ...x, time: e.target.value } : x)))}
+              aria-label="Horário"
+            />
+            <span className="mine-text">{n.text}</span>
+            <button type="button" className="mine-send" onClick={() => send(n)} disabled={!canSend} aria-label="Enviar agora">
+              {sent === n.id ? <Icon name="check" size={16} stroke={3} /> : <Icon name="play" size={14} />}
+            </button>
+            <button type="button" className="mine-del" onClick={() => save(list.filter((x) => x.id !== n.id))} aria-label="Apagar">
+              <Icon name="x" size={14} stroke={2.5} />
+            </button>
+          </li>
+        ))}
+      </ul>
+      <form
+        className="mine-add"
+        onSubmit={(e) => {
+          e.preventDefault()
+          if (!text.trim()) return
+          save([...list, { id: newId(), time, text: text.trim(), on: true }])
+          setText('')
+        }}
+      >
+        <input id="cn-new-time" type="time" value={time} onChange={(e) => setTime(e.target.value)} aria-label="Horário" />
+        <input id="cn-new-text" value={text} onChange={(e) => setText(e.target.value)} placeholder="Ex.: Larga o celular e vai treinar" />
+        <button type="submit" className="mine-plus" aria-label="Adicionar">
+          <Icon name="plus" size={18} stroke={2.5} />
+        </button>
+      </form>
+      {canSend ? (
+        <button type="button" className="cta" onClick={() => send(list[0] ?? { id: 'x', time: '', text: 'Treinou hoje? Bora, filho!', on: true })}>
+          <Icon name="bell" size={18} /> Disparar agora: "{(list[0]?.text ?? 'Treinou hoje? Bora, filho!').slice(0, 28)}"
+        </button>
+      ) : (
+        <p className="muted">Ative as notificações acima para disparar.</p>
+      )}
+      {sent === 'erro' && <p className="bad">Não consegui enviar. Abra o app pelo ícone da tela de início.</p>}
+    </section>
   )
 }
