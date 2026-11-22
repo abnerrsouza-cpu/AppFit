@@ -252,7 +252,7 @@ function WeeklyForm({ s, onClose }: { s: AppState; onClose: () => void }) {
             <span>
               <Icon name="camera" size={30} />
               <b className="ttl">
-                {busy ? t('Processando...') : f.photoId ? t('Foto enviada. Toque para trocar') : t('Tirar ou enviar foto')}
+                {busy ? t('Processando...') : f.photoId ? t('Foto enviada. Toque para trocar') : t('Tire ou envie uma foto de corpo inteiro')}
                 <Info text={t('Foto de corpo inteiro para o antes e depois. Use sempre a mesma luz, pose e lugar para a comparação ser justa.')} />
               </b>
               <small>{t('A foto fica guardada só no seu aparelho.')}</small>
@@ -279,7 +279,7 @@ function WeeklyForm({ s, onClose }: { s: AppState; onClose: () => void }) {
 
         <fieldset className="card field">
           <legend>
-            <Icon name="target" size={18} /> {t('Nota da semana')}
+            <Icon name="target" size={18} /> {t('Dê uma nota de 1 a 5 para a sua semana')}
             <Info text={t('Dê de 1 a 5 para como foi sua dieta, seu treino e seu cardio na semana.')} />
           </legend>
           <Rate k="dietRate" l={t('Dieta')} />
@@ -289,20 +289,20 @@ function WeeklyForm({ s, onClose }: { s: AppState; onClose: () => void }) {
 
         <fieldset className="card field">
           <legend>
-            <Icon name="quote" size={18} /> {t('Sem enrolação')}
+            <Icon name="quote" size={18} /> {t('Responda com sinceridade')}
             <Info text={t('Três respostas curtas: o que deu certo, onde você se sabotou e um compromisso para a próxima semana.')} />
           </legend>
           <label>
-            {t('Sua maior vitória da semana')}
+            {t('O que deu certo nesta semana?')}
             <input id="wk-win" value={f.win} onChange={(e) => set('win', e.target.value)} />
           </label>
           <label>
-            {t('Onde você se sabotou')}
+            {t('Onde você se sabotou nesta semana?')}
             <input id="wk-fail" value={f.fail} onChange={(e) => set('fail', e.target.value)} />
           </label>
           <label>
-            {t('Um compromisso para a próxima semana')}
-            <input id="wk-commit" value={f.commit} onChange={(e) => set('commit', e.target.value)} placeholder={t('Ex.: sábado sem delivery')} />
+            {t('O que você vai fazer diferente na próxima semana?')}
+            <input id="wk-commit" value={f.commit} onChange={(e) => set('commit', e.target.value)} placeholder={t('Ex.: não pedir delivery no sábado')} />
           </label>
         </fieldset>
 

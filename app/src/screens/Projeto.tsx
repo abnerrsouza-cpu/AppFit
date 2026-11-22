@@ -18,11 +18,11 @@ import {
 
 type Sec = 'expectativa' | 'promessas' | 'metas' | 'desabafo' | 'fotos'
 const SECS: { id: Sec; label: string; emoji: string }[] = [
-  { id: 'expectativa', label: 'Expectativa', emoji: '🌟' },
-  { id: 'promessas', label: 'Promessas', emoji: '🤞' },
-  { id: 'metas', label: 'Metas', emoji: '🎯' },
-  { id: 'desabafo', label: 'Desabafo', emoji: '💬' },
-  { id: 'fotos', label: 'Fotos', emoji: '📸' },
+  { id: 'expectativa', label: 'Expectativa', emoji: '' },
+  { id: 'promessas', label: 'Promessas', emoji: '' },
+  { id: 'metas', label: 'Metas', emoji: '' },
+  { id: 'desabafo', label: 'Desabafo', emoji: '' },
+  { id: 'fotos', label: 'Fotos', emoji: '' },
 ]
 
 const dm = (s: string) => fmtDayMonth(parseYmd(s))
@@ -70,12 +70,10 @@ export function Projeto({ s }: { s: AppState }) {
           <b>{left}</b> {t('dias')}
           <Info light text={t('Dias que faltam até a data da sua meta. Você define a data na aba Expectativa.')} />
         </span>
-        <p className="pj-result">{pj.vision.result || t('Defina o resultado que você quer na aba Expectativa.')}</p>
+        <p className="pj-result">{pj.vision.result || t('Escreva na aba Expectativa o resultado que você quer.')}</p>
         <div className="pj-stats">
-          <span>🤞 {kept} {kept === 1 ? t('promessa cumprida') : t('promessas cumpridas')}</span>
-          <span>
-            🎯 {goalsDone}/{pj.goals.length} {t('metas')}
-          </span>
+          <span>{kept === 1 ? t('1 promessa cumprida') : t('{n} promessas cumpridas', { n: kept })}</span>
+          <span>{t('{a} de {b} metas batidas', { a: goalsDone, b: pj.goals.length })}</span>
         </div>
       </section>
 
@@ -86,7 +84,7 @@ export function Projeto({ s }: { s: AppState }) {
       <div className="cat-row">
         {SECS.map((x) => (
           <button key={x.id} type="button" className={`cat ${sec === x.id ? 'on' : ''}`} onClick={() => setSec(x.id)}>
-            <span>{x.emoji}</span> {t(x.label)}
+            {t(x.label)}
           </button>
         ))}
       </div>
@@ -119,15 +117,17 @@ function Expectativa({ s, visionUrl }: { s: AppState; visionUrl?: string }) {
           }}
         />
         {visionUrl ? (
-          <img src={visionUrl} alt={t('Foto da expectativa')} />
+          <img src={visionUrl} alt={t('Foto do shape que você quer ter')} />
         ) : (
           <span>
-            <span className="big-emo">🖼️</span>
+            <span className="pj-photo-ic">
+              <Icon name="camera" size={26} />
+            </span>
             <b className="ttl">
-              {busy ? t('Salvando...') : t('Foto da expectativa')}
+              {busy ? t('Salvando...') : t('Adicione uma foto do shape que você quer ter')}
               <Info text={t('Uma imagem do resultado que você quer. Ela vira o fundo do topo do Projetinho, para você ver todo dia.')} />
             </b>
-            <small>{t('O shape que você quer ter. Uma referência, um print, uma foto sua antiga.')}</small>
+            <small>{t('Pode ser uma foto de referência ou uma foto sua de quando estava em forma. Toque aqui para escolher.')}</small>
           </span>
         )}
         {visionUrl && <span className="pj-photo-tag">{t('Toque para trocar')}</span>}
@@ -136,28 +136,28 @@ function Expectativa({ s, visionUrl }: { s: AppState; visionUrl?: string }) {
       <div className="card field">
         <label>
           <span className="ttl">
-            🎯 {t('Resultado que eu quero (meu foco)')}
+            {t('Qual resultado você quer alcançar?')}
             <Info text={t('Escreva em uma frase o resultado que você quer. Aparece em destaque no topo da tela.')} />
           </span>
-          <textarea id="pj-result" rows={2} value={v.result} onChange={(e) => upd({ result: e.target.value })} placeholder={t('Ex.: 80 kg, abdômen aparecendo')} />
+          <textarea id="pj-result" rows={2} value={v.result} onChange={(e) => upd({ result: e.target.value })} placeholder={t('Ex.: chegar a 80 kg com o abdômen aparecendo')} />
         </label>
         <label>
           <span className="ttl">
-            😌 {t('Como vou me sentir quando chegar lá')}
+            {t('Como você vai se sentir quando chegar lá?')}
             <Info text={t('Imaginar o sentimento ajuda a não desistir. Escreva como você vai se sentir no dia que chegar.')} />
           </span>
-          <textarea id="pj-feeling" rows={2} value={v.feeling} onChange={(e) => upd({ feeling: e.target.value })} placeholder={t('Ex.: confiante, leve, orgulhoso')} />
+          <textarea id="pj-feeling" rows={2} value={v.feeling} onChange={(e) => upd({ feeling: e.target.value })} placeholder={t('Ex.: confiante para tirar a camisa na praia')} />
         </label>
         <label>
           <span className="ttl">
-            ❤️ {t('Por que isso importa pra mim')}
+            {t('Por que isso é importante para você?')}
             <Info text={t('O motivo verdadeiro. É ele que segura você nos dias sem vontade.')} />
           </span>
-          <textarea id="pj-why" rows={2} value={v.why} onChange={(e) => upd({ why: e.target.value })} placeholder={t('O motivo real, sem filtro')} />
+          <textarea id="pj-why" rows={2} value={v.why} onChange={(e) => upd({ why: e.target.value })} placeholder={t('Ex.: quero ser exemplo para os meus filhos')} />
         </label>
         <label>
           <span className="ttl">
-            📅 {t('Até quando')}
+            {t('Até que data você quer chegar lá?')}
             <Info text={t('A data em que você quer chegar no resultado. A contagem de dias do topo usa essa data.')} />
           </span>
           <input id="pj-date" type="date" value={v.targetDate} onChange={(e) => upd({ targetDate: e.target.value })} />
@@ -184,13 +184,13 @@ function Promessas({ s }: { s: AppState }) {
         }}
       >
         <span className="pj-add-pre">
-          {t('Eu prometo que')}
-          <Info text={t('Escreva um compromisso com você mesmo. Depois marque Cumpri ou Quebrei. Promessas cumpridas aparecem no topo.')} />
+          {t('Escreva uma promessa para você mesmo')}
+          <Info text={t('Escreva um compromisso com você mesmo. Depois marque Cumpri ou Não cumpri. Promessas cumpridas aparecem no topo.')} />
         </span>
-        <textarea id="pj-new-promise" rows={2} value={text} onChange={(e) => setText(e.target.value)} placeholder={t('vou treinar amanhã mesmo cansado')} />
+        <textarea id="pj-new-promise" rows={2} value={text} onChange={(e) => setText(e.target.value)} placeholder={t('Ex.: vou treinar amanhã mesmo cansado')} />
         <WithInfo text={t('Salva a promessa na lista abaixo com a data de hoje.')}>
           <button type="submit" className="cta sm-cta">
-            {t('Fazer promessa')}
+            {t('Salvar promessa')}
           </button>
         </WithInfo>
       </form>
@@ -204,11 +204,14 @@ function Promessas({ s }: { s: AppState }) {
                 <Icon name="check" size={16} stroke={3} /> {t('Cumpri')}
               </button>
               <button type="button" className="pa no" onClick={() => set(p.id, 'quebrada')}>
-                <Icon name="x" size={16} stroke={3} /> {t('Quebrei')}
+                <Icon name="x" size={16} stroke={3} /> {t('Não cumpri')}
               </button>
             </div>
           ) : (
-            <span className="promise-badge">{p.status === 'cumprida' ? `✅ ${t('Cumprida')}` : `💔 ${t('Quebrada. Recomece.')}`}</span>
+            <span className={`promise-badge ${p.status === 'cumprida' ? 'ok' : 'bad'}`}>
+              <Icon name={p.status === 'cumprida' ? 'check' : 'x'} size={14} stroke={3} />
+              {p.status === 'cumprida' ? t('Cumprida') : t('Não cumprida. Faça uma nova promessa.')}
+            </span>
           )}
         </div>
       ))}
@@ -216,12 +219,9 @@ function Promessas({ s }: { s: AppState }) {
   )
 }
 
-const GOAL_EMOJI = ['🎯', '⚖️', '🏋️', '🏃', '🥗', '💧', '😴', '🔥']
-
 function Metas({ s }: { s: AppState }) {
   const list = getProjeto(s).goals
   const [title, setTitle] = useState('')
-  const [emoji, setEmoji] = useState('🎯')
   const [due, setDue] = useState('')
   const done = list.filter((g) => g.done).length
   const toggle = (g: Goal) => setProjeto((p) => ({ ...p, goals: p.goals.map((x) => (x.id === g.id ? { ...x, done: !x.done } : x)) }))
@@ -244,7 +244,9 @@ function Metas({ s }: { s: AppState }) {
           const d = g.due ? daysBetween(new Date(), parseYmd(g.due)) : null
           return (
             <div key={g.id} className={`card goal ${g.done ? 'is-done' : ''}`}>
-              <span className="goal-emo">{g.emoji}</span>
+              <span className="goal-emo">
+                <Icon name="target" size={20} />
+              </span>
               <span className="goal-txt">
                 <b>{g.title}</b>
                 {d !== null && <small>{g.done ? t('Batida!') : d >= 0 ? t('faltam {n} dias', { n: d }) : t('atrasada {n} dias', { n: -d })}</small>}
@@ -260,30 +262,23 @@ function Metas({ s }: { s: AppState }) {
         onSubmit={(e) => {
           e.preventDefault()
           if (!title.trim()) return
-          setProjeto((p) => ({ ...p, goals: [...p.goals, { id: newId(), emoji, title: title.trim(), due, done: false }] }))
+          setProjeto((p) => ({ ...p, goals: [...p.goals, { id: newId(), emoji: '', title: title.trim(), due, done: false }] }))
           setTitle('')
           setDue('')
         }}
       >
         <span className="pj-add-pre">
-          {t('Nova meta')}
-          <Info text={t('Crie um objetivo com prazo, como correr 5 km. Escolha um emoji, escreva a meta e a data. Marque o círculo quando bater.')} />
+          {t('Escreva uma nova meta')}
+          <Info text={t('Crie um objetivo com prazo, como correr 5 km. Escreva a meta, escolha a data limite e salve. Marque o círculo quando bater.')} />
         </span>
-        <div className="emo-pick">
-          {GOAL_EMOJI.map((e) => (
-            <button key={e} type="button" className={emoji === e ? 'on' : ''} onClick={() => setEmoji(e)}>
-              {e}
-            </button>
-          ))}
-        </div>
-        <input id="pj-goal-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t('Ex.: Fazer 10 barras seguidas')} />
+        <input id="pj-goal-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t('Ex.: fazer 10 barras seguidas')} />
         <label>
-          {t('Prazo')}
+          {t('Data limite')}
           <input id="pj-goal-due" type="date" value={due} onChange={(e) => setDue(e.target.value)} />
         </label>
         <WithInfo text={t('Salva a meta na lista. O app mostra quantos dias faltam até o prazo.')}>
           <button type="submit" className="cta sm-cta">
-            {t('Adicionar meta')}
+            {t('Salvar meta')}
           </button>
         </WithInfo>
       </form>
@@ -291,19 +286,23 @@ function Metas({ s }: { s: AppState }) {
   )
 }
 
-const MOODS = ['😫', '😤', '😔', '😐', '🙂', '💪']
+const MOODS = ['mal', 'irritado', 'triste', 'normal', 'bem', 'motivado']
+const MOOD_LABEL: Record<string, string> = { mal: 'Mal', irritado: 'Irritado', triste: 'Triste', normal: 'Normal', bem: 'Bem', motivado: 'Motivado' }
+// desabafos antigos guardavam emoji
+const FROM_EMOJI: Record<string, string> = { '😫': 'mal', '😤': 'irritado', '😔': 'triste', '😐': 'normal', '🙂': 'bem', '💪': 'motivado' }
+const moodId = (m: string) => FROM_EMOJI[m] ?? m
 const REPLY: Record<string, string> = {
-  '😫': 'Dia pesado. Só não deixa ele virar dois. Amanhã a primeira refeição é a do plano.',
-  '😤': 'Usa essa raiva no treino. Ela vira carga na barra.',
-  '😔': 'Tá tudo bem não estar bem. Você escreveu, e isso já é não fugir.',
-  '😐': 'Dia neutro também conta. Constância é feita de dias assim.',
-  '🙂': 'Guarda esse sentimento. Ele é a prova de que está funcionando.',
-  '💪': 'É isso. Lembra desse dia quando a vontade sumir.',
+  mal: 'Dia pesado. Só não deixa ele virar dois. Amanhã a primeira refeição é a do plano.',
+  irritado: 'Usa essa raiva no treino. Ela vira carga na barra.',
+  triste: 'Tá tudo bem não estar bem. Você escreveu, e isso já é não fugir.',
+  normal: 'Dia neutro também conta. Constância é feita de dias assim.',
+  bem: 'Guarda esse sentimento. Ele é a prova de que está funcionando.',
+  motivado: 'É isso. Lembra desse dia quando a vontade sumir.',
 }
 
 function Desabafo({ s }: { s: AppState }) {
   const list = getProjeto(s).vents
-  const [mood, setMood] = useState('😐')
+  const [mood, setMood] = useState('normal')
   const [text, setText] = useState('')
   const [reply, setReply] = useState<string | null>(null)
   return (
@@ -319,20 +318,20 @@ function Desabafo({ s }: { s: AppState }) {
         }}
       >
         <span className="pj-add-pre">
-          <Icon name="lock" size={14} /> {t('Só você lê isso')}
-          <Info text={t('Um diário privado. Escolha a carinha do seu humor e escreva o que está sentindo. O treinador responde na hora.')} />
+          {t('Como você está se sentindo hoje?')}
+          <Info text={t('Um diário privado. Escolha como você está, escreva o que está sentindo e salve. O treinador responde na hora.')} />
         </span>
-        <div className="emo-pick mood">
+        <div className="chips">
           {MOODS.map((m) => (
-            <button key={m} type="button" className={mood === m ? 'on' : ''} onClick={() => setMood(m)}>
-              {m}
+            <button key={m} type="button" className={`chip ${mood === m ? 'on' : ''}`} onClick={() => setMood(m)}>
+              {t(MOOD_LABEL[m])}
             </button>
           ))}
         </div>
-        <textarea id="pj-vent" rows={4} value={text} onChange={(e) => setText(e.target.value)} placeholder={t('Fala o que tá pesando. Sem filtro.')} />
+        <textarea id="pj-vent" rows={4} value={text} onChange={(e) => setText(e.target.value)} placeholder={t('Escreva o que está pesando. Só você vai ler.')} />
         <WithInfo text={t('Salva o desabafo com a data de hoje. Ninguém além de você vê.')}>
           <button type="submit" className="cta sm-cta">
-            {t('Desabafar')}
+            {t('Salvar desabafo')}
           </button>
         </WithInfo>
       </form>
@@ -346,9 +345,10 @@ function Desabafo({ s }: { s: AppState }) {
       )}
       {list.map((v) => (
         <div key={v.id} className="card vent">
-          <span className="vent-mood">{v.mood}</span>
           <div>
-            <small>{dm(v.date)}</small>
+            <small>
+              {dm(v.date)} · {t(MOOD_LABEL[moodId(v.mood)] ?? 'Normal')}
+            </small>
             <p>{v.text}</p>
           </div>
         </div>
@@ -380,7 +380,7 @@ function Fotos({ s }: { s: AppState }) {
         <Info text={t('Guarde qualquer momento do projeto: treino, prato, espelho. Toque numa foto para ver em tela cheia.')} />
       </label>
       {list.length === 0 ? (
-        <p className="muted center-txt">{t('Treino, prato, espelho, conquista. Guarde aqui os momentos do projeto.')}</p>
+        <p className="muted center-txt">{t('Nenhuma foto ainda. Adicione fotos dos seus treinos, refeições ou do espelho.')}</p>
       ) : (
         <div className="gallery">
           {list.map((p) => (

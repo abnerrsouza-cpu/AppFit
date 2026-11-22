@@ -6,7 +6,6 @@ import { enableNotifications, fireTestNow, notifyStatus, show } from '../notify'
 import { dailySchedule, toneLabel } from '../psych'
 import { type AppState, type CustomNudge, type Tone, defaultCustom, newId, setState } from '../store'
 
-const TONE_EMOJI: Record<Tone, string> = { parceiro: '🤝', treinador: '📣', sargento: '🪖' }
 
 export function Alerts({ s, onBack }: { s: AppState; onBack: () => void }) {
   const [status, setStatus] = useState(notifyStatus())
@@ -31,7 +30,7 @@ export function Alerts({ s, onBack }: { s: AppState; onBack: () => void }) {
             <Info text={t('Aqui ficam as mensagens que o app te manda ao longo do dia e as cobranças que você mesmo cria.')} />
           </b>
           <small>
-            {TONE_EMOJI[s.profile.tone]} {t('modo {x}', { x: toneLabel()[s.profile.tone].name.toLowerCase() })}
+            {t('modo {x}', { x: toneLabel()[s.profile.tone].name.toLowerCase() })}
           </small>
         </div>
       </header>
@@ -48,8 +47,8 @@ export function Alerts({ s, onBack }: { s: AppState; onBack: () => void }) {
             className={`tone tone-${tn} ${s.profile.tone === tn ? 'on' : ''}`}
             onClick={() => setState((st) => ({ ...st, profile: { ...st.profile, tone: tn } }))}
           >
-            <span className="tone-emo">{TONE_EMOJI[tn]}</span>
             <b>{toneLabel()[tn].name}</b>
+            <small>{toneLabel()[tn].desc}</small>
           </button>
         ))}
       </div>
@@ -106,7 +105,7 @@ export function Alerts({ s, onBack }: { s: AppState; onBack: () => void }) {
       <section className={`card test-mode ${s.testEvery ? 'on' : ''}`}>
         <div>
           <b className="ttl">
-            🧪 {t('Modo teste: a cada 5 min')}
+            {t('Modo teste: a cada 5 min')}
             <Info text={t('Liga um disparo de cobrança a cada 5 minutos para você ver como chega no celular. Funciona com o app aberto. Desligue quando terminar.')} />
           </b>
           <small>{s.testEvery ? t('Ligado. Deixe o app aberto para receber.') : t('Para ver as cobranças chegando. Funciona com o app aberto.')}</small>

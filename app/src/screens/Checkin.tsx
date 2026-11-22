@@ -7,11 +7,11 @@ import { type AppState, type DailyLog, type Trained, setState, today, workoutFor
 
 // Escalas de carinha: viram nota 0-10 por baixo, mas a pessoa só toca.
 const FACES = [
-  { e: '😫', l: 'Péssimo', v: 2 },
-  { e: '😕', l: 'Fraco', v: 4 },
-  { e: '😐', l: 'Ok', v: 6 },
-  { e: '🙂', l: 'Bom', v: 8 },
-  { e: '🔥', l: 'Perfeito', v: 10 },
+  { l: 'Péssimo', v: 2 },
+  { l: 'Fraco', v: 4 },
+  { l: 'Ok', v: 6 },
+  { l: 'Bom', v: 8 },
+  { l: 'Perfeito', v: 10 },
 ]
 const nearest = (v: number) => FACES.reduce((a, f) => (Math.abs(f.v - v) < Math.abs(a.v - v) ? f : a)).v
 
@@ -54,7 +54,9 @@ export function Checkin({ s, onClose }: { s: AppState; onClose: () => void }) {
     return (
       <div className="sheet">
         <div className={`result result-${result.level}`}>
-          <span className="result-emoji">{result.level === 'good' ? '🏆' : result.level === 'warn' ? '⚠️' : '😤'}</span>
+          <span className="result-icon">
+            <Icon name={result.level === 'good' ? 'check' : result.level === 'warn' ? 'alert' : 'x'} size={40} stroke={2.6} />
+          </span>
           <h1>{result.title}</h1>
           <p>{result.body}</p>
           <button type="button" className="cta" onClick={onClose}>
@@ -65,15 +67,15 @@ export function Checkin({ s, onClose }: { s: AppState; onClose: () => void }) {
     )
   }
 
-  const trainOpts: { v: Trained; e: string; l: string }[] = wk
+  const trainOpts: { v: Trained; l: string }[] = wk
     ? [
-        { v: 'sim', e: '💪', l: t('Fiz tudo') },
-        { v: 'parcial', e: '😮‍💨', l: t('Fiz uma parte') },
-        { v: 'nao', e: '🛋️', l: t('Não fiz') },
+        { v: 'sim', l: t('Fiz tudo') },
+        { v: 'parcial', l: t('Fiz uma parte') },
+        { v: 'nao', l: t('Não fiz') },
       ]
     : [
-        { v: 'descanso', e: '😴', l: t('Descansei') },
-        { v: 'sim', e: '💪', l: t('Treinei mesmo assim') },
+        { v: 'descanso', l: t('Descansei') },
+        { v: 'sim', l: t('Treinei mesmo assim') },
       ]
 
   const next = () => (step < STEPS - 1 ? setStep(step + 1) : submit())
@@ -98,12 +100,12 @@ export function Checkin({ s, onClose }: { s: AppState; onClose: () => void }) {
       <div className="story-body">
         {step === 0 && (
           <>
-            <h1>{wk ? t('E o treino de hoje?') : t('Hoje era descanso')}</h1>
+            <h1>{wk ? t('Você fez o treino de hoje?') : t('Hoje era dia de descanso. Você treinou?')}</h1>
             {wk && <p className="lead">{wk.title}</p>}
             <div className="big-opts">
               {trainOpts.map((o) => (
                 <button key={o.v} type="button" className={`big-opt ${f.trained === o.v ? 'on' : ''} ${o.v === 'nao' ? 'neg' : ''}`} onClick={() => set('trained', o.v)}>
-                  <span className="emo">{o.e}</span>
+                  <span className={`radio ${f.trained === o.v ? 'on' : ''}`} />
                   <b>{o.l}</b>
                 </button>
               ))}
@@ -113,7 +115,7 @@ export function Checkin({ s, onClose }: { s: AppState; onClose: () => void }) {
 
         {step === 1 && (
           <>
-            <h1>{t('Fez cardio?')}</h1>
+            <h1>{t('Quantos minutos de cardio você fez?')}</h1>
             <div className="chip-grid">
               {[0, 15, 20, 30, 45, 60].map((m) => (
                 <button key={m} type="button" className={`tap ${f.cardioMin === m ? 'on' : ''}`} onClick={() => set('cardioMin', m)}>
@@ -125,15 +127,14 @@ export function Checkin({ s, onClose }: { s: AppState; onClose: () => void }) {
             {f.cardioMin > 0 && (
               <div className="type-row">
                 {[
-                  ['Esteira', '🏃'],
-                  ['Bike', '🚴'],
-                  ['Escada', '🪜'],
-                  ['Rua', '🌳'],
-                  ['Natação', '🏊'],
-                ].map(([ty, e]) => (
+                  ['Esteira'],
+                  ['Bike'],
+                  ['Escada'],
+                  ['Rua'],
+                  ['Natação'],
+                ].map(([ty]) => (
                   <button key={ty} type="button" className={`type ${f.cardioType === ty ? 'on' : ''}`} onClick={() => set('cardioType', ty)}>
-                    <span>{e}</span>
-                    <small>{t(ty)}</small>
+                    <b>{t(ty)}</b>
                   </button>
                 ))}
               </div>
@@ -143,8 +144,8 @@ export function Checkin({ s, onClose }: { s: AppState; onClose: () => void }) {
 
         {step === 2 && (
           <>
-            <h1>{t('Seguiu as refeições?')}</h1>
-            <p className="lead">{t('Toque nas que você furou.')}</p>
+            <h1>{t('Você seguiu as refeições do plano?')}</h1>
+            <p className="lead">{t('Toque nas refeições que você não seguiu.')}</p>
             <div className="plates">
               {p.meals.map((m) => {
                 const ok = f.mealsOk[m.id]
@@ -160,7 +161,7 @@ export function Checkin({ s, onClose }: { s: AppState; onClose: () => void }) {
             {missed.length > 0 && (
               <label className="soft-input">
                 {t('O que você comeu no lugar?')}
-                <textarea id="ci-ate" rows={2} value={f.ate} placeholder={t('Sem vergonha. Só você vê.')} onChange={(e) => set('ate', e.target.value)} />
+                <textarea id="ci-ate" rows={2} value={f.ate} placeholder={t('Escreva o que você comeu. Só você vê.')} onChange={(e) => set('ate', e.target.value)} />
               </label>
             )}
           </>
@@ -168,14 +169,14 @@ export function Checkin({ s, onClose }: { s: AppState; onClose: () => void }) {
 
         {step === 3 && (
           <>
-            <h1>{t('No geral, como foi a dieta?')}</h1>
+            <h1>{t('Que nota você dá para a sua dieta hoje?')}</h1>
             <Faces value={nearest(f.dietScore)} onChange={(v) => set('dietScore', v)} />
           </>
         )}
 
         {step === 4 && (
           <>
-            <h1>{t('E o corpo?')}</h1>
+            <h1>{t('Água, sono e foco de hoje')}</h1>
             <div className="mini-q">
               <span>{t('Quanta água você bebeu?')}</span>
               <div className="glasses">
@@ -238,8 +239,7 @@ function Faces({ value, onChange, small = false }: { value: number; onChange: (v
     <div className={`faces ${small ? 'sm' : ''}`}>
       {FACES.map((f) => (
         <button key={f.v} type="button" className={`face ${value === f.v ? 'on' : ''}`} onClick={() => onChange(f.v)}>
-          <span>{f.e}</span>
-          <small>{t(f.l)}</small>
+          <b>{t(f.l)}</b>
         </button>
       ))}
     </div>

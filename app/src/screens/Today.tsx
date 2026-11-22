@@ -17,7 +17,7 @@ interface Task {
   done: boolean
 }
 
-const EMOJI: Record<Kind, string> = { wake: '☀️', meal: '🍽️', train: '🏋️', checkin: '📝' }
+const ICON: Record<Kind, string> = { wake: 'sun', meal: 'food', train: 'dumbbell', checkin: 'list' }
 
 function greeting() {
   const h = new Date().getHours()
@@ -103,7 +103,9 @@ export function Today({ s, go, openCheckin, owes }: { s: AppState; go: (tab: Tab
             {late && current.time !== hhmm && <span className="now-time">{t('desde {h}', { h: current.time })}</span>}
           </div>
           <div className="now-main">
-            <span className="now-emoji">{EMOJI[current.kind]}</span>
+            <span className="now-emoji">
+              <Icon name={ICON[current.kind]} size={30} />
+            </span>
             <div>
               <b>{current.title}</b>
               {current.kind === 'meal' && current.detail && <p>{current.detail}</p>}
@@ -131,7 +133,9 @@ export function Today({ s, go, openCheckin, owes }: { s: AppState; go: (tab: Tab
         </section>
       ) : (
         <section className="now-card is-done">
-          <span className="now-emoji">🏆</span>
+          <span className="now-emoji">
+            <Icon name="check" size={32} stroke={3} />
+          </span>
           <b>{t('Dia cumprido.')}</b>
           <p>{t('Tudo marcado e prestação de contas enviada. Amanhã de novo.')}</p>
         </section>
@@ -170,7 +174,9 @@ export function Today({ s, go, openCheckin, owes }: { s: AppState; go: (tab: Tab
           {tasks.map((x) => (
             <li key={x.id} className={`trow ${x.done ? 'is-done' : ''} ${x === current ? 'is-current' : ''}`}>
               <span className="trow-time">{x.time}</span>
-              <span className="trow-emoji">{EMOJI[x.kind]}</span>
+              <span className="trow-emoji">
+                <Icon name={ICON[x.kind]} size={18} />
+              </span>
               <span className="trow-title">{x.title}</span>
               <button
                 type="button"

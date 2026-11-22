@@ -3791,3 +3791,106 @@ input[type='range'] {
     transform: scale(0.4);
   }
 }
+
+/* ================= sem emoji: ícones e escalas com palavras ================= */
+.now-emoji {
+  color: #fff;
+}
+.trow-emoji {
+  display: grid;
+  place-items: center;
+  color: var(--fg-3);
+}
+.trow.is-current .trow-emoji {
+  color: var(--red-1);
+}
+.big-opt {
+  font-weight: 600;
+}
+.radio {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  transition: all 0.15s;
+}
+.radio.on {
+  border: 7px solid var(--yel-2);
+}
+.big-opt.neg .radio.on {
+  border-color: var(--bad);
+}
+.faces .face b {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--fg-2);
+}
+.face {
+  padding: 16px 2px;
+  background: var(--surface);
+  border-color: var(--line);
+}
+.face.on {
+  background: linear-gradient(135deg, var(--yel-1), var(--yel-2));
+  border-color: transparent;
+}
+.face.on b {
+  color: #fff;
+}
+.faces.sm .face {
+  padding: 12px 2px;
+}
+.type b {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.type {
+  padding: 14px 8px;
+}
+.type.on {
+  background: var(--red-soft);
+}
+.pj-photo-ic {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background: var(--red-soft);
+  color: var(--red-1);
+}
+.promise-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.promise-badge.ok {
+  color: var(--good);
+}
+.promise-badge.bad {
+  color: var(--bad);
+}
+.goal-emo {
+  color: var(--red-1);
+}
+.tone small {
+  display: block;
+}
+/* campo de data não passa da borda (iPhone dá largura mínima própria) */
+input[type='date'],
+input[type='time'] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  max-width: 100%;
+  min-height: 48px;
+  text-align: left;
+}
+input[type='date']::-webkit-date-and-time-value,
+input[type='time']::-webkit-date-and-time-value {
+  text-align: left;
+}
+.day-list-h h2.ttl {
+  display: flex;
+}
