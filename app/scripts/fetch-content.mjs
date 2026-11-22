@@ -56,6 +56,12 @@ const out = {
   videos: videos.slice(0, 30).map(({ url, ...v }) => ({ ...v, url: v.short ? `https://www.youtube.com/shorts/${v.id}` : `https://www.youtube.com/watch?v=${v.id}` })),
 }
 const json = JSON.stringify(out, null, 1)
-await writeFile(new URL('../public/content.json', import.meta.url), json)
-await writeFile(new URL('../src/content-snapshot.json', import.meta.url), json)
+const outIdx = process.argv.indexOf('--out')
+if (outIdx > 0) {
+  // modo servidor: grava só o arquivo servido
+  await writeFile(new URL('../' + process.argv[outIdx + 1], import.meta.url), json)
+} else {
+  await writeFile(new URL('../public/content.json', import.meta.url), json)
+  await writeFile(new URL('../src/content-snapshot.json', import.meta.url), json)
+}
 console.log(`gravados ${out.videos.length} vídeos`)
