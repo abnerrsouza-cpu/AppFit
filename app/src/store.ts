@@ -215,11 +215,11 @@ function demoState(): AppState {
     }
   }
 
-  return { demo: true, onboarded: true, profile, daily, weekly, checks: {}, theme: 'dark' }
+  return { demo: true, onboarded: true, profile, daily, weekly, checks: {}, theme: 'light' }
 }
 
 // ---------- persistência ----------
-const KEY = 'semdesculpa:v1'
+const KEY = 'semdesculpa:v2'
 
 function load(): AppState {
   try {
