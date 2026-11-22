@@ -176,7 +176,7 @@ export function Onboarding({ p0, s }: { p0: Profile; s: AppState }) {
           </div>
           <label className={`card honest ${signed ? 'on' : ''}`}>
             <input id="ob-sign" type="checkbox" checked={signed} onChange={(e) => setSigned(e.target.checked)} />
-            <span className="tick">{signed && <Icon name="check" size={16} stroke={3} />}</span>
+            <span className={`tick ${signed ? 'emoji' : ''}`}>{signed ? '✅' : ''}</span>
             <span>
               <b>{t('Eu, {nome}, me comprometo a prestar contas todos os dias, com a verdade.', { nome: p.name || '...' })}</b>
               <small>{t('Assinado em {d}', { d: new Date().toLocaleDateString() })}</small>

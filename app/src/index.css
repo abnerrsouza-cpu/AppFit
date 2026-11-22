@@ -3777,3 +3777,17 @@ input[type='range'] {
 .tone.tone-sargento.on::after {
   background: var(--bad);
 }
+
+/* confirmação marcada: ✅ no lugar da bolinha */
+.tick.emoji {
+  border: 0;
+  background: none;
+  font-size: 1.55rem;
+  line-height: 1;
+  animation: tickPop 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.4);
+}
+@keyframes tickPop {
+  from {
+    transform: scale(0.4);
+  }
+}
