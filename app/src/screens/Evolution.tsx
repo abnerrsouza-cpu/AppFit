@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { BeforeAfter } from '../components/BeforeAfter'
 import { Icon } from '../components/Icon'
 import { Info, WithInfo } from '../components/Info'
+import { Locked } from '../components/Locked'
 import { compress, putPhoto } from '../photos'
 import { WeekBars } from '../components/WeekBars'
 import { t } from '../i18n'
@@ -9,7 +10,7 @@ import { type AppState, type WeeklyLog, currentWeight, fmtDayMonth, newId, parse
 
 const label = (w: WeeklyLog, i: number) => `${t('Sem.')} ${i + 1} · ${fmtDayMonth(parseYmd(w.weekStart))}`
 
-export function Evolution({ s }: { s: AppState }) {
+export function Evolution({ s, openCheckin }: { s: AppState; openCheckin: () => void }) {
   const weeks = useMemo(() => Object.values(s.weekly).sort((a, b) => a.weekStart.localeCompare(b.weekStart)), [s.weekly])
   const withPhoto = weeks.map((w, i) => ({ w, i })).filter((x) => x.w.photoId)
   const [aIdx, setA] = useState(0)
@@ -33,6 +34,15 @@ export function Evolution({ s }: { s: AppState }) {
         </h1>
       </header>
 
+      {withPhoto.length < 2 ? (
+        <Locked
+          icon="camera"
+          title={t('Envie 2 fotos semanais para liberar o Antes x Depois')}
+          text={t('Tire uma foto de corpo inteiro no check-in semanal. Na segunda semana, a comparação aparece aqui.')}
+          progress={[withPhoto.length, 2]}
+          onClick={() => setForm(true)}
+        />
+      ) : (
       <section className="card block">
         <BeforeAfter
           beforeId={A?.w.photoId}
@@ -65,7 +75,9 @@ export function Evolution({ s }: { s: AppState }) {
           </div>
         )}
       </section>
+      )}
 
+      {(withPhoto.length >= 2 || hasThisWeek) && (
       <button type="button" className={`card alert-card ${hasThisWeek ? 'is-ok' : ''}`} onClick={() => setForm(true)}>
         <Icon name={hasThisWeek ? 'check' : 'camera'} />
         <span>
@@ -77,10 +89,31 @@ export function Evolution({ s }: { s: AppState }) {
         </span>
         <Icon name="chevR" />
       </button>
+      )}
 
-      <Journey s={s} />
+      {weeks.length === 0 ? (
+        <Locked
+          icon="scale"
+          title={t('Registre seu peso para liberar o Rumo à meta e o gráfico de peso')}
+          text={t('Informe seu peso de hoje no check-in semanal.')}
+          onClick={() => setForm(true)}
+        />
+      ) : (
+        <>
+          <Journey s={s} />
+          <WeightChart s={s} weeks={weeks} />
+        </>
+      )}
 
-      <WeightChart s={s} weeks={weeks} />
+      {ws.checkins === 0 ? (
+        <Locked
+          icon="list"
+          title={t('Faça sua primeira prestação de contas para liberar os gráficos de dieta e cardio')}
+          text={t('Toda noite você dá uma nota para a dieta e informa o cardio. Os gráficos da semana aparecem aqui.')}
+          onClick={openCheckin}
+        />
+      ) : (
+      <>
 
       <section className="card block">
         <div className="block-h">
@@ -105,6 +138,8 @@ export function Evolution({ s }: { s: AppState }) {
         </div>
         <WeekBars days={ws.days} values={ws.logs.map((l) => (l ? l.cardioMin : null))} max={60} unit="min" />
       </section>
+      </>
+      )}
     </div>
   )
 }

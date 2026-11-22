@@ -17,6 +17,11 @@ export default function App() {
   const s = useAppState()
   const [tab, setTab] = useState<Tab>('inicio')
   const [checkin, setCheckin] = useState(false)
+  const [menuSec, setMenuSec] = useState<string | null>(null)
+  const goMenu = (sec: string) => {
+    setMenuSec(sec)
+    setTab('menu')
+  }
 
   useEffect(() => {
     document.documentElement.dataset.theme = s.theme
@@ -51,12 +56,12 @@ export default function App() {
           </button>
         </div>
       )}
-      {tab === 'inicio' && <Today s={s} go={setTab} openCheckin={() => setCheckin(true)} owes={owes} />}
-      {tab === 'evolucao' && <Evolution s={s} />}
+      {tab === 'inicio' && <Today s={s} go={setTab} goMenu={goMenu} openCheckin={() => setCheckin(true)} owes={owes} />}
+      {tab === 'evolucao' && <Evolution s={s} openCheckin={() => setCheckin(true)} />}
       {tab === 'cobrancas' && <Alerts s={s} onBack={() => setTab('inicio')} />}
       {tab === 'projeto' && <Projeto s={s} />}
-      {tab === 'menu' && <Menu s={s} />}
-      <BottomNav tab={tab} onTab={setTab} dots={{}} />
+      {tab === 'menu' && <Menu s={s} initialSec={menuSec} onOpened={() => setMenuSec(null)} />}
+      <BottomNav tab={tab} onTab={(x) => { setMenuSec(null); setTab(x) }} dots={{}} />
     </div>
   )
 }

@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Icon } from '../components/Icon'
 import { Info, WithInfo } from '../components/Info'
+import { Locked } from '../components/Locked'
+import { notifyStatus } from '../notify'
 import { Rings } from '../components/Rings'
 import type { Tab } from '../components/BottomNav'
 import { headline } from '../psych'
@@ -44,7 +46,7 @@ export function todayProgress(s: AppState) {
   return { train: !wk ? 1 : checks.train ? 1 : 0, diet: p.meals.filter((m) => checks[m.id]).length / meals, cardio: 0, rest: !wk }
 }
 
-export function Today({ s, go, openCheckin, owes }: { s: AppState; go: (tab: Tab) => void; openCheckin: () => void; owes: boolean }) {
+export function Today({ s, go, goMenu, openCheckin, owes }: { s: AppState; go: (tab: Tab) => void; goMenu: (sec: string) => void; openCheckin: () => void; owes: boolean }) {
   const p = s.profile
   const now = new Date()
   const key = today()
@@ -192,6 +194,8 @@ export function Today({ s, go, openCheckin, owes }: { s: AppState; go: (tab: Tab
         </ul>
       </section>
 
+      <Setup s={s} go={go} goMenu={goMenu} />
+
       <section className="streak-card">
         <div className="streak-main">
           <span className="streak-flame">
@@ -220,5 +224,74 @@ export function Today({ s, go, openCheckin, owes }: { s: AppState; go: (tab: Tab
         </div>
       </section>
     </div>
+  )
+}
+
+/** Pendências de configuração. Cada card some quando a pessoa cumpre. */
+function Setup({ s, go, goMenu }: { s: AppState; go: (tab: Tab) => void; goMenu: (sec: string) => void }) {
+  const p = s.profile
+  const items = [
+    {
+      done: notifyStatus() === 'granted',
+      el: (
+        <Locked
+          key="notif"
+          icon="bell"
+          title={t('Ative as notificações para receber as cobranças no celular')}
+          text={t('Sem isso, o app só te cobra quando você abre.')}
+          onClick={() => go('cobrancas')}
+        />
+      ),
+    },
+    {
+      done: p.meals.length > 0 && p.meals.some((m) => m.items.trim()),
+      el: (
+        <Locked
+          key="dieta"
+          icon="food"
+          title={t('Cadastre sua dieta para receber as cobranças das refeições')}
+          text={t('Escreva o horário e o que comer em cada refeição.')}
+          onClick={() => goMenu('dieta')}
+        />
+      ),
+    },
+    {
+      done: p.workouts.length > 0 && p.workouts.some((w) => w.items.trim()),
+      el: (
+        <Locked
+          key="treino"
+          icon="dumbbell"
+          title={t('Cadastre sua ficha de treino para ver os exercícios do dia')}
+          text={t('Escolha os dias de treino e escreva os exercícios.')}
+          onClick={() => goMenu('treino')}
+        />
+      ),
+    },
+    {
+      done: !!p.letter.trim(),
+      el: (
+        <Locked
+          key="carta"
+          icon="quote"
+          title={t('Escreva sua carta de compromisso')}
+          text={t('O treinador usa a carta para te cobrar nos dias difíceis.')}
+          onClick={() => goMenu('carta')}
+        />
+      ),
+    },
+  ]
+  const done = items.filter((i) => i.done).length
+  if (done === items.length) return null
+  return (
+    <section className="setup">
+      <div className="setup-h">
+        <h2 className="ttl">
+          {t('Complete para liberar tudo')}
+          <Info text={t('Configurações que faltam para o app funcionar por completo. Toque em cada uma para resolver. Elas somem quando você termina.')} />
+        </h2>
+        <span className="soft-chip">{t('{a} de {b}', { a: done, b: items.length })}</span>
+      </div>
+      {items.filter((i) => !i.done).map((i) => i.el)}
+    </section>
   )
 }

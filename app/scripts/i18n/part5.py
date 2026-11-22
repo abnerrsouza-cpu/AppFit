@@ -1,0 +1,20 @@
+# Traduções (parte 5): funções bloqueadas e pendências.
+D = {
+ '{a} de {b}': ('{a} of {b}', '{a} de {b}'),
+ 'Complete para liberar tudo': ('Complete to unlock everything', 'Completa para desbloquear todo'),
+ 'Configurações que faltam para o app funcionar por completo. Toque em cada uma para resolver. Elas somem quando você termina.': ("Setup still missing for the app to work fully. Tap each one to fix it. They disappear when you're done.", 'Configuraciones que faltan para que la app funcione por completo. Toca cada una para resolverla. Desaparecen cuando terminas.'),
+ 'Ative as notificações para receber as cobranças no celular': ('Turn on notifications to get reminders on your phone', 'Activa las notificaciones para recibir las exigencias en el celular'),
+ 'Sem isso, o app só te cobra quando você abre.': ('Without it, the app only checks on you when you open it.', 'Sin esto, la app solo te exige cuando la abres.'),
+ 'Cadastre sua dieta para receber as cobranças das refeições': ('Add your diet to get meal reminders', 'Registra tu dieta para recibir las exigencias de las comidas'),
+ 'Escreva o horário e o que comer em cada refeição.': ('Write the time and what to eat for each meal.', 'Escribe el horario y qué comer en cada comida.'),
+ 'Cadastre sua ficha de treino para ver os exercícios do dia': ("Add your workout plan to see the day's exercises", 'Registra tu rutina para ver los ejercicios del día'),
+ 'Escolha os dias de treino e escreva os exercícios.': ('Choose your training days and write the exercises.', 'Elige los días de entrenamiento y escribe los ejercicios.'),
+ 'Escreva sua carta de compromisso': ('Write your commitment letter', 'Escribe tu carta de compromiso'),
+ 'O treinador usa a carta para te cobrar nos dias difíceis.': ('The coach uses the letter to push you on hard days.', 'El entrenador usa la carta para exigirte en los días difíciles.'),
+ 'Envie 2 fotos semanais para liberar o Antes x Depois': ('Upload 2 weekly photos to unlock Before & After', 'Sube 2 fotos semanales para desbloquear el Antes y Después'),
+ 'Tire uma foto de corpo inteiro no check-in semanal. Na segunda semana, a comparação aparece aqui.': ('Take a full-body photo in the weekly check-in. In the second week, the comparison shows up here.', 'Toma una foto de cuerpo entero en el check-in semanal. En la segunda semana, la comparación aparece aquí.'),
+ 'Registre seu peso para liberar o Rumo à meta e o gráfico de peso': ('Log your weight to unlock Road to the goal and the weight chart', 'Registra tu peso para desbloquear Rumbo a la meta y el gráfico de peso'),
+ 'Informe seu peso de hoje no check-in semanal.': ("Enter today's weight in the weekly check-in.", 'Informa tu peso de hoy en el check-in semanal.'),
+ 'Faça sua primeira prestação de contas para liberar os gráficos de dieta e cardio': ('Do your first daily report to unlock the diet and cardio charts', 'Haz tu primera rendición de cuentas para desbloquear los gráficos de dieta y cardio'),
+ 'Toda noite você dá uma nota para a dieta e informa o cardio. Os gráficos da semana aparecem aqui.': ("Every night you rate your diet and log cardio. The week's charts show up here.", 'Cada noche le das una nota a la dieta e informas el cardio. Los gráficos de la semana aparecen aquí.'),
+}

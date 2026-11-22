@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Icon } from '../components/Icon'
 import { Info, WithInfo } from '../components/Info'
 import { LANGS, t, weekday } from '../i18n'
@@ -6,8 +6,12 @@ import { type AppState, type Profile, bmi, currentWeight, newId, resetToBlank, r
 
 type Section = null | 'perfil' | 'rotina' | 'treino' | 'dieta' | 'agenda' | 'relogio' | 'carta'
 
-export function Menu({ s }: { s: AppState }) {
-  const [sec, setSec] = useState<Section>(null)
+export function Menu({ s, initialSec = null, onOpened }: { s: AppState; initialSec?: string | null; onOpened?: () => void }) {
+  const [sec, setSec] = useState<Section>(initialSec as Section)
+  useEffect(() => {
+    if (initialSec) onOpened?.()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const [confirm, setConfirm] = useState(false)
   const p = s.profile
   const upd = (patch: Partial<Profile>) => setState((st) => ({ ...st, profile: { ...st.profile, ...patch } }))

@@ -3894,3 +3894,89 @@ input[type='time']::-webkit-date-and-time-value {
 .day-list-h h2.ttl {
   display: flex;
 }
+
+/* ================= funções bloqueadas (card vermelho) ================= */
+.locked {
+  align-items: center;
+}
+.locked-ic {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--bad) 14%, transparent);
+  color: var(--bad);
+}
+.locked-ic i {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--bad);
+  color: #fff;
+  box-shadow: 0 0 0 2px var(--surface);
+}
+.locked-txt {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.locked-txt b {
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+.locked-prog {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.locked-bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--bad) 15%, transparent);
+  overflow: hidden;
+}
+.locked-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 6px;
+  background: var(--bad);
+}
+.locked-prog small {
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--bad);
+}
+.setup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.setup-h {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 2px 0;
+}
+.setup-h h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.alert-card.locked > .locked-ic {
+  flex: none;
+  display: grid;
+  flex-direction: initial;
+  width: 44px;
+}
