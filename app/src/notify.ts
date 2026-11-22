@@ -2,8 +2,8 @@
 // MVP: com o app instalado (PWA), dispara as cobranças nos horários da rotina enquanto
 // o app estiver aberto ou em segundo plano recente.
 // Produção: o servidor envia Web Push (VAPID) pelo mesmo cronograma, com o app fechado.
-import { dailySchedule } from './psych'
-import { getState, today } from './store'
+import { dailySchedule, nudge } from './psych'
+import { defaultCustom, getState, today } from './store'
 
 export type NotifyStatus = 'unsupported' | 'denied' | 'granted' | 'default' | 'needs-install'
 
@@ -41,7 +41,7 @@ export async function enableNotifications(): Promise<NotifyStatus> {
 
 export async function show(title: string, body: string) {
   if (!('Notification' in window) || Notification.permission !== 'granted') return false
-  const opts: NotificationOptions = { body, icon: './icon-192.png', badge: './icon-192.png', tag: title }
+  const opts: NotificationOptions = { body, icon: './icon-192.png', badge: './icon-192.png', tag: `${title}-${Date.now()}` }
   try {
     if (reg) await reg.showNotification(title, opts)
     else new Notification(title, opts)
@@ -58,6 +58,7 @@ export function startScheduler() {
   const tick = () => {
     const s = getState()
     if (!s.onboarded) return
+    testTick()
     const now = new Date()
     const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
     let fired: Record<string, string[]> = {}
@@ -86,5 +87,49 @@ export function startScheduler() {
     }
   }
   tick()
-  return window.setInterval(tick, 60_000)
+  document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && tick())
+  return window.setInterval(tick, 30_000)
+}
+
+// ---------- modo teste: dispara a cada N minutos, alternando frases ----------
+const LAST_TEST = 'semdesculpa:lastTest'
+let testIdx = 0
+
+export function testMessages() {
+  const s = getState()
+  const mine = (s.custom ?? defaultCustom()).filter((c) => c.on && c.text.trim()).map((c) => ({ title: 'Recado seu', body: c.text }))
+  const app = (['treino', 'checkin', 'geral', 'checkin_atrasado', 'acordar'] as const).map((m, i) => ({
+    title: 'Sem Desculpa',
+    body: nudge(s, m, { treino: 'Seu treino de hoje', hora: new Date().toTimeString().slice(0, 5) }, i * 7 + Date.now()),
+  }))
+  // intercala: frase sua, frase do app, frase sua...
+  const out: { title: string; body: string }[] = []
+  for (let i = 0; i < Math.max(mine.length, app.length); i++) {
+    if (mine.length) out.push(mine[i % mine.length])
+    out.push(app[i % app.length])
+  }
+  return out
+}
+
+export function fireTestNow() {
+  const list = testMessages()
+  const m = list[testIdx++ % list.length]
+  try {
+    localStorage.setItem(LAST_TEST, String(Date.now()))
+  } catch {
+    /* ignora */
+  }
+  return show(m.title, m.body)
+}
+
+function testTick() {
+  const every = getState().testEvery || 0
+  if (!every) return
+  let last = 0
+  try {
+    last = Number(localStorage.getItem(LAST_TEST) || 0)
+  } catch {
+    /* ignora */
+  }
+  if (Date.now() - last >= every * 60_000 - 5_000) void fireTestNow()
 }

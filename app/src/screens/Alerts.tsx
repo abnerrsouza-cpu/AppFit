@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Icon } from '../components/Icon'
-import { enableNotifications, notifyStatus, show } from '../notify'
+import { enableNotifications, fireTestNow, notifyStatus, show } from '../notify'
 import { dailySchedule, toneLabel } from '../psych'
 import { type AppState, type CustomNudge, type Tone, defaultCustom, newId, setState } from '../store'
 
@@ -87,6 +87,27 @@ export function Alerts({ s, onBack }: { s: AppState; onBack: () => void }) {
           </div>
         )}
       </div>
+
+      <section className={`card test-mode ${s.testEvery ? 'on' : ''}`}>
+        <div>
+          <b>🧪 Modo teste: a cada 5 min</b>
+          <small>{s.testEvery ? 'Ligado. Deixe o app aberto para receber.' : 'Para ver as cobranças chegando. Funciona com o app aberto.'}</small>
+        </div>
+        <button
+          type="button"
+          className={`switch ${s.testEvery ? 'on' : ''}`}
+          aria-pressed={!!s.testEvery}
+          aria-label="Modo teste a cada 5 minutos"
+          disabled={status !== 'granted'}
+          onClick={() => {
+            const on = !s.testEvery
+            setState((st) => ({ ...st, testEvery: on ? 5 : 0 }))
+            if (on) void fireTestNow()
+          }}
+        >
+          <i />
+        </button>
+      </section>
 
       <MyNudges s={s} canSend={status === 'granted'} />
     </div>

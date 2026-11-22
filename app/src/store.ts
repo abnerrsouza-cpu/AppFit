@@ -79,6 +79,7 @@ export interface AppState {
   checks: Record<string, Record<string, boolean>> // tarefas do dia marcadas
   theme: 'dark' | 'light'
   custom?: CustomNudge[] // cobranças escritas pelo próprio usuário
+  testEvery?: number // modo teste: dispara a cada N minutos (0 = desligado)
   projeto?: Projeto
 }
 

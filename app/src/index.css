@@ -3602,3 +3602,23 @@ input[type='range'] {
 .bnav-item {
   font-size: 0.66rem;
 }
+
+.test-mode {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+}
+.test-mode > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.test-mode small {
+  color: var(--fg-2);
+}
+.test-mode.on {
+  border-color: var(--yel-2);
+  background: var(--red-soft);
+}
