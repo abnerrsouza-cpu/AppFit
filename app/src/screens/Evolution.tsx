@@ -3,9 +3,10 @@ import { BeforeAfter } from '../components/BeforeAfter'
 import { Icon } from '../components/Icon'
 import { compress, putPhoto } from '../photos'
 import { WeekBars } from '../components/WeekBars'
+import { t } from '../i18n'
 import { type AppState, type WeeklyLog, currentWeight, fmtDayMonth, newId, parseYmd, setState, weekStartOf, weekStats, ymd } from '../store'
 
-const label = (w: WeeklyLog, i: number) => `Sem. ${i + 1} · ${fmtDayMonth(parseYmd(w.weekStart))}`
+const label = (w: WeeklyLog, i: number) => `${t('Sem.')} ${i + 1} · ${fmtDayMonth(parseYmd(w.weekStart))}`
 
 export function Evolution({ s }: { s: AppState }) {
   const weeks = useMemo(() => Object.values(s.weekly).sort((a, b) => a.weekStart.localeCompare(b.weekStart)), [s.weekly])
@@ -24,8 +25,8 @@ export function Evolution({ s }: { s: AppState }) {
   return (
     <div className="screen">
       <header className="page-h">
-        <span className="eyebrow">Evolução</span>
-        <h1>Antes x Depois</h1>
+        <span className="eyebrow">{t('Evolução')}</span>
+        <h1>{t('Antes x Depois')}</h1>
       </header>
 
       <section className="card block">
@@ -38,7 +39,7 @@ export function Evolution({ s }: { s: AppState }) {
         {withPhoto.length >= 2 && (
           <div className="row2 pickers">
             <label>
-              Antes
+              {t('Antes')}
               <select id="ev-a" value={aIdx} onChange={(e) => setA(Number(e.target.value))}>
                 {withPhoto.map((x, k) => (
                   <option key={k} value={k}>
@@ -48,7 +49,7 @@ export function Evolution({ s }: { s: AppState }) {
               </select>
             </label>
             <label>
-              Depois
+              {t('Depois')}
               <select id="ev-b" value={bIdx} onChange={(e) => setB(Number(e.target.value))}>
                 {withPhoto.map((x, k) => (
                   <option key={k} value={k}>
@@ -64,8 +65,8 @@ export function Evolution({ s }: { s: AppState }) {
       <button type="button" className={`card alert-card ${hasThisWeek ? 'is-ok' : ''}`} onClick={() => setForm(true)}>
         <Icon name={hasThisWeek ? 'check' : 'camera'} />
         <span>
-          <b>{hasThisWeek ? 'Check-in semanal feito' : 'Check-in semanal pendente'}</b>
-          <small>{hasThisWeek ? 'Toque para revisar foto, peso e notas.' : 'Foto, peso e a verdade sobre a semana.'}</small>
+          <b>{hasThisWeek ? t('Check-in semanal feito') : t('Check-in semanal pendente')}</b>
+          <small>{hasThisWeek ? t('Toque para revisar foto, peso e notas.') : t('Foto, peso e a verdade sobre a semana.')}</small>
         </span>
         <Icon name="chevR" />
       </button>
@@ -76,17 +77,17 @@ export function Evolution({ s }: { s: AppState }) {
 
       <section className="card block">
         <div className="block-h">
-          <h2>Dieta na semana</h2>
-          <span className="soft-chip">meta: barra na linha</span>
+          <h2>{t('Dieta na semana')}</h2>
+          <span className="soft-chip">{t('meta: barra na linha')}</span>
         </div>
         <WeekBars days={ws.days} values={ws.logs.map((l) => (l ? l.dietScore : null))} max={10} unit="/10" goalLine={8} />
       </section>
 
       <section className="card block">
         <div className="block-h">
-          <h2>Cardio na semana</h2>
+          <h2>{t('Cardio na semana')}</h2>
           <span className="soft-chip">
-            {ws.cardio} de {s.profile.cardioGoalMin} min
+            {t('{a} de {b} min', { a: ws.cardio, b: s.profile.cardioGoalMin })}
           </span>
         </div>
         <WeekBars days={ws.days} values={ws.logs.map((l) => (l ? l.cardioMin : null))} max={60} unit="min" />
@@ -117,15 +118,15 @@ function WeightChart({ s, weeks }: { s: AppState; weeks: WeeklyLog[] }) {
     <section className="card block">
       <div className="block-h">
         <div>
-          <h2>Peso</h2>
-          <p>Sua linha até a meta</p>
+          <h2>{t('Peso')}</h2>
+          <p>{t('Sua linha até a meta')}</p>
         </div>
         <b className="big-figure">
           {last.toFixed(1)}
           <small> kg</small>
         </b>
       </div>
-      <svg className="line-chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Peso por semana">
+      <svg className="line-chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={t('Peso por semana')}>
         {ticks.map((t) => (
           <g key={t}>
             <line x1={padL} x2={W - padR} y1={y(t)} y2={y(t)} className="grid" />
@@ -136,20 +137,20 @@ function WeightChart({ s, weeks }: { s: AppState; weeks: WeeklyLog[] }) {
         ))}
         <line x1={padL} x2={W - padR} y1={y(p.weightGoal)} y2={y(p.weightGoal)} className="goal" />
         <text x={W - padR} y={y(p.weightGoal) - 5} textAnchor="end" className="axis">
-          meta
+          {t('meta')}
         </text>
         <path d={area} className="area" />
         <path d={path} className="line" />
         {vals.map((v, i) => (
           <circle key={i} cx={x(i)} cy={y(v)} r={i === vals.length - 1 ? 5 : 3} className={i === vals.length - 1 ? 'pt-end' : 'pt'}>
-            <title>{i === 0 ? `Início: ${v} kg` : `Semana ${i}: ${v} kg`}</title>
+            <title>{i === 0 ? `${t('Início')}: ${v} kg` : `${t('Semana')} ${i}: ${v} kg`}</title>
           </circle>
         ))}
         <text x={x(0)} y={H - 6} textAnchor="start" className="axis">
-          início
+          {t('início')}
         </text>
         <text x={x(vals.length - 1)} y={H - 6} textAnchor="end" className="axis">
-          sem. {vals.length - 1}
+          {t('sem.')} {vals.length - 1}
         </text>
       </svg>
     </section>
@@ -197,7 +198,7 @@ function WeeklyForm({ s, onClose }: { s: AppState; onClose: () => void }) {
       <span>{l}</span>
       <div className="rate-btns">
         {[1, 2, 3, 4, 5].map((n) => (
-          <button key={n} type="button" className={f[k] >= n ? 'on' : ''} onClick={() => set(k, n)} aria-label={`${l}: ${n} de 5`}>
+          <button key={n} type="button" className={f[k] >= n ? 'on' : ''} onClick={() => set(k, n)} aria-label={`${l}: ${n}/5`}>
             {n}
           </button>
         ))}
@@ -208,10 +209,10 @@ function WeeklyForm({ s, onClose }: { s: AppState; onClose: () => void }) {
   return (
     <div className="sheet">
       <div className="sheet-h">
-        <button type="button" className="round-btn" onClick={onClose} aria-label="Voltar">
+        <button type="button" className="round-btn" onClick={onClose} aria-label={t('Voltar')}>
           <Icon name="back" />
         </button>
-        <span className="eyebrow">Check-in semanal</span>
+        <span className="eyebrow">{t('Check-in semanal')}</span>
       </div>
       <form
         className="form"
@@ -221,33 +222,33 @@ function WeeklyForm({ s, onClose }: { s: AppState; onClose: () => void }) {
           onClose()
         }}
       >
-        <h1>Fechamento da semana</h1>
-        <p className="lead">Foto sem filtro e sem ângulo esperto. Mesma luz, mesma pose, mesmo lugar toda semana.</p>
+        <h1>{t('Fechamento da semana')}</h1>
+        <p className="lead">{t('Foto sem filtro e sem ângulo esperto. Mesma luz, mesma pose, mesmo lugar toda semana.')}</p>
 
         <label className="card photo-drop">
           <input id="wk-photo" type="file" accept="image/*" capture="environment" onChange={(e) => onFile(e.target.files?.[0])} />
           {preview ? (
-            <img src={preview} alt="Foto da semana" />
+            <img src={preview} alt={t('Foto da semana')} />
           ) : (
             <span>
               <Icon name="camera" size={30} />
-              <b>{busy ? 'Processando...' : f.photoId ? 'Foto enviada. Toque para trocar' : 'Tirar ou enviar foto'}</b>
-              <small>A foto fica guardada só no seu aparelho.</small>
+              <b>{busy ? t('Processando...') : f.photoId ? t('Foto enviada. Toque para trocar') : t('Tirar ou enviar foto')}</b>
+              <small>{t('A foto fica guardada só no seu aparelho.')}</small>
             </span>
           )}
         </label>
 
         <fieldset className="card field">
           <legend>
-            <Icon name="scale" size={18} /> Medidas
+            <Icon name="scale" size={18} /> {t('Medidas')}
           </legend>
           <div className="row2">
             <label>
-              Peso (kg)
+              {t('Peso (kg)')}
               <input id="wk-weight" type="number" step={0.1} inputMode="decimal" value={f.weight} onChange={(e) => set('weight', Number(e.target.value))} />
             </label>
             <label>
-              Cintura (cm)
+              {t('Cintura (cm)')}
               <input id="wk-waist" type="number" step={0.5} inputMode="decimal" value={f.waist} onChange={(e) => set('waist', Number(e.target.value))} />
             </label>
           </div>
@@ -255,33 +256,33 @@ function WeeklyForm({ s, onClose }: { s: AppState; onClose: () => void }) {
 
         <fieldset className="card field">
           <legend>
-            <Icon name="target" size={18} /> Nota da semana
+            <Icon name="target" size={18} /> {t('Nota da semana')}
           </legend>
-          <Rate k="dietRate" l="Dieta" />
-          <Rate k="trainRate" l="Treino" />
-          <Rate k="cardioRate" l="Cardio" />
+          <Rate k="dietRate" l={t('Dieta')} />
+          <Rate k="trainRate" l={t('Treino')} />
+          <Rate k="cardioRate" l={t('Cardio')} />
         </fieldset>
 
         <fieldset className="card field">
           <legend>
-            <Icon name="quote" size={18} /> Sem enrolação
+            <Icon name="quote" size={18} /> {t('Sem enrolação')}
           </legend>
           <label>
-            Sua maior vitória da semana
+            {t('Sua maior vitória da semana')}
             <input id="wk-win" value={f.win} onChange={(e) => set('win', e.target.value)} />
           </label>
           <label>
-            Onde você se sabotou
+            {t('Onde você se sabotou')}
             <input id="wk-fail" value={f.fail} onChange={(e) => set('fail', e.target.value)} />
           </label>
           <label>
-            Um compromisso para a próxima semana
-            <input id="wk-commit" value={f.commit} onChange={(e) => set('commit', e.target.value)} placeholder="Ex.: sábado sem delivery" />
+            {t('Um compromisso para a próxima semana')}
+            <input id="wk-commit" value={f.commit} onChange={(e) => set('commit', e.target.value)} placeholder={t('Ex.: sábado sem delivery')} />
           </label>
         </fieldset>
 
         <button type="submit" className="cta">
-          Fechar a semana
+          {t('Fechar a semana')}
         </button>
       </form>
     </div>
@@ -296,8 +297,8 @@ function Journey({ s }: { s: AppState }) {
   return (
     <section className="card block">
       <div className="block-h">
-        <h2>Rumo à meta</h2>
-        <span className="soft-chip">{left > 0 ? `faltam ${String(left).replace('.', ',')} kg` : 'meta batida'}</span>
+        <h2>{t('Rumo à meta')}</h2>
+        <span className="soft-chip">{left > 0 ? t('faltam {n} kg', { n: String(left).replace('.', ',') }) : t('meta batida')}</span>
       </div>
       <div className="journey">
         <div className="journey-track">

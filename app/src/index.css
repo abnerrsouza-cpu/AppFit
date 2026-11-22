@@ -3622,3 +3622,32 @@ input[type='range'] {
   border-color: var(--yel-2);
   background: var(--red-soft);
 }
+
+/* seletor de idioma (rodapé do Perfil e da tela de boas-vindas) */
+.lang-pick {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 6px;
+  padding: 5px;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.lang-pick button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 4px;
+  border-radius: var(--r-pill);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--fg-2);
+  white-space: nowrap;
+}
+.lang-pick button.on {
+  background: linear-gradient(135deg, var(--yel-1), var(--yel-2));
+  color: #fff;
+  font-weight: 600;
+}

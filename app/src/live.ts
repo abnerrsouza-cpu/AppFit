@@ -2,6 +2,7 @@
 // se o app estiver publicado, busca a versão mais nova que o robô diário grava em content.json.
 import { useEffect, useState } from 'react'
 import snapshot from './content-snapshot.json'
+import { t } from './i18n'
 
 export interface LiveVideo {
   id: string
@@ -43,11 +44,11 @@ export function useLiveContent() {
 
 export function ago(iso: string) {
   const d = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000)
-  if (d <= 0) return 'hoje'
-  if (d === 1) return 'ontem'
-  if (d < 7) return `há ${d} dias`
+  if (d <= 0) return t('hoje')
+  if (d === 1) return t('ontem')
+  if (d < 7) return t('há {n} dias', { n: d })
   const w = Math.floor(d / 7)
-  return w === 1 ? 'há 1 semana' : `há ${w} semanas`
+  return w === 1 ? t('há 1 semana') : t('há {n} semanas', { n: w })
 }
 
 export const thumb = (id: string) => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Icon } from '../components/Icon'
-import { type AppState, type Profile, WEEKDAYS, bmi, currentWeight, newId, resetToBlank, resetToDemo, setState } from '../store'
+import { LANGS, t, weekday } from '../i18n'
+import { type AppState, type Profile, bmi, currentWeight, newId, resetToBlank, resetToDemo, setLang, setState } from '../store'
 
 type Section = null | 'perfil' | 'rotina' | 'treino' | 'dieta' | 'agenda' | 'relogio' | 'carta'
 
@@ -14,10 +15,10 @@ export function Menu({ s }: { s: AppState }) {
     return (
       <div className="screen">
         <div className="sheet-h">
-          <button type="button" className="round-btn" onClick={() => setSec(null)} aria-label="Voltar">
+          <button type="button" className="round-btn" onClick={() => setSec(null)} aria-label={t('Voltar')}>
             <Icon name="back" />
           </button>
-          <span className="eyebrow">Menu</span>
+          <span className="eyebrow">{t('Perfil')}</span>
         </div>
         {sec === 'perfil' && <Perfil p={p} upd={upd} weight={currentWeight(s)} />}
         {sec === 'rotina' && <Rotina p={p} upd={upd} />}
@@ -48,68 +49,69 @@ export function Menu({ s }: { s: AppState }) {
       <div className="card profile-card">
         <span className="avatar">{(p.name || '?').slice(0, 1).toUpperCase()}</span>
         <span>
-          <b>{p.name || 'Sem nome'}</b>
+          <b>{p.name || t('Sem nome')}</b>
           <small>
-            {p.goal} · {p.height} cm · {currentWeight(s).toFixed(1)} kg
+            {t(p.goal)} · {p.height} cm · {currentWeight(s).toFixed(1)} kg
           </small>
         </span>
       </div>
 
       <div className="card menu-group">
-        <span className="group-label">Seus dados</span>
-        <Row id="perfil" icon="user" title="Perfil e medidas" sub="Peso, altura, idade, objetivo" />
-        <Row id="rotina" icon="sun" title="Rotina" sub={`Acorda ${p.wake} · treina ${p.trainTime} · dorme ${p.sleep}`} />
-        <Row id="carta" icon="quote" title="Carta de compromisso" sub="Usada nas cobranças" />
+        <span className="group-label">{t('Seus dados')}</span>
+        <Row id="perfil" icon="user" title={t('Perfil e medidas')} sub={t('Peso, altura, idade, objetivo')} />
+        <Row id="rotina" icon="sun" title={t('Rotina')} sub={t('Acorda {a} · treina {b} · dorme {c}', { a: p.wake, b: p.trainTime, c: p.sleep })} />
+        <Row id="carta" icon="quote" title={t('Carta de compromisso')} sub={t('Usada nas cobranças')} />
       </div>
 
       <div className="card menu-group">
-        <span className="group-label">Planos</span>
-        <Row id="treino" icon="dumbbell" title="Ficha de treino" sub={`${p.workouts.length} dias por semana`} />
-        <Row id="dieta" icon="food" title="Plano alimentar" sub={`${p.meals.length} refeições por dia`} />
+        <span className="group-label">{t('Planos')}</span>
+        <Row id="treino" icon="dumbbell" title={t('Ficha de treino')} sub={t('{n} dias por semana', { n: p.workouts.length })} />
+        <Row id="dieta" icon="food" title={t('Plano alimentar')} sub={t('{n} refeições por dia', { n: p.meals.length })} />
       </div>
 
       <div className="card menu-group">
-        <span className="group-label">Conexões</span>
-        <Row id="agenda" icon="calendar" title="Google Agenda" sub={p.icalUrl ? 'Conectada' : 'Colar link público'} />
-        <Row id="relogio" icon="watch" title="Relógio de treino" sub="Strava · em breve" />
+        <span className="group-label">{t('Conexões')}</span>
+        <Row id="agenda" icon="calendar" title={t('Google Agenda')} sub={p.icalUrl ? t('Conectada') : t('Colar link público')} />
+        <Row id="relogio" icon="watch" title={t('Relógio de treino')} sub={t('Strava · em breve')} />
       </div>
 
-      <div className="theme-switch" role="group" aria-label="Tema">
+      <div className="theme-switch" role="group" aria-label={t('Tema')}>
         <button type="button" className={s.theme === 'light' ? 'on' : ''} onClick={() => setState((st) => ({ ...st, theme: 'light' }))}>
-          <Icon name="sun" size={18} /> Claro
+          <Icon name="sun" size={18} /> {t('Claro')}
         </button>
         <button type="button" className={s.theme === 'dark' ? 'on' : ''} onClick={() => setState((st) => ({ ...st, theme: 'dark' }))}>
-          <Icon name="moon" size={18} /> Escuro
+          <Icon name="moon" size={18} /> {t('Escuro')}
         </button>
       </div>
 
       {s.demo ? (
         <button type="button" className="cta" onClick={resetToBlank}>
-          Sair do exemplo e começar o meu desafio
+          {t('Sair do exemplo e começar o meu desafio')}
         </button>
       ) : confirm ? (
         <div className="card confirm">
-          <b>Apagar todos os seus dados?</b>
-          <small>Check-ins, fotos e configurações deste aparelho. Não dá para desfazer.</small>
+          <b>{t('Apagar todos os seus dados?')}</b>
+          <small>{t('Check-ins, fotos e configurações deste aparelho. Não dá para desfazer.')}</small>
           <div className="row2">
             <button type="button" className="ghost-btn" onClick={() => setConfirm(false)}>
-              Cancelar
+              {t('Cancelar')}
             </button>
             <button type="button" className="danger-btn" onClick={resetToBlank}>
-              Apagar
+              {t('Apagar')}
             </button>
           </div>
         </div>
       ) : (
         <button type="button" className="ghost-btn" onClick={() => setConfirm(true)}>
-          <Icon name="logout" size={18} /> Recomeçar do zero
+          <Icon name="logout" size={18} /> {t('Recomeçar do zero')}
         </button>
       )}
       {!s.demo && (
         <button type="button" className="link center" onClick={resetToDemo}>
-          Ver dados de exemplo
+          {t('Ver dados de exemplo')}
         </button>
       )}
+      <LangPicker s={s} />
     </div>
   )
 }
@@ -120,55 +122,55 @@ function Perfil({ p, upd, weight }: { p: Profile; upd: Upd; weight: number }) {
   const b = bmi(weight, p.height)
   return (
     <form className="form" onSubmit={(e) => e.preventDefault()}>
-      <h1>Perfil e medidas</h1>
+      <h1>{t('Perfil e medidas')}</h1>
       <div className="card field">
         <label>
-          Nome
+          {t('Nome')}
           <input id="pf-name" value={p.name} onChange={(e) => upd({ name: e.target.value })} />
         </label>
         <label>
-          Objetivo
+          {t('Objetivo')}
           <select id="pf-goal" value={p.goal} onChange={(e) => upd({ goal: e.target.value })}>
             {['Perder gordura', 'Perder gordura e ganhar definição', 'Ganhar massa', 'Manter e ter constância'].map((g) => (
-              <option key={g}>{g}</option>
+              <option key={g} value={g}>{t(g)}</option>
             ))}
           </select>
         </label>
         <div className="row2">
           <label>
-            Idade
+            {t('Idade')}
             <input id="pf-age" type="number" inputMode="numeric" value={p.age} onChange={(e) => upd({ age: Number(e.target.value) })} />
           </label>
           <label>
-            Altura (cm)
+            {t('Altura (cm)')}
             <input id="pf-height" type="number" inputMode="numeric" value={p.height} onChange={(e) => upd({ height: Number(e.target.value) })} />
           </label>
         </div>
         <div className="row2">
           <label>
-            Peso inicial (kg)
+            {t('Peso inicial (kg)')}
             <input id="pf-w0" type="number" step={0.1} inputMode="decimal" value={p.weightStart} onChange={(e) => upd({ weightStart: Number(e.target.value) })} />
           </label>
           <label>
-            Peso meta (kg)
+            {t('Peso meta (kg)')}
             <input id="pf-wg" type="number" step={0.1} inputMode="decimal" value={p.weightGoal} onChange={(e) => upd({ weightGoal: Number(e.target.value) })} />
           </label>
         </div>
         <label>
-          Meta de cardio por semana (min)
+          {t('Meta de cardio por semana (min)')}
           <input id="pf-cardio" type="number" inputMode="numeric" value={p.cardioGoalMin} onChange={(e) => upd({ cardioGoalMin: Number(e.target.value) })} />
         </label>
       </div>
       <div className="card kv-card">
         <div className="kv">
-          <span>Peso atual</span>
+          <span>{t('Peso atual')}</span>
           <b>{weight.toFixed(1)} kg</b>
-          <span>IMC</span>
+          <span>{t('IMC')}</span>
           <b>{b.toFixed(1)}</b>
-          <span>Falta para a meta</span>
+          <span>{t('Falta para a meta')}</span>
           <b>{Math.max(0, weight - p.weightGoal).toFixed(1)} kg</b>
         </div>
-        <small className="muted">O peso atual vem do check-in semanal.</small>
+        <small className="muted">{t('O peso atual vem do check-in semanal.')}</small>
       </div>
     </form>
   )
@@ -177,14 +179,14 @@ function Perfil({ p, upd, weight }: { p: Profile; upd: Upd; weight: number }) {
 function Rotina({ p, upd }: { p: Profile; upd: Upd }) {
   const T = ({ k, l }: { k: 'wake' | 'trainTime' | 'checkinTime' | 'sleep'; l: string }) => (
     <label>
-      {l}
+      {t(l)}
       <input id={`rt-${k}`} type="time" value={p[k]} onChange={(e) => upd({ [k]: e.target.value })} />
     </label>
   )
   return (
     <form className="form" onSubmit={(e) => e.preventDefault()}>
-      <h1>Rotina</h1>
-      <p className="lead">Esses horários definem quando o app te cobra.</p>
+      <h1>{t('Rotina')}</h1>
+      <p className="lead">{t('Esses horários definem quando o app te cobra.')}</p>
       <div className="card field">
         <div className="row2">
           <T k="wake" l="Acordar" />
@@ -208,21 +210,21 @@ function Treino({ p, upd }: { p: Profile; upd: Upd }) {
   }
   return (
     <form className="form" onSubmit={(e) => e.preventDefault()}>
-      <h1>Ficha de treino</h1>
-      <p className="lead">Um exercício por linha. Dias desligados são descanso.</p>
+      <h1>{t('Ficha de treino')}</h1>
+      <p className="lead">{t('Um exercício por linha. Dias desligados são descanso.')}</p>
       {[1, 2, 3, 4, 5, 6, 0].map((wd) => {
         const w = p.workouts.find((x) => x.weekday === wd)
         return (
           <div key={wd} className="card field">
             <div className="field-top">
-              <b className="cap">{WEEKDAYS[wd]}</b>
-              <button type="button" className={`switch ${w ? 'on' : ''}`} onClick={() => set(wd, w ? null : {})} aria-label={`Treino na ${WEEKDAYS[wd]}`} aria-pressed={!!w}>
+              <b className="cap">{weekday(wd)}</b>
+              <button type="button" className={`switch ${w ? 'on' : ''}`} onClick={() => set(wd, w ? null : {})} aria-label={`${t('Treino')}: ${weekday(wd)}`} aria-pressed={!!w}>
                 <i />
               </button>
             </div>
             {w && (
               <>
-                <input id={`tr-t-${wd}`} value={w.title} onChange={(e) => set(wd, { title: e.target.value })} placeholder="Nome do treino" />
+                <input id={`tr-t-${wd}`} value={w.title} onChange={(e) => set(wd, { title: e.target.value })} placeholder={t('Nome do treino')} />
                 <textarea id={`tr-i-${wd}`} rows={4} value={w.items} onChange={(e) => set(wd, { items: e.target.value })} placeholder={'Supino reto 4x10\nCrucifixo 3x12'} />
               </>
             )}
@@ -237,25 +239,25 @@ function Dieta({ p, upd }: { p: Profile; upd: Upd }) {
   const set = (id: string, patch: Partial<Profile['meals'][number]>) => upd({ meals: p.meals.map((m) => (m.id === id ? { ...m, ...patch } : m)) })
   return (
     <form className="form" onSubmit={(e) => e.preventDefault()}>
-      <h1>Plano alimentar</h1>
-      <p className="lead">Cada refeição vira uma notificação no horário.</p>
+      <h1>{t('Plano alimentar')}</h1>
+      <p className="lead">{t('Cada refeição vira uma notificação no horário.')}</p>
       {p.meals
         .slice()
         .sort((a, b) => a.time.localeCompare(b.time))
         .map((m) => (
           <div key={m.id} className="card field">
             <div className="row2">
-              <input id={`dt-n-${m.id}`} value={m.name} onChange={(e) => set(m.id, { name: e.target.value })} aria-label="Nome da refeição" />
-              <input id={`dt-t-${m.id}`} type="time" value={m.time} onChange={(e) => set(m.id, { time: e.target.value })} aria-label="Horário" />
+              <input id={`dt-n-${m.id}`} value={m.name} onChange={(e) => set(m.id, { name: e.target.value })} aria-label={t('Nome da refeição')} />
+              <input id={`dt-t-${m.id}`} type="time" value={m.time} onChange={(e) => set(m.id, { time: e.target.value })} aria-label={t('Horário')} />
             </div>
-            <textarea id={`dt-i-${m.id}`} rows={2} value={m.items} onChange={(e) => set(m.id, { items: e.target.value })} placeholder="O que comer" />
+            <textarea id={`dt-i-${m.id}`} rows={2} value={m.items} onChange={(e) => set(m.id, { items: e.target.value })} placeholder={t('O que comer')} />
             <button type="button" className="link danger" onClick={() => upd({ meals: p.meals.filter((x) => x.id !== m.id) })}>
-              Remover refeição
+              {t('Remover refeição')}
             </button>
           </div>
         ))}
-      <button type="button" className="ghost-btn" onClick={() => upd({ meals: [...p.meals, { id: newId(), time: '10:00', name: 'Nova refeição', items: '' }] })}>
-        <Icon name="plus" size={18} /> Adicionar refeição
+      <button type="button" className="ghost-btn" onClick={() => upd({ meals: [...p.meals, { id: newId(), time: '10:00', name: t('Nova refeição'), items: '' }] })}>
+        <Icon name="plus" size={18} /> {t('Adicionar refeição')}
       </button>
     </form>
   )
@@ -264,19 +266,19 @@ function Dieta({ p, upd }: { p: Profile; upd: Upd }) {
 function Agenda({ p, upd }: { p: Profile; upd: Upd }) {
   return (
     <form className="form" onSubmit={(e) => e.preventDefault()}>
-      <h1>Google Agenda</h1>
-      <p className="lead">O app lê seus compromissos e cobra com base neles: "Você tinha Academia às 18h. Foi?"</p>
+      <h1>{t('Google Agenda')}</h1>
+      <p className="lead">{t('O app lê seus compromissos e cobra com base neles: "Você tinha Academia às 18h. Foi?"')}</p>
       <div className="card field">
         <label>
-          Endereço secreto no formato iCal
+          {t('Endereço secreto no formato iCal')}
           <input id="ag-url" type="url" value={p.icalUrl} onChange={(e) => upd({ icalUrl: e.target.value.trim() })} placeholder="https://calendar.google.com/calendar/ical/.../basic.ics" />
         </label>
       </div>
       <ol className="steps card">
-        <li>Abra o Google Agenda no computador.</li>
-        <li>Configurações, depois clique na sua agenda.</li>
-        <li>Em "Integrar agenda", copie o "Endereço secreto no formato iCal".</li>
-        <li>Cole aqui.</li>
+        <li>{t('Abra o Google Agenda no computador.')}</li>
+        <li>{t('Configurações, depois clique na sua agenda.')}</li>
+        <li>{t('Em "Integrar agenda", copie o "Endereço secreto no formato iCal".')}</li>
+        <li>{t('Cole aqui.')}</li>
       </ol>
     </form>
   )
@@ -285,14 +287,14 @@ function Agenda({ p, upd }: { p: Profile; upd: Upd }) {
 function Relogio() {
   return (
     <div className="form">
-      <h1>Relógio de treino</h1>
+      <h1>{t('Relógio de treino')}</h1>
       <div className="card field">
         <p>
-          A conexão vai ser pelo <b>Strava</b>, que recebe dados de Garmin, Amazfit, Polar, Coros, Apple Watch e outros. O cardio entra sozinho na prestação de contas.
+          {t('A conexão vai ser pelo Strava, que recebe dados de Garmin, Amazfit, Polar, Coros, Apple Watch e outros. O cardio entra sozinho na prestação de contas.')}
         </p>
-        <p className="muted">Apple Saúde e Samsung Health não podem ser lidos por um app web. Para eles, sincronize com o Strava.</p>
+        <p className="muted">{t('Apple Saúde e Samsung Health não podem ser lidos por um app web. Para eles, sincronize com o Strava.')}</p>
         <button type="button" className="ghost-btn" disabled>
-          <Icon name="lock" size={18} /> Em breve
+          <Icon name="lock" size={18} /> {t('Em breve')}
         </button>
       </div>
     </div>
@@ -302,11 +304,24 @@ function Relogio() {
 function Carta({ p, upd }: { p: Profile; upd: Upd }) {
   return (
     <form className="form" onSubmit={(e) => e.preventDefault()}>
-      <h1>Carta de compromisso</h1>
-      <p className="lead">Escreva para você mesmo daqui a {p.cycleDays} dias. Por que você começou? O que você não aguenta mais? O app vai te lembrar disso nos dias difíceis.</p>
+      <h1>{t('Carta de compromisso')}</h1>
+      <p className="lead">{t('Escreva para você mesmo daqui a {n} dias. Por que você começou? O que você não aguenta mais? O app vai te lembrar disso nos dias difíceis.', { n: p.cycleDays })}</p>
       <div className="card field">
-        <textarea id="ct-letter" rows={8} value={p.letter} onChange={(e) => upd({ letter: e.target.value })} placeholder="Cansei de..." />
+        <textarea id="ct-letter" rows={8} value={p.letter} onChange={(e) => upd({ letter: e.target.value })} placeholder={t('Cansei de...')} />
       </div>
     </form>
+  )
+}
+
+export function LangPicker({ s }: { s: AppState }) {
+  const cur = s.lang ?? 'pt'
+  return (
+    <div className="lang-pick" role="group" aria-label="Idioma / Language / Idioma">
+      {LANGS.map((l) => (
+        <button key={l.id} type="button" className={cur === l.id ? 'on' : ''} onClick={() => setLang(l.id)}>
+          <span>{l.flag}</span> {l.label}
+        </button>
+      ))}
+    </div>
   )
 }

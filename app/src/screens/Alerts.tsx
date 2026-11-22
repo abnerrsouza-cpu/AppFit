@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Icon } from '../components/Icon'
+import { t } from '../i18n'
 import { enableNotifications, fireTestNow, notifyStatus, show } from '../notify'
 import { dailySchedule, toneLabel } from '../psych'
 import { type AppState, type CustomNudge, type Tone, defaultCustom, newId, setState } from '../store'
@@ -17,30 +18,30 @@ export function Alerts({ s, onBack }: { s: AppState; onBack: () => void }) {
   return (
     <div className="screen">
       <header className="chat-h">
-        <button type="button" className="round-btn" onClick={onBack} aria-label="Voltar">
+        <button type="button" className="round-btn" onClick={onBack} aria-label={t('Voltar')}>
           <Icon name="back" />
         </button>
         <span className="coach-av lg">
           <Icon name="flame" size={26} />
         </span>
         <div>
-          <b>Seu treinador</b>
+          <b>{t('Seu treinador')}</b>
           <small>
-            {TONE_EMOJI[s.profile.tone]} modo {toneLabel[s.profile.tone].name.toLowerCase()}
+            {TONE_EMOJI[s.profile.tone]} {t('modo {x}', { x: toneLabel()[s.profile.tone].name.toLowerCase() })}
           </small>
         </div>
       </header>
 
       <div className="tone-pick">
-        {(Object.keys(toneLabel) as Tone[]).map((t) => (
+        {(Object.keys(toneLabel()) as Tone[]).map((tn) => (
           <button
-            key={t}
+            key={tn}
             type="button"
-            className={`tone tone-${t} ${s.profile.tone === t ? 'on' : ''}`}
-            onClick={() => setState((st) => ({ ...st, profile: { ...st.profile, tone: t } }))}
+            className={`tone tone-${tn} ${s.profile.tone === tn ? 'on' : ''}`}
+            onClick={() => setState((st) => ({ ...st, profile: { ...st.profile, tone: tn } }))}
           >
-            <span className="tone-emo">{TONE_EMOJI[t]}</span>
-            <b>{toneLabel[t].name}</b>
+            <span className="tone-emo">{TONE_EMOJI[tn]}</span>
+            <b>{toneLabel()[tn].name}</b>
           </button>
         ))}
       </div>
@@ -51,25 +52,25 @@ export function Alerts({ s, onBack }: { s: AppState; onBack: () => void }) {
             <Icon name="bell" />
           </span>
           <div>
-            <b>Deixe eu te cobrar fora do app</b>
+            <b>{t('Deixe eu te cobrar fora do app')}</b>
             <small>
-              {status === 'default' && 'Ative as notificações.'}
-              {status === 'denied' && 'Você bloqueou. Libere nas configurações do navegador.'}
-              {status === 'needs-install' && 'No iPhone: Compartilhar e depois "Adicionar à Tela de Início".'}
-              {status === 'unsupported' && 'Instale o app no celular para ativar.'}
+              {status === 'default' && t('Ative as notificações.')}
+              {status === 'denied' && t('Você bloqueou. Libere nas configurações do navegador.')}
+              {status === 'needs-install' && t('No iPhone: Compartilhar e depois "Adicionar à Tela de Início".')}
+              {status === 'unsupported' && t('Instale o app no celular para ativar.')}
             </small>
           </div>
           {status === 'default' && (
             <button type="button" className="pill-btn sm" onClick={async () => setStatus(await enableNotifications())}>
-              Ativar
+              {t('Ativar')}
             </button>
           )}
         </section>
       )}
 
       <div className="chat">
-        <span className="chat-day">Hoje</span>
-        {past.length === 0 && <p className="muted center-txt">Ainda tá cedo. A primeira mensagem sai às {list[0]?.time}.</p>}
+        <span className="chat-day">{t('Hoje')}</span>
+        {past.length === 0 && <p className="muted center-txt">{t('Ainda tá cedo. A primeira mensagem sai às {h}.', { h: list[0]?.time ?? '' })}</p>}
         {past.map((n) => (
           <div key={n.moment + n.time} className={`msg ${n.moment === 'checkin_atrasado' ? 'hot' : ''}`}>
             <p>{n.body}</p>
@@ -83,21 +84,21 @@ export function Alerts({ s, onBack }: { s: AppState; onBack: () => void }) {
               <i />
               <i />
             </span>
-            <small>próxima às {next.time}</small>
+            <small>{t('próxima às {h}', { h: next.time })}</small>
           </div>
         )}
       </div>
 
       <section className={`card test-mode ${s.testEvery ? 'on' : ''}`}>
         <div>
-          <b>🧪 Modo teste: a cada 5 min</b>
-          <small>{s.testEvery ? 'Ligado. Deixe o app aberto para receber.' : 'Para ver as cobranças chegando. Funciona com o app aberto.'}</small>
+          <b>🧪 {t('Modo teste: a cada 5 min')}</b>
+          <small>{s.testEvery ? t('Ligado. Deixe o app aberto para receber.') : t('Para ver as cobranças chegando. Funciona com o app aberto.')}</small>
         </div>
         <button
           type="button"
           className={`switch ${s.testEvery ? 'on' : ''}`}
           aria-pressed={!!s.testEvery}
-          aria-label="Modo teste a cada 5 minutos"
+          aria-label={t('Modo teste a cada 5 minutos')}
           disabled={status !== 'granted'}
           onClick={() => {
             const on = !s.testEvery
@@ -122,7 +123,7 @@ function MyNudges({ s, canSend }: { s: AppState; canSend: boolean }) {
   const save = (l: CustomNudge[]) => setState((st) => ({ ...st, custom: l }))
 
   const send = async (n: CustomNudge) => {
-    const ok = await show('Recado seu', n.text)
+    const ok = await show(t('Recado seu'), n.text)
     setSent(ok ? n.id : 'erro')
     setTimeout(() => setSent(null), 2500)
   }
@@ -130,10 +131,10 @@ function MyNudges({ s, canSend }: { s: AppState; canSend: boolean }) {
   return (
     <section className="card block mine">
       <div className="block-h">
-        <h2>Suas cobranças</h2>
-        <span className="soft-chip">todo dia</span>
+        <h2>{t('Suas cobranças')}</h2>
+        <span className="soft-chip">{t('todo dia')}</span>
       </div>
-      <p className="hint">Escreva do seu jeito. Elas chegam como notificação no horário.</p>
+      <p className="hint">{t('Escreva do seu jeito. Elas chegam como notificação no horário.')}</p>
       <ul className="mine-list">
         {list.map((n) => (
           <li key={n.id} className={n.on ? '' : 'off'}>
@@ -142,13 +143,13 @@ function MyNudges({ s, canSend }: { s: AppState; canSend: boolean }) {
               type="time"
               value={n.time}
               onChange={(e) => save(list.map((x) => (x.id === n.id ? { ...x, time: e.target.value } : x)))}
-              aria-label="Horário"
+              aria-label={t('Horário')}
             />
             <span className="mine-text">{n.text}</span>
-            <button type="button" className="mine-send" onClick={() => send(n)} disabled={!canSend} aria-label="Enviar agora">
+            <button type="button" className="mine-send" onClick={() => send(n)} disabled={!canSend} aria-label={t('Enviar agora')}>
               {sent === n.id ? <Icon name="check" size={16} stroke={3} /> : <Icon name="play" size={14} />}
             </button>
-            <button type="button" className="mine-del" onClick={() => save(list.filter((x) => x.id !== n.id))} aria-label="Apagar">
+            <button type="button" className="mine-del" onClick={() => save(list.filter((x) => x.id !== n.id))} aria-label={t('Apagar')}>
               <Icon name="x" size={14} stroke={2.5} />
             </button>
           </li>
@@ -163,20 +164,20 @@ function MyNudges({ s, canSend }: { s: AppState; canSend: boolean }) {
           setText('')
         }}
       >
-        <input id="cn-new-time" type="time" value={time} onChange={(e) => setTime(e.target.value)} aria-label="Horário" />
-        <input id="cn-new-text" value={text} onChange={(e) => setText(e.target.value)} placeholder="Ex.: Larga o celular e vai treinar" />
-        <button type="submit" className="mine-plus" aria-label="Adicionar">
+        <input id="cn-new-time" type="time" value={time} onChange={(e) => setTime(e.target.value)} aria-label={t('Horário')} />
+        <input id="cn-new-text" value={text} onChange={(e) => setText(e.target.value)} placeholder={t('Ex.: Larga o celular e vai treinar')} />
+        <button type="submit" className="mine-plus" aria-label={t('Adicionar')}>
           <Icon name="plus" size={18} stroke={2.5} />
         </button>
       </form>
       {canSend ? (
-        <button type="button" className="cta" onClick={() => send(list[0] ?? { id: 'x', time: '', text: 'Treinou hoje? Bora, filho!', on: true })}>
-          <Icon name="bell" size={18} /> Disparar agora: "{(list[0]?.text ?? 'Treinou hoje? Bora, filho!').slice(0, 28)}"
+        <button type="button" className="cta" onClick={() => send(list[0] ?? { id: 'x', time: '', text: t('Treinou hoje? Bora, filho!'), on: true })}>
+          <Icon name="bell" size={18} /> {t('Disparar agora')}: "{(list[0]?.text ?? t('Treinou hoje? Bora, filho!')).slice(0, 28)}"
         </button>
       ) : (
-        <p className="muted">Ative as notificações acima para disparar.</p>
+        <p className="muted">{t('Ative as notificações acima para disparar.')}</p>
       )}
-      {sent === 'erro' && <p className="bad">Não consegui enviar. Abra o app pelo ícone da tela de início.</p>}
+      {sent === 'erro' && <p className="bad">{t('Não consegui enviar. Abra o app pelo ícone da tela de início.')}</p>}
     </section>
   )
 }

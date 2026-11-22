@@ -1,3 +1,5 @@
+import { t } from './i18n'
+
 // Conteúdo da aba Notícias.
 // MVP: artigos escritos aqui. Produção: vir de um CMS/planilha ou de feeds RSS pelo servidor,
 // para publicar sem atualizar o app.
@@ -157,3 +159,15 @@ export const ARTICLES: Article[] = [
     takeaway: ['Feche os três anéis todo dia.'],
   },
 ]
+
+/** Artigo traduzido para o idioma atual (os textos em português são as chaves do dicionário). */
+export function localize(a: Article): Article {
+  return {
+    ...a,
+    title: t(a.title),
+    summary: t(a.summary),
+    date: a.date,
+    body: a.body.map((b) => ({ h: b.h ? t(b.h) : undefined, p: t(b.p) })),
+    takeaway: a.takeaway.map((x) => t(x)),
+  }
+}

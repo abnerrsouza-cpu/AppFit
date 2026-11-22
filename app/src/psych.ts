@@ -12,6 +12,8 @@ import {
   workoutFor,
 } from './store'
 
+import { t } from './i18n'
+
 const brl = (n: number) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
 export type Moment =
@@ -36,7 +38,7 @@ function ctx(s: AppState) {
   const st = streak(s)
   const quote = firstSentence(p.letter)
   return {
-    nome: p.name || 'você',
+    nome: p.name || t('você'),
     pago: brl(p.price),
     custoDia: brl(c.costPerDay),
     diasRestantes: c.left,
@@ -47,9 +49,9 @@ function ctx(s: AppState) {
   }
 }
 
-function firstSentence(t: string) {
-  const s = (t || '').trim().split(/(?<=[.!?])\s/)[0]
-  return s || 'Eu prometi que dessa vez ia ser diferente.'
+function firstSentence(txt: string) {
+  const s = (txt || '').trim().split(/(?<=[.!?])\s/)[0]
+  return s || t('Eu prometi que dessa vez ia ser diferente.')
 }
 
 type Bank = Record<Tone, string[]>
@@ -128,7 +130,7 @@ const BANK: Record<Moment, Bank> = {
 
 export function nudge(s: AppState, moment: Moment, extra: Record<string, string> = {}, seed = daySeed()): string {
   const c = ctx(s)
-  return fill(pick(BANK[moment][s.profile.tone], seed), c, extra)
+  return fill(t(pick(BANK[moment][s.profile.tone], seed)), c, extra)
 }
 
 const TITLES: Record<Moment, string> = {
@@ -146,22 +148,22 @@ export function dailySchedule(s: AppState, d = new Date()): Nudge[] {
   const p = s.profile
   const list: Nudge[] = []
   const add = (moment: Moment, time: string, extra: Record<string, string> = {}, title?: string) =>
-    list.push({ moment, time, title: title ?? TITLES[moment], body: nudge(s, moment, { hora: time, ...extra }) })
+    list.push({ moment, time, title: title ?? t(TITLES[moment]), body: nudge(s, moment, { hora: time, ...extra }) })
 
   add('acordar', p.wake)
-  p.meals.forEach((m) => add('refeicao', m.time, { refeicao: m.name, itens: m.items || 'o que está no plano' }, m.name))
+  p.meals.forEach((m) => add('refeicao', m.time, { refeicao: m.name, itens: m.items || t('o que está no plano') }, m.name))
   const w = workoutFor(p, d)
   if (w) {
     const [h, mi] = p.trainTime.split(':').map(Number)
     const pre = `${String(Math.max(0, h - 1)).padStart(2, '0')}:${String(mi).padStart(2, '0')}`
-    add('treino', pre, { treino: w.title, hora: p.trainTime }, `Treino: ${w.title}`)
+    add('treino', pre, { treino: w.title, hora: p.trainTime }, `${t('Treino')}: ${w.title}`)
   }
   add('checkin', p.checkinTime)
   const [ch, cm] = p.checkinTime.split(':').map(Number)
   const late = `${String(Math.min(23, ch + 1)).padStart(2, '0')}:${String(cm).padStart(2, '0')}`
   add('checkin_atrasado', late)
   if (d.getDay() === 0) add('semanal', '10:00')
-  for (const c of s.custom ?? defaultCustom()) if (c.on && c.text.trim()) list.push({ moment: 'geral', time: c.time, title: 'Recado seu', body: c.text })
+  for (const c of s.custom ?? defaultCustom()) if (c.on && c.text.trim()) list.push({ moment: 'geral', time: c.time, title: t('Recado seu'), body: c.text })
   return list.sort((a, b) => a.time.localeCompare(b.time))
 }
 
@@ -183,7 +185,7 @@ function feedbackShort(s: AppState, l: DailyLog) {
 
 /** Resposta depois da prestação de contas. Elogia o que foi cumprido, cobra o que não foi. */
 export function feedback(s: AppState, l: DailyLog): { title: string; body: string; level: 'good' | 'warn' | 'bad' } {
-  const t = s.profile.tone
+  const tone = s.profile.tone
   const c = ctx(s)
   const score =
     (l.trained === 'sim' || l.trained === 'descanso' ? 4 : l.trained === 'parcial' ? 2 : 0) +
@@ -194,29 +196,29 @@ export function feedback(s: AppState, l: DailyLog): { title: string; body: strin
   if (score >= 8) {
     return {
       level: 'good',
-      title: { parceiro: 'Dia cumprido. Orgulho de você.', treinador: 'Dia pago. Isso é disciplina.', sargento: 'Cumpriu. Não fez mais que a obrigação. Amanhã de novo.' }[t],
-      body: fill('Sequência: {streak} dias. Faltam {diasRestantes}. O {custoDia} de hoje foi bem investido.', c),
+      title: t({ parceiro: 'Dia cumprido. Orgulho de você.', treinador: 'Dia pago. Isso é disciplina.', sargento: 'Cumpriu. Não fez mais que a obrigação. Amanhã de novo.' }[tone]),
+      body: fill(t('Sequência: {streak} dias. Faltam {diasRestantes}. O {custoDia} de hoje foi bem investido.'), c),
     }
   }
   if (score >= 5) {
     return {
       level: 'warn',
-      title: { parceiro: 'Dia ok. Dá pra apertar amanhã.', treinador: 'Meio-termo não muda corpo nenhum.', sargento: 'Meia boca. E meia boca é o que te trouxe até aqui.' }[t],
+      title: t({ parceiro: 'Dia ok. Dá pra apertar amanhã.', treinador: 'Meio-termo não muda corpo nenhum.', sargento: 'Meia boca. E meia boca é o que te trouxe até aqui.' }[tone]),
       body:
         l.trained === 'nao'
-          ? 'Faltou o treino. Amanhã ele vem primeiro, antes de qualquer desculpa aparecer.'
-          : fill('A dieta ficou em {nota}/10. Qual foi o momento exato em que você furou? Anota e evita amanhã.', c, { nota: String(l.dietScore) }),
+          ? t('Faltou o treino. Amanhã ele vem primeiro, antes de qualquer desculpa aparecer.')
+          : fill(t('A dieta ficou em {nota}/10. Qual foi o momento exato em que você furou? Anota e evita amanhã.'), c, { nota: String(l.dietScore) }),
     }
   }
   return {
     level: 'bad',
-    title: { parceiro: 'Dia difícil. Acontece, mas não vira hábito.', treinador: 'Hoje você perdeu pra você mesmo.', sargento: 'Hoje foi dinheiro jogado fora.' }[t],
-    body: fill('Você escreveu: "{carta}" Pelo menos foi sincero, e isso conta. Amanhã é o dia de provar que hoje foi exceção.', c),
+    title: t({ parceiro: 'Dia difícil. Acontece, mas não vira hábito.', treinador: 'Hoje você perdeu pra você mesmo.', sargento: 'Hoje foi dinheiro jogado fora.' }[tone]),
+    body: fill(t('Você escreveu: "{carta}" Pelo menos foi sincero, e isso conta. Amanhã é o dia de provar que hoje foi exceção.'), c),
   }
 }
 
-export const toneLabel: Record<Tone, { name: string; desc: string }> = {
-  parceiro: { name: 'Parceiro', desc: 'Firme, mas gentil' },
-  treinador: { name: 'Treinador', desc: 'Direto, sem enrolação' },
-  sargento: { name: 'Sargento', desc: 'Brutal. Só pra quem aguenta' },
-}
+export const toneLabel = (): Record<Tone, { name: string; desc: string }> => ({
+  parceiro: { name: t('Parceiro'), desc: t('Firme, mas gentil') },
+  treinador: { name: t('Treinador'), desc: t('Direto, sem enrolação') },
+  sargento: { name: t('Sargento'), desc: t('Brutal. Só pra quem aguenta') },
+})

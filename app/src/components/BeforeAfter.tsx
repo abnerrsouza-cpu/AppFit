@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { t } from '../i18n'
 import { getPhoto } from '../photos'
 
 /** Duas fotos sobrepostas. Arrastar a linha revela a foto 1 ou a 2. */
@@ -39,7 +40,7 @@ export function BeforeAfter({
   if (!a || !b) {
     return (
       <div className={`ba ba-empty ${compact ? 'ba-compact' : ''}`}>
-        <span>Envie pelo menos duas fotos semanais para ver o antes e depois.</span>
+        <span>{t('Envie pelo menos duas fotos semanais para ver o antes e depois.')}</span>
       </div>
     )
   }
@@ -73,7 +74,7 @@ export function BeforeAfter({
         max={100}
         value={pos}
         onChange={(e) => setPos(Number(e.target.value))}
-        aria-label="Comparar antes e depois"
+        aria-label={t('Comparar antes e depois')}
       />
     </div>
   )

@@ -10,6 +10,7 @@ import { News } from './screens/News'
 import { Onboarding } from './screens/Onboarding'
 import { Projeto } from './screens/Projeto'
 import { Today } from './screens/Today'
+import { t } from './i18n'
 import { resetToBlank, today, useAppState } from './store'
 
 export default function App() {
@@ -31,7 +32,7 @@ export default function App() {
     window.scrollTo(0, 0)
   }, [tab, checkin])
 
-  if (!s.onboarded) return <Onboarding p0={s.profile} />
+  if (!s.onboarded) return <Onboarding p0={s.profile} s={s} />
   if (checkin) return <Checkin s={s} onClose={() => setCheckin(false)} />
 
   const hhmm = new Date().toTimeString().slice(0, 5)
@@ -41,9 +42,9 @@ export default function App() {
     <div className="app">
       {s.demo && (
         <div className="demo-bar">
-          <span>Você está vendo dados de exemplo.</span>
+          <span>{t('Você está vendo dados de exemplo.')}</span>
           <button type="button" onClick={resetToBlank}>
-            Começar o meu <Icon name="arrow" size={14} />
+            {t('Começar o meu')} <Icon name="arrow" size={14} />
           </button>
         </div>
       )}

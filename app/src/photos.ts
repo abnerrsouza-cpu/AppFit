@@ -1,3 +1,4 @@
+import { t } from './i18n'
 // Fotos ficam no IndexedDB do aparelho (localStorage é pequeno demais).
 // Na versão com servidor: bucket privado no Supabase Storage.
 
@@ -140,7 +141,7 @@ function demoPhoto(id: string): string {
   }
   g.fillStyle = 'rgba(255,255,255,.85)'
   g.font = '600 30px Poppins, system-ui, sans-serif'
-  g.fillText(before ? 'EXEMPLO · SEMANA 1' : 'EXEMPLO · SEMANA 6', 28, 52)
+  g.fillText(before ? t('EXEMPLO · SEMANA 1') : t('EXEMPLO · SEMANA 6'), 28, 52)
   const url = c.toDataURL('image/jpeg', 0.85)
   demoCache.set(id, url)
   return url

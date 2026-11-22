@@ -1,3 +1,4 @@
+import { t } from '../i18n'
 import { Icon } from './Icon'
 
 export type Tab = 'inicio' | 'noticias' | 'evolucao' | 'projeto' | 'cobrancas' | 'menu'
@@ -12,7 +13,7 @@ const ITEMS: { id: Tab; label: string; icon: string }[] = [
 
 export function BottomNav({ tab, onTab, dots }: { tab: Tab; onTab: (t: Tab) => void; dots: Partial<Record<Tab, boolean>> }) {
   return (
-    <nav className="bnav" aria-label="Navegação principal">
+    <nav className="bnav" aria-label={t('Navegação principal')}>
       {ITEMS.map((it) => (
         <button
           key={it.id}
@@ -25,7 +26,7 @@ export function BottomNav({ tab, onTab, dots }: { tab: Tab; onTab: (t: Tab) => v
             <Icon name={it.icon} size={24} stroke={1.8} />
             {dots[it.id] && <i className="bnav-dot" />}
           </span>
-          <span>{it.label}</span>
+          <span>{t(it.label)}</span>
         </button>
       ))}
     </nav>

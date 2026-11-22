@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Icon } from '../components/Icon'
+import { t } from '../i18n'
 import { compress, getPhoto, putPhoto } from '../photos'
 import {
   type AppState,
@@ -57,18 +58,18 @@ export function Projeto({ s }: { s: AppState }) {
   return (
     <div className="screen">
       <header className="page-h">
-        <h1>Meu projetinho</h1>
+        <h1>{t('Meu projetinho')}</h1>
       </header>
 
       <section className="pj-hero" style={visionUrl ? { backgroundImage: `linear-gradient(180deg, rgba(5,15,40,.15), rgba(5,15,40,.85)), url(${visionUrl})` } : undefined}>
         <span className="pj-count">
-          <b>{left}</b> dias
+          <b>{left}</b> {t('dias')}
         </span>
-        <p className="pj-result">{pj.vision.result || 'Defina o resultado que você quer na aba Expectativa.'}</p>
+        <p className="pj-result">{pj.vision.result || t('Defina o resultado que você quer na aba Expectativa.')}</p>
         <div className="pj-stats">
-          <span>🤞 {kept} {kept === 1 ? "promessa cumprida" : "promessas cumpridas"}</span>
+          <span>🤞 {kept} {kept === 1 ? t('promessa cumprida') : t('promessas cumpridas')}</span>
           <span>
-            🎯 {goalsDone}/{pj.goals.length} metas
+            🎯 {goalsDone}/{pj.goals.length} {t('metas')}
           </span>
         </div>
       </section>
@@ -76,7 +77,7 @@ export function Projeto({ s }: { s: AppState }) {
       <div className="cat-row">
         {SECS.map((x) => (
           <button key={x.id} type="button" className={`cat ${sec === x.id ? 'on' : ''}`} onClick={() => setSec(x.id)}>
-            <span>{x.emoji}</span> {x.label}
+            <span>{x.emoji}</span> {t(x.label)}
           </button>
         ))}
       </div>
@@ -109,32 +110,32 @@ function Expectativa({ s, visionUrl }: { s: AppState; visionUrl?: string }) {
           }}
         />
         {visionUrl ? (
-          <img src={visionUrl} alt="Foto da expectativa" />
+          <img src={visionUrl} alt={t('Foto da expectativa')} />
         ) : (
           <span>
             <span className="big-emo">🖼️</span>
-            <b>{busy ? 'Salvando...' : 'Foto da expectativa'}</b>
-            <small>O shape que você quer ter. Uma referência, um print, uma foto sua antiga.</small>
+            <b>{busy ? t('Salvando...') : t('Foto da expectativa')}</b>
+            <small>{t('O shape que você quer ter. Uma referência, um print, uma foto sua antiga.')}</small>
           </span>
         )}
-        {visionUrl && <span className="pj-photo-tag">Toque para trocar</span>}
+        {visionUrl && <span className="pj-photo-tag">{t('Toque para trocar')}</span>}
       </label>
 
       <div className="card field">
         <label>
-          🎯 Resultado que eu quero (meu foco)
-          <textarea id="pj-result" rows={2} value={v.result} onChange={(e) => upd({ result: e.target.value })} placeholder="Ex.: 80 kg, abdômen aparecendo" />
+          🎯 {t('Resultado que eu quero (meu foco)')}
+          <textarea id="pj-result" rows={2} value={v.result} onChange={(e) => upd({ result: e.target.value })} placeholder={t('Ex.: 80 kg, abdômen aparecendo')} />
         </label>
         <label>
-          😌 Como vou me sentir quando chegar lá
-          <textarea id="pj-feeling" rows={2} value={v.feeling} onChange={(e) => upd({ feeling: e.target.value })} placeholder="Ex.: confiante, leve, orgulhoso" />
+          😌 {t('Como vou me sentir quando chegar lá')}
+          <textarea id="pj-feeling" rows={2} value={v.feeling} onChange={(e) => upd({ feeling: e.target.value })} placeholder={t('Ex.: confiante, leve, orgulhoso')} />
         </label>
         <label>
-          ❤️ Por que isso importa pra mim
-          <textarea id="pj-why" rows={2} value={v.why} onChange={(e) => upd({ why: e.target.value })} placeholder="O motivo real, sem filtro" />
+          ❤️ {t('Por que isso importa pra mim')}
+          <textarea id="pj-why" rows={2} value={v.why} onChange={(e) => upd({ why: e.target.value })} placeholder={t('O motivo real, sem filtro')} />
         </label>
         <label>
-          📅 Até quando
+          📅 {t('Até quando')}
           <input id="pj-date" type="date" value={v.targetDate} onChange={(e) => upd({ targetDate: e.target.value })} />
         </label>
       </div>
@@ -158,27 +159,27 @@ function Promessas({ s }: { s: AppState }) {
           setText('')
         }}
       >
-        <span className="pj-add-pre">Eu prometo que</span>
-        <textarea id="pj-new-promise" rows={2} value={text} onChange={(e) => setText(e.target.value)} placeholder="vou treinar amanhã mesmo cansado" />
+        <span className="pj-add-pre">{t('Eu prometo que')}</span>
+        <textarea id="pj-new-promise" rows={2} value={text} onChange={(e) => setText(e.target.value)} placeholder={t('vou treinar amanhã mesmo cansado')} />
         <button type="submit" className="cta sm-cta">
-          Fazer promessa
+          {t('Fazer promessa')}
         </button>
       </form>
       {list.map((p) => (
         <div key={p.id} className={`card promise is-${p.status}`}>
           <p>"{p.text}"</p>
-          <small>Prometido em {dm(p.date)}</small>
+          <small>{t('Prometido em {d}', { d: dm(p.date) })}</small>
           {p.status === 'aberta' ? (
             <div className="promise-actions">
               <button type="button" className="pa ok" onClick={() => set(p.id, 'cumprida')}>
-                <Icon name="check" size={16} stroke={3} /> Cumpri
+                <Icon name="check" size={16} stroke={3} /> {t('Cumpri')}
               </button>
               <button type="button" className="pa no" onClick={() => set(p.id, 'quebrada')}>
-                <Icon name="x" size={16} stroke={3} /> Quebrei
+                <Icon name="x" size={16} stroke={3} /> {t('Quebrei')}
               </button>
             </div>
           ) : (
-            <span className="promise-badge">{p.status === 'cumprida' ? '✅ Cumprida' : '💔 Quebrada. Recomece.'}</span>
+            <span className="promise-badge">{p.status === 'cumprida' ? `✅ ${t('Cumprida')}` : `💔 ${t('Quebrada. Recomece.')}`}</span>
           )}
         </div>
       ))}
@@ -200,7 +201,7 @@ function Metas({ s }: { s: AppState }) {
       {list.length > 0 && (
         <div className="card pj-progress">
           <b>
-            {done} de {list.length} metas batidas
+            {t('{a} de {b} metas batidas', { a: done, b: list.length })}
           </b>
           <div className="meter meter-lg">
             <span style={{ width: `${(done / list.length) * 100}%` }} />
@@ -217,9 +218,9 @@ function Metas({ s }: { s: AppState }) {
               <span className="goal-emo">{g.emoji}</span>
               <span className="goal-txt">
                 <b>{g.title}</b>
-                {d !== null && <small>{g.done ? 'Batida!' : d >= 0 ? `faltam ${d} dias` : `atrasada ${-d} dias`}</small>}
+                {d !== null && <small>{g.done ? t('Batida!') : d >= 0 ? t('faltam {n} dias', { n: d }) : t('atrasada {n} dias', { n: -d })}</small>}
               </span>
-              <button type="button" className={`tick ${g.done ? 'on' : ''}`} onClick={() => toggle(g)} aria-label={g.done ? 'Desmarcar meta' : 'Marcar meta como batida'}>
+              <button type="button" className={`tick ${g.done ? 'on' : ''}`} onClick={() => toggle(g)} aria-label={g.done ? t('Desmarcar meta') : t('Marcar meta como batida')}>
                 {g.done && <Icon name="check" size={16} stroke={3} />}
               </button>
             </div>
@@ -235,7 +236,7 @@ function Metas({ s }: { s: AppState }) {
           setDue('')
         }}
       >
-        <span className="pj-add-pre">Nova meta</span>
+        <span className="pj-add-pre">{t('Nova meta')}</span>
         <div className="emo-pick">
           {GOAL_EMOJI.map((e) => (
             <button key={e} type="button" className={emoji === e ? 'on' : ''} onClick={() => setEmoji(e)}>
@@ -243,13 +244,13 @@ function Metas({ s }: { s: AppState }) {
             </button>
           ))}
         </div>
-        <input id="pj-goal-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ex.: Fazer 10 barras seguidas" />
+        <input id="pj-goal-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t('Ex.: Fazer 10 barras seguidas')} />
         <label>
-          Prazo
+          {t('Prazo')}
           <input id="pj-goal-due" type="date" value={due} onChange={(e) => setDue(e.target.value)} />
         </label>
         <button type="submit" className="cta sm-cta">
-          Adicionar meta
+          {t('Adicionar meta')}
         </button>
       </form>
     </div>
@@ -279,12 +280,12 @@ function Desabafo({ s }: { s: AppState }) {
           e.preventDefault()
           if (!text.trim()) return
           setProjeto((p) => ({ ...p, vents: [{ id: newId(), date: today(), mood, text: text.trim() }, ...p.vents] }))
-          setReply(REPLY[mood])
+          setReply(t(REPLY[mood]))
           setText('')
         }}
       >
         <span className="pj-add-pre">
-          <Icon name="lock" size={14} /> Só você lê isso
+          <Icon name="lock" size={14} /> {t('Só você lê isso')}
         </span>
         <div className="emo-pick mood">
           {MOODS.map((m) => (
@@ -293,9 +294,9 @@ function Desabafo({ s }: { s: AppState }) {
             </button>
           ))}
         </div>
-        <textarea id="pj-vent" rows={4} value={text} onChange={(e) => setText(e.target.value)} placeholder="Fala o que tá pesando. Sem filtro." />
+        <textarea id="pj-vent" rows={4} value={text} onChange={(e) => setText(e.target.value)} placeholder={t('Fala o que tá pesando. Sem filtro.')} />
         <button type="submit" className="cta sm-cta">
-          Desabafar
+          {t('Desabafar')}
         </button>
       </form>
       {reply && (
@@ -338,10 +339,10 @@ function Fotos({ s }: { s: AppState }) {
             e.target.value = ''
           }}
         />
-        <Icon name="camera" size={22} /> {busy ? 'Salvando...' : 'Adicionar foto'}
+        <Icon name="camera" size={22} /> {busy ? t('Salvando...') : t('Adicionar foto')}
       </label>
       {list.length === 0 ? (
-        <p className="muted center-txt">Treino, prato, espelho, conquista. Guarde aqui os momentos do projeto.</p>
+        <p className="muted center-txt">{t('Treino, prato, espelho, conquista. Guarde aqui os momentos do projeto.')}</p>
       ) : (
         <div className="gallery">
           {list.map((p) => (
@@ -350,7 +351,7 @@ function Fotos({ s }: { s: AppState }) {
         </div>
       )}
       {view && (
-        <button type="button" className="lightbox" onClick={() => setView(null)} aria-label="Fechar foto">
+        <button type="button" className="lightbox" onClick={() => setView(null)} aria-label={t('Fechar foto')}>
           <img src={view} alt="" />
         </button>
       )}

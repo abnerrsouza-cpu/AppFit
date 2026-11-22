@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { WEEKDAYS_SHORT, fmtDayMonth } from '../store'
+import { t, weekdayShort } from '../i18n'
+import { fmtDayMonth } from '../store'
 
 /** Barras da semana (uma série). Toque numa barra mostra o valor. */
 export function WeekBars({
@@ -23,7 +24,7 @@ export function WeekBars({
       <div className="wb-plot" style={{ height: H }}>
         {goalLine != null && (
           <div className="wb-goal" style={{ bottom: (goalLine / max) * H }}>
-            <span>meta {goalLine}</span>
+            <span>{t('meta')} {goalLine}</span>
           </div>
         )}
         {values.map((v, i) => (
@@ -36,7 +37,7 @@ export function WeekBars({
             onFocus={() => setHover(i)}
             onBlur={() => setHover(null)}
             onClick={() => setHover(hover === i ? null : i)}
-            aria-label={`${fmtDayMonth(days[i])}: ${v == null ? 'sem registro' : v + ' ' + unit}`}
+            aria-label={`${fmtDayMonth(days[i])}: ${v == null ? t('sem registro') : v + ' ' + unit}`}
           >
             {v == null ? (
               <span className="wb-empty" />
@@ -45,7 +46,7 @@ export function WeekBars({
             )}
             {hover === i && (
               <span className="wb-tip">
-                <b>{v == null ? '—' : v}</b> {v == null ? 'sem registro' : unit}
+                <b>{v == null ? '—' : v}</b> {v == null ? t('sem registro') : unit}
                 <small>{fmtDayMonth(days[i])}</small>
               </span>
             )}
@@ -55,7 +56,7 @@ export function WeekBars({
       <div className="wb-axis">
         {days.map((d, i) => (
           <span key={i} className={i === todayIdx ? 'is-today' : ''}>
-            {WEEKDAYS_SHORT[d.getDay()]}
+            {weekdayShort(d.getDay())}
           </span>
         ))}
       </div>

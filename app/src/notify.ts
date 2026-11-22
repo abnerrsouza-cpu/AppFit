@@ -3,6 +3,7 @@
 // o app estiver aberto ou em segundo plano recente.
 // Produção: o servidor envia Web Push (VAPID) pelo mesmo cronograma, com o app fechado.
 import { dailySchedule, nudge } from './psych'
+import { t } from './i18n'
 import { defaultCustom, getState, today } from './store'
 
 export type NotifyStatus = 'unsupported' | 'denied' | 'granted' | 'default' | 'needs-install'
@@ -32,7 +33,7 @@ export async function enableNotifications(): Promise<NotifyStatus> {
   if (!('Notification' in window)) return notifyStatus()
   try {
     const r = await Notification.requestPermission()
-    if (r === 'granted') await show('Cobrança ativada', 'A partir de agora eu vou te cobrar o dia inteiro. Você pediu por isso.')
+    if (r === 'granted') await show(t('Cobrança ativada'), t('A partir de agora eu vou te cobrar o dia inteiro. Você pediu por isso.'))
     return r as NotifyStatus
   } catch {
     return 'denied'
@@ -97,10 +98,10 @@ let testIdx = 0
 
 export function testMessages() {
   const s = getState()
-  const mine = (s.custom ?? defaultCustom()).filter((c) => c.on && c.text.trim()).map((c) => ({ title: 'Recado seu', body: c.text }))
+  const mine = (s.custom ?? defaultCustom()).filter((c) => c.on && c.text.trim()).map((c) => ({ title: t('Recado seu'), body: c.text }))
   const app = (['treino', 'checkin', 'geral', 'checkin_atrasado', 'acordar'] as const).map((m, i) => ({
     title: 'Sem Desculpa',
-    body: nudge(s, m, { treino: 'Seu treino de hoje', hora: new Date().toTimeString().slice(0, 5) }, i * 7 + Date.now()),
+    body: nudge(s, m, { treino: t('Seu treino de hoje'), hora: new Date().toTimeString().slice(0, 5) }, i * 7 + Date.now()),
   }))
   // intercala: frase sua, frase do app, frase sua...
   const out: { title: string; body: string }[] = []

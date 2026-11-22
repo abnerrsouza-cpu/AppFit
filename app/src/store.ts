@@ -1,3 +1,4 @@
+import { type Lang, detectLang, getLang, setLangRuntime, t, tr } from './i18n'
 // Estado do app. No MVP fica no localStorage do aparelho.
 // Na versão com servidor, troca-se este arquivo por chamadas ao Supabase.
 import { useEffect, useState } from 'react'
@@ -79,6 +80,7 @@ export interface AppState {
   checks: Record<string, Record<string, boolean>> // tarefas do dia marcadas
   theme: 'dark' | 'light'
   custom?: CustomNudge[] // cobranças escritas pelo próprio usuário
+  lang?: Lang
   testEvery?: number // modo teste: dispara a cada N minutos (0 = desligado)
   projeto?: Projeto
 }
@@ -140,7 +142,7 @@ export function blankProjeto(startDate: string, cycleDays: number): Projeto {
   }
 }
 
-export const defaultCustom = (): CustomNudge[] => [{ id: 'bora-filho', time: '20:00', text: 'Treinou hoje? Bora, filho!', on: true }]
+export const defaultCustom = (): CustomNudge[] => [{ id: 'bora-filho', time: '20:00', text: t('Treinou hoje? Bora, filho!'), on: true }]
 
 export function getProjeto(s: AppState): Projeto {
   return s.projeto ?? blankProjeto(s.profile.startDate, s.profile.cycleDays)
@@ -163,8 +165,6 @@ export const addDays = (d: Date, n: number) => {
 }
 export const today = () => ymd(new Date())
 export const weekStartOf = (d: Date) => addDays(d, -((d.getDay() + 6) % 7)) // segunda
-export const WEEKDAYS = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado']
-export const WEEKDAYS_SHORT = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
 export const fmtDayMonth = (d: Date) => `${pad(d.getDate())}/${pad(d.getMonth() + 1)}`
 export const daysBetween = (a: Date, b: Date) =>
   Math.round((parseYmd(ymd(b)).getTime() - parseYmd(ymd(a)).getTime()) / 86400000)
@@ -172,7 +172,8 @@ export const daysBetween = (a: Date, b: Date) =>
 // ---------- dados de exemplo ----------
 const uid = () => Math.random().toString(36).slice(2, 9)
 
-export function blankProfile(): Profile {
+export function blankProfile(lang: Lang = getLang()): Profile {
+  const L = (x: string) => tr(lang, x)
   return {
     name: '',
     age: 30,
@@ -192,26 +193,27 @@ export function blankProfile(): Profile {
     icalUrl: '',
     cardioGoalMin: 150,
     meals: [
-      { id: uid(), time: '07:00', name: 'Café da manhã', items: '' },
-      { id: uid(), time: '12:30', name: 'Almoço', items: '' },
-      { id: uid(), time: '16:00', name: 'Lanche', items: '' },
-      { id: uid(), time: '20:00', name: 'Jantar', items: '' },
+      { id: uid(), time: '07:00', name: L('Café da manhã'), items: '' },
+      { id: uid(), time: '12:30', name: L('Almoço'), items: '' },
+      { id: uid(), time: '16:00', name: L('Lanche'), items: '' },
+      { id: uid(), time: '20:00', name: L('Jantar'), items: '' },
     ],
     workouts: [
-      { weekday: 1, title: 'Treino A', items: '' },
-      { weekday: 2, title: 'Treino B', items: '' },
-      { weekday: 3, title: 'Treino C', items: '' },
-      { weekday: 4, title: 'Treino A', items: '' },
-      { weekday: 5, title: 'Treino B', items: '' },
+      { weekday: 1, title: L('Treino A'), items: '' },
+      { weekday: 2, title: L('Treino B'), items: '' },
+      { weekday: 3, title: L('Treino C'), items: '' },
+      { weekday: 4, title: L('Treino A'), items: '' },
+      { weekday: 5, title: L('Treino B'), items: '' },
     ],
   }
 }
 
-function demoState(): AppState {
+function demoState(lang: Lang = getLang()): AppState {
+  const L = (x: string) => tr(lang, x)
   const now = new Date()
   const start = addDays(now, -37)
   const profile: Profile = {
-    ...blankProfile(),
+    ...blankProfile(lang),
     name: 'Abner',
     age: 29,
     height: 178,
@@ -219,20 +221,19 @@ function demoState(): AppState {
     weightGoal: 80,
     goal: 'Perder gordura e ganhar definição',
     startDate: ymd(start),
-    letter:
-      'Cansei de me esconder em foto. Daqui a 90 dias eu quero tirar a camisa na praia sem pensar duas vezes. Eu sei que consigo, só preciso parar de negociar comigo mesmo.',
+    letter: L('Cansei de me esconder em foto. Daqui a 90 dias eu quero tirar a camisa na praia sem pensar duas vezes. Eu sei que consigo, só preciso parar de negociar comigo mesmo.'),
     meals: [
-      { id: 'm1', time: '07:00', name: 'Café da manhã', items: '3 ovos mexidos, 1 pão integral, café sem açúcar' },
-      { id: 'm2', time: '12:30', name: 'Almoço', items: '150g frango, 120g arroz, feijão, salada à vontade' },
-      { id: 'm3', time: '16:00', name: 'Lanche', items: 'Iogurte natural + 1 scoop whey + 1 banana' },
-      { id: 'm4', time: '20:00', name: 'Jantar', items: '150g carne magra, 200g batata-doce, legumes' },
+      { id: 'm1', time: '07:00', name: L('Café da manhã'), items: L('3 ovos mexidos, 1 pão integral, café sem açúcar') },
+      { id: 'm2', time: '12:30', name: L('Almoço'), items: L('150g frango, 120g arroz, feijão, salada à vontade') },
+      { id: 'm3', time: '16:00', name: L('Lanche'), items: L('Iogurte natural + 1 scoop whey + 1 banana') },
+      { id: 'm4', time: '20:00', name: L('Jantar'), items: L('150g carne magra, 200g batata-doce, legumes') },
     ],
     workouts: [
-      { weekday: 1, title: 'Peito e tríceps', items: 'Supino reto 4x10\nSupino inclinado halter 3x12\nCrucifixo 3x12\nTríceps corda 4x12\nTríceps francês 3x10' },
-      { weekday: 2, title: 'Costas e bíceps', items: 'Puxada frente 4x10\nRemada curvada 4x10\nRemada baixa 3x12\nRosca direta 4x10\nRosca martelo 3x12' },
-      { weekday: 3, title: 'Pernas', items: 'Agachamento 4x8\nLeg press 4x12\nCadeira extensora 3x15\nStiff 4x10\nPanturrilha 4x15' },
-      { weekday: 4, title: 'Ombros e abdômen', items: 'Desenvolvimento 4x10\nElevação lateral 4x12\nCrucifixo inverso 3x12\nAbdominal infra 4x15\nPrancha 3x45s' },
-      { weekday: 5, title: 'Full body + cardio', items: 'Agachamento 3x10\nSupino 3x10\nRemada 3x10\nEsteira inclinada 25 min' },
+      { weekday: 1, title: L('Peito e tríceps'), items: L('Supino reto 4x10\nSupino inclinado halter 3x12\nCrucifixo 3x12\nTríceps corda 4x12\nTríceps francês 3x10') },
+      { weekday: 2, title: L('Costas e bíceps'), items: L('Puxada frente 4x10\nRemada curvada 4x10\nRemada baixa 3x12\nRosca direta 4x10\nRosca martelo 3x12') },
+      { weekday: 3, title: L('Pernas'), items: L('Agachamento 4x8\nLeg press 4x12\nCadeira extensora 3x15\nStiff 4x10\nPanturrilha 4x15') },
+      { weekday: 4, title: L('Ombros e abdômen'), items: L('Desenvolvimento 4x10\nElevação lateral 4x12\nCrucifixo inverso 3x12\nAbdominal infra 4x15\nPrancha 3x45s') },
+      { weekday: 5, title: L('Full body + cardio'), items: L('Agachamento 3x10\nSupino 3x10\nRemada 3x10\nEsteira inclinada 25 min') },
     ],
   }
 
@@ -250,10 +251,10 @@ function demoState(): AppState {
       date: key,
       trained: !hasWorkout ? 'descanso' : s <= 5 ? 'nao' : s === 6 ? 'parcial' : 'sim',
       cardioMin: wd === 0 ? 0 : [20, 30, 25, 0, 40, 30, 35][wd],
-      cardioType: wd === 6 ? 'Bike' : 'Esteira',
+      cardioType: wd === 6 ? L('Bike') : L('Esteira'),
       dietScore: s,
       mealsOk: { m1: true, m2: s > 5, m3: s > 6, m4: s > 7 },
-      ate: s > 7 ? 'Segui o plano.' : 'Furei no jantar, pedi lanche.',
+      ate: s > 7 ? L('Segui o plano.') : L('Furei no jantar, pedi lanche.'),
       focus: Math.min(10, s + 1),
       water: s > 6 ? 3 : 2,
       sleepH: s > 6 ? 7.5 : 6,
@@ -277,38 +278,38 @@ function demoState(): AppState {
       dietRate: 4,
       trainRate: 4,
       cardioRate: 3,
-      win: 'Não faltei nenhum treino.',
-      fail: 'Fim de semana foi fraco na dieta.',
-      commit: 'Sábado sem delivery.',
+      win: L('Não faltei nenhum treino.'),
+      fail: L('Fim de semana foi fraco na dieta.'),
+      commit: L('Sábado sem delivery.'),
       submittedAt: key,
     }
   }
 
   const projeto: Projeto = {
     promises: [
-      { id: 'p1', text: 'Não vou pedir delivery no fim de semana.', date: ymd(addDays(now, -10)), status: 'cumprida' },
-      { id: 'p2', text: 'Vou treinar mesmo nos dias sem vontade.', date: ymd(addDays(now, -6)), status: 'aberta' },
-      { id: 'p3', text: 'Dormir antes da meia-noite de segunda a sexta.', date: ymd(addDays(now, -3)), status: 'quebrada' },
+      { id: 'p1', text: L('Não vou pedir delivery no fim de semana.'), date: ymd(addDays(now, -10)), status: 'cumprida' },
+      { id: 'p2', text: L('Vou treinar mesmo nos dias sem vontade.'), date: ymd(addDays(now, -6)), status: 'aberta' },
+      { id: 'p3', text: L('Dormir antes da meia-noite de segunda a sexta.'), date: ymd(addDays(now, -3)), status: 'quebrada' },
     ],
     vents: [
-      { id: 'v1', date: ymd(addDays(now, -2)), mood: '😤', text: 'Hoje bateu a vontade de largar tudo. Fui treinar com raiva e saí melhor.' },
-      { id: 'v2', date: ymd(addDays(now, -8)), mood: '🙂', text: 'Primeira vez que a calça antiga fechou. Pequeno, mas eu vi.' },
+      { id: 'v1', date: ymd(addDays(now, -2)), mood: '😤', text: L('Hoje bateu a vontade de largar tudo. Fui treinar com raiva e saí melhor.') },
+      { id: 'v2', date: ymd(addDays(now, -8)), mood: '🙂', text: L('Primeira vez que a calça antiga fechou. Pequeno, mas eu vi.') },
     ],
     goals: [
-      { id: 'g1', emoji: '⚖️', title: 'Chegar a 80 kg', due: ymd(addDays(start, 90)), done: false },
-      { id: 'g2', emoji: '🏃', title: 'Correr 5 km sem parar', due: ymd(addDays(now, 30)), done: false },
-      { id: 'g3', emoji: '🏋️', title: 'Supino com 80 kg', due: ymd(addDays(now, 45)), done: false },
-      { id: 'g4', emoji: '🥗', title: '30 dias sem refrigerante', due: ymd(addDays(now, -5)), done: true },
+      { id: 'g1', emoji: '⚖️', title: L('Chegar a 80 kg'), due: ymd(addDays(start, 90)), done: false },
+      { id: 'g2', emoji: '🏃', title: L('Correr 5 km sem parar'), due: ymd(addDays(now, 30)), done: false },
+      { id: 'g3', emoji: '🏋️', title: L('Supino com 80 kg'), due: ymd(addDays(now, 45)), done: false },
+      { id: 'g4', emoji: '🥗', title: L('30 dias sem refrigerante'), due: ymd(addDays(now, -5)), done: true },
     ],
     vision: {
-      result: 'Abdômen aparecendo, 80 kg e ombro largo.',
-      feeling: 'Confiante para tirar a camisa na praia sem pensar duas vezes.',
-      why: 'Quero ser exemplo em casa e parar de fugir de foto.',
+      result: L('Abdômen aparecendo, 80 kg e ombro largo.'),
+      feeling: L('Confiante para tirar a camisa na praia sem pensar duas vezes.'),
+      why: L('Quero ser exemplo em casa e parar de fugir de foto.'),
       targetDate: ymd(addDays(start, 90)),
     },
     photos: [],
   }
-  return { demo: true, onboarded: true, profile, daily, weekly, checks: {}, theme: 'light', custom: defaultCustom(), projeto }
+  return { demo: true, onboarded: true, profile, daily, weekly, checks: {}, theme: 'light', custom: defaultCustom(), projeto, lang }
 }
 
 // ---------- persistência ----------
@@ -317,11 +318,23 @@ const KEY = 'semdesculpa:v2'
 function load(): AppState {
   try {
     const raw = localStorage.getItem(KEY)
-    if (raw) return JSON.parse(raw) as AppState
+    if (raw) {
+      const st = JSON.parse(raw) as AppState
+      setLangRuntime(st.lang ?? detectLang())
+      return st
+    }
   } catch {
     /* sem storage: segue com exemplo */
   }
-  return demoState()
+  const lang = detectLang()
+  setLangRuntime(lang)
+  return demoState(lang)
+}
+
+/** Troca o idioma. Se estiver vendo o exemplo, refaz o exemplo no idioma novo. */
+export function setLang(lang: Lang) {
+  setLangRuntime(lang)
+  setState((s) => (s.demo ? { ...demoState(lang), theme: s.theme, lang } : { ...s, lang }))
 }
 
 let state: AppState = load()
@@ -355,11 +368,12 @@ export function resetToBlank() {
     checks: {},
     theme: state.theme,
     custom: defaultCustom(),
+    lang: state.lang,
   }))
 }
 
 export function resetToDemo() {
-  setState(() => ({ ...demoState(), theme: state.theme }))
+  setState(() => ({ ...demoState(), theme: state.theme, lang: state.lang }))
 }
 
 export function useAppState(): AppState {
