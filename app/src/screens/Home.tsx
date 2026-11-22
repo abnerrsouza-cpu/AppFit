@@ -47,7 +47,7 @@ export function todayProgress(s: AppState) {
   }
 }
 
-export function Home({ s, go, openCheckin }: { s: AppState; go: (t: Tab) => void; openCheckin: () => void }) {
+export function Home({ s, go, openCheckin, owes }: { s: AppState; go: (t: Tab) => void; openCheckin: () => void; owes: boolean }) {
   const p = s.profile
   const now = new Date()
   const c = cycleInfo(p)
@@ -79,8 +79,9 @@ export function Home({ s, go, openCheckin }: { s: AppState; go: (t: Tab) => void
             {greeting()}, {p.name || 'você'}
           </h1>
         </div>
-        <button type="button" className="avatar sm" onClick={() => go('menu')} aria-label="Abrir menu">
-          {(p.name || '?').slice(0, 1).toUpperCase()}
+        <button type="button" className="bell-btn" onClick={() => go('cobrancas')} aria-label="Cobranças do treinador">
+          <Icon name="bell" size={22} />
+          {owes && <i className="bnav-dot" />}
         </button>
       </header>
 

@@ -1,12 +1,12 @@
 import { Icon } from './Icon'
 
-export type Tab = 'inicio' | 'dia' | 'evolucao' | 'cobrancas' | 'menu'
+export type Tab = 'inicio' | 'dia' | 'noticias' | 'evolucao' | 'cobrancas' | 'menu'
 
 const ITEMS: { id: Tab; label: string; icon: string }[] = [
   { id: 'inicio', label: 'Início', icon: 'home' },
   { id: 'dia', label: 'Seu dia', icon: 'sun' },
+  { id: 'noticias', label: 'Notícias', icon: 'news' },
   { id: 'evolucao', label: 'Evolução', icon: 'photo' },
-  { id: 'cobrancas', label: 'Cobranças', icon: 'bell' },
   { id: 'menu', label: 'Menu', icon: 'menu' },
 ]
 

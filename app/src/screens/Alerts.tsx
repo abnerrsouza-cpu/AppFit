@@ -6,7 +6,7 @@ import { type AppState, type Tone, setState } from '../store'
 
 const TONE_EMOJI: Record<Tone, string> = { parceiro: '🤝', treinador: '📣', sargento: '🪖' }
 
-export function Alerts({ s }: { s: AppState }) {
+export function Alerts({ s, onBack }: { s: AppState; onBack: () => void }) {
   const [status, setStatus] = useState(notifyStatus())
   const now = new Date()
   const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
@@ -17,6 +17,9 @@ export function Alerts({ s }: { s: AppState }) {
   return (
     <div className="screen">
       <header className="chat-h">
+        <button type="button" className="round-btn" onClick={onBack} aria-label="Voltar">
+          <Icon name="back" />
+        </button>
         <span className="coach-av lg">
           <Icon name="flame" size={26} />
         </span>
