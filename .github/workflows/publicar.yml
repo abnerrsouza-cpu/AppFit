@@ -1,8 +1,12 @@
-# Alternativa ao Railway: publica o app no GitHub Pages.
-# Só roda manualmente (Actions > Publicar app > Run workflow) e exige Settings > Pages > Source: GitHub Actions.
-name: Publicar app (GitHub Pages)
+# Publica o app no GitHub Pages (https://abnerrsouza-cpu.github.io/AppFit/).
+# Roda a cada push, todo dia às 6h17 (horário de Brasília) para trazer vídeos novos, ou manualmente.
+name: Publicar app
 
 on:
+  push:
+    branches: [claude/fitness-accountability-app-19wlg7, main]
+  schedule:
+    - cron: '17 9 * * *'
   workflow_dispatch:
 
 permissions:
