@@ -1,6 +1,6 @@
 import { BeforeAfter } from '../components/BeforeAfter'
 import { Icon } from '../components/Icon'
-import { WeekBars } from '../components/WeekBars'
+import { Rings } from '../components/Rings'
 import type { Tab } from '../components/BottomNav'
 import { headline } from '../psych'
 import {
@@ -12,7 +12,7 @@ import {
   fmtDayMonth,
   streak,
   today,
-  weekStats,
+  weekDays,
   workoutFor,
   ymd,
 } from '../store'
@@ -22,215 +22,186 @@ function greeting() {
   return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'
 }
 
+/** Progresso de hoje: vem da prestação de contas, ou das tarefas marcadas em "Seu dia". */
+export function todayProgress(s: AppState) {
+  const p = s.profile
+  const key = today()
+  const log = s.daily[key]
+  const checks = s.checks[key] || {}
+  const wk = workoutFor(p, new Date())
+  const dailyCardio = Math.max(10, Math.round(p.cardioGoalMin / 5))
+  const meals = p.meals.length || 1
+  if (log) {
+    return {
+      train: log.trained === 'sim' || log.trained === 'descanso' ? 1 : log.trained === 'parcial' ? 0.5 : 0,
+      diet: Object.values(log.mealsOk).filter(Boolean).length / meals,
+      cardio: log.cardioMin / dailyCardio,
+      rest: !wk,
+    }
+  }
+  return {
+    train: !wk ? 1 : checks.train ? 1 : 0,
+    diet: p.meals.filter((m) => checks[m.id]).length / meals,
+    cardio: 0,
+    rest: !wk,
+  }
+}
+
 export function Home({ s, go, openCheckin }: { s: AppState; go: (t: Tab) => void; openCheckin: () => void }) {
   const p = s.profile
   const now = new Date()
   const c = cycleInfo(p)
   const st = streak(s)
-  const w = weekStats(s)
   const done = !!s.daily[today()]
   const wk = workoutFor(p, now)
+  const prog = todayProgress(s)
   const weight = currentWeight(s)
-  const lost = +(p.weightStart - weight).toFixed(1)
+  const total = Math.abs(p.weightStart - p.weightGoal) || 1
+  const walked = Math.max(0, Math.min(1, (p.weightStart - weight) / (p.weightStart - p.weightGoal || 1)))
+  const left = Math.max(0, +(weight - p.weightGoal).toFixed(1))
   const photos = Object.values(s.weekly)
     .filter((x) => x.photoId)
     .sort((a, b) => a.weekStart.localeCompare(b.weekStart))
   const first = photos[0]
   const last = photos[photos.length - 1]
+  const days = weekDays()
+
+  const status = (v: number) => (v >= 1 ? 'Feito' : v > 0 ? 'Em andamento' : done ? 'Não fez' : 'Falta')
 
   return (
     <div className="screen">
-      <header className="hello">
-        <h1>
-          {greeting()}, {p.name || 'você'}
-        </h1>
-        <p>{headline(s)}</p>
+      <header className="top-row">
+        <div>
+          <span className="date-chip">
+            {WEEKDAYS[now.getDay()]}, {fmtDayMonth(now)}
+          </span>
+          <h1 className="hi">
+            {greeting()}, {p.name || 'você'}
+          </h1>
+        </div>
+        <button type="button" className="avatar sm" onClick={() => go('menu')} aria-label="Abrir menu">
+          {(p.name || '?').slice(0, 1).toUpperCase()}
+        </button>
       </header>
 
-      <button type="button" className="card day-card" onClick={() => go('dia')}>
-        <span className="day-icon">
-          <Icon name="sun" size={30} />
+      <button type="button" className="coach" onClick={() => go('cobrancas')}>
+        <span className="coach-av">
+          <Icon name="flame" size={22} />
         </span>
-        <span className="day-txt">
-          <b>
-            Seu dia · {WEEKDAYS[now.getDay()]}, {fmtDayMonth(now)}
-          </b>
-          <small>{wk ? `Treino: ${wk.title}` : 'Dia de descanso. Dieta continua.'}</small>
-        </span>
-        <span className="pill-btn">
-          Abrir <Icon name="arrow" size={18} />
-        </span>
+        <span className="coach-bubble">{headline(s)}</span>
       </button>
 
-      {!done && (
-        <button type="button" className="card alert-card" onClick={openCheckin}>
-          <Icon name="alert" />
-          <span>
-            <b>Prestação de contas pendente</b>
-            <small>Até meia-noite, ou a sequência de {st} dias zera.</small>
-          </span>
-          <Icon name="chevR" />
-        </button>
-      )}
-
-      <section className="hero-card">
-        <div className="hero-top">
-          <span>Sequência</span>
-          <span className="hero-icon">
-            <Icon name="flame" />
-          </span>
+      <section className="card today">
+        <div className="today-rings">
+          <Rings
+            size={148}
+            values={[
+              { v: prog.train, color: 'var(--ring-1)' },
+              { v: prog.diet, color: 'var(--ring-2)' },
+              { v: prog.cardio, color: 'var(--ring-3)' },
+            ]}
+          />
         </div>
-        <div className="hero-num">
-          {st}
-          <small>{st === 1 ? 'dia' : 'dias'}</small>
-        </div>
-        <p>prestando contas sem falhar</p>
-        <div className="hero-cycle">
-          <div className="hero-bar">
-            <span style={{ width: `${c.pct * 100}%` }} />
+        <ul className="today-legend">
+          <li>
+            <i style={{ background: 'var(--ring-1)' }}>
+              <Icon name="dumbbell" size={16} />
+            </i>
+            <span>
+              <b>{prog.rest ? 'Descanso' : wk?.title}</b>
+              <small>{prog.rest ? 'Dia livre de treino' : status(prog.train)}</small>
+            </span>
+          </li>
+          <li>
+            <i style={{ background: 'var(--ring-2)' }}>
+              <Icon name="food" size={16} />
+            </i>
+            <span>
+              <b>Dieta</b>
+              <small>{status(prog.diet)}</small>
+            </span>
+          </li>
+          <li>
+            <i style={{ background: 'var(--ring-3)' }}>
+              <Icon name="run" size={16} />
+            </i>
+            <span>
+              <b>Cardio</b>
+              <small>{status(prog.cardio)}</small>
+            </span>
+          </li>
+        </ul>
+        {done ? (
+          <div className="today-done">
+            <Icon name="check" size={18} stroke={3} /> Prestação de contas enviada
           </div>
-          <span>
-            Dia {c.day} de {p.cycleDays} · faltam {c.left}
-          </span>
-        </div>
+        ) : (
+          <button type="button" className="cta" onClick={openCheckin}>
+            Prestar contas do dia
+          </button>
+        )}
       </section>
 
-      <div className="grid2">
-        <div className="card tile">
-          <span className="tile-h">
-            Treinos <Icon name="dumbbell" size={18} />
+      <section className="streak-card">
+        <div className="streak-main">
+          <span className="streak-flame">
+            <Icon name="flame" size={44} stroke={2.2} />
           </span>
-          <b className="tile-n">
-            {w.trained}
-            <small>/{w.planned}</small>
-          </b>
-          <span className="tile-s">nesta semana</span>
-        </div>
-        <div className="card tile">
-          <span className="tile-h">
-            Cardio <Icon name="run" size={18} />
-          </span>
-          <b className="tile-n">
-            {w.cardio}
-            <small> min</small>
-          </b>
-          <div className="meter">
-            <span style={{ width: `${Math.min(100, (w.cardio / p.cardioGoalMin) * 100)}%` }} />
-          </div>
-          <span className="tile-s">meta {p.cardioGoalMin} min</span>
-        </div>
-        <div className="card tile">
-          <span className="tile-h">
-            Dieta <Icon name="food" size={18} />
-          </span>
-          <b className={`tile-n ${w.diet >= 8 ? 'ok' : w.diet >= 6 ? 'warn' : w.checkins ? 'bad' : ''}`}>
-            {w.checkins ? w.diet.toFixed(1) : '—'}
-            <small>/10</small>
-          </b>
-          <span className="tile-s">média da semana</span>
-        </div>
-        <div className="card tile">
-          <span className="tile-h">
-            Peso <Icon name="scale" size={18} />
-          </span>
-          <b className="tile-n">
-            {weight.toFixed(1)}
-            <small> kg</small>
-          </b>
-          <span className={`tile-s ${lost > 0 ? 'ok' : ''}`}>
-            {lost > 0 ? `−${lost} kg desde o início` : `meta ${p.weightGoal} kg`}
-          </span>
-        </div>
-      </div>
-
-      <section className="card block">
-        <div className="block-h">
           <div>
-            <h2>Termômetro da semana</h2>
-            <p>Prestação de contas por dia</p>
+            <b className="streak-n">{st}</b>
+            <span>dias sem falhar</span>
           </div>
-          <b className="big-figure">
-            {w.checkins}
-            <small>/7</small>
-          </b>
         </div>
-        <div className="thermo">
-          {w.days.map((d, i) => {
-            const l = w.logs[i]
-            const future = ymd(d) > today()
-            const isToday = ymd(d) === today()
-            const state = future ? 'future' : !l ? (isToday ? 'pending' : 'miss') : l.dietScore >= 8 && l.trained !== 'nao' ? 'good' : l.dietScore >= 6 ? 'mid' : 'bad'
+        <div className="flames">
+          {days.map((d) => {
+            const k = ymd(d)
+            const l = s.daily[k]
+            const fut = k > today()
+            const cls = fut ? 'fut' : l ? (l.dietScore >= 8 && l.trained !== 'nao' ? 'lit' : 'half') : k === today() ? 'now' : 'off'
             return (
-              <div key={i} className={`thermo-d is-${state}`}>
-                <span className="thermo-dot">
-                  {state === 'good' && <Icon name="check" size={16} stroke={3} />}
-                  {state === 'mid' && <Icon name="alert" size={15} stroke={2.4} />}
-                  {(state === 'bad' || state === 'miss') && <Icon name="x" size={15} stroke={3} />}
-                </span>
-                <b>{WEEKDAYS_SHORT[d.getDay()]}</b>
-              </div>
+              <span key={k} className={`fl fl-${cls}`}>
+                <i>{cls === 'off' ? <Icon name="x" size={14} stroke={3} /> : <Icon name="flame" size={18} />}</i>
+                <small>{WEEKDAYS_SHORT[d.getDay()]}</small>
+              </span>
             )
           })}
         </div>
-        <div className="thermo-legend">
-          <span>
-            <i style={{ background: 'var(--good)' }} /> Cumpriu
-          </span>
-          <span>
-            <i style={{ background: 'var(--warn)' }} /> Parcial
-          </span>
-          <span>
-            <i style={{ background: 'var(--bad)' }} /> Furou ou sumiu
-          </span>
+        <div className="cycle">
+          <div className="cycle-bar">
+            <span style={{ width: `${c.pct * 100}%` }} />
+          </div>
+          <small>
+            Dia {c.day} de {p.cycleDays}
+          </small>
         </div>
       </section>
 
       <section className="card block">
         <div className="block-h">
-          <div>
-            <h2>Dieta</h2>
-            <p>Nota que você se deu por dia (0 a 10)</p>
+          <h2>Rumo à meta</h2>
+          <span className="soft-chip">{left > 0 ? `faltam ${left.toString().replace('.', ',')} kg` : 'meta batida'}</span>
+        </div>
+        <div className="journey">
+          <div className="journey-track">
+            <span className="journey-fill" style={{ width: `${walked * 100}%` }} />
+            <span className="journey-me" style={{ left: `${walked * 100}%` }}>
+              {(p.name || '?').slice(0, 1).toUpperCase()}
+            </span>
+            <span className="journey-flag">
+              <Icon name="target" size={18} />
+            </span>
+          </div>
+          <div className="journey-ends">
+            <small>{p.weightStart} kg</small>
+            <small>{p.weightGoal} kg</small>
           </div>
         </div>
-        <WeekBars days={w.days} values={w.logs.map((l) => (l ? l.dietScore : null))} max={10} unit="/10" goalLine={8} />
+        {total > 0 && walked > 0 && <p className="hint">Você já andou {Math.round(walked * 100)}% do caminho.</p>}
       </section>
 
       <section className="card block">
         <div className="block-h">
-          <div>
-            <h2>Cardio</h2>
-            <p>Minutos por dia</p>
-          </div>
-          <b className="big-figure">
-            {w.cardio}
-            <small> min</small>
-          </b>
-        </div>
-        <WeekBars days={w.days} values={w.logs.map((l) => (l ? l.cardioMin : null))} max={60} unit="min" />
-      </section>
-
-      <section className="card block">
-        <div className="block-h">
-          <div>
-            <h2>Foco</h2>
-            <p>Média da semana</p>
-          </div>
-          <b className="big-figure">
-            {w.checkins ? w.focus.toFixed(1) : '—'}
-            <small>/10</small>
-          </b>
-        </div>
-        <div className="meter meter-lg">
-          <span style={{ width: `${(w.focus / 10) * 100}%` }} />
-        </div>
-      </section>
-
-      <section className="card block">
-        <div className="block-h">
-          <div>
-            <h2>Antes x Depois</h2>
-            <p>Arraste a linha para comparar</p>
-          </div>
+          <h2>Antes x Depois</h2>
           <button type="button" className="link" onClick={() => go('evolucao')}>
             Ver tudo <Icon name="arrow" size={16} />
           </button>
@@ -239,15 +210,15 @@ export function Home({ s, go, openCheckin }: { s: AppState; go: (t: Tab) => void
           compact
           beforeId={first?.photoId}
           afterId={last && last !== first ? last.photoId : undefined}
-          beforeLabel={first ? fmtDayMonth(new Date(first.weekStart + 'T12:00')) : ''}
-          afterLabel={last ? fmtDayMonth(new Date(last.weekStart + 'T12:00')) : ''}
+          beforeLabel="Antes"
+          afterLabel="Agora"
         />
       </section>
 
       <section className="card block letter">
         <Icon name="quote" size={26} />
         <p>{p.letter || 'Escreva sua carta de compromisso no Menu. Ela vai ser usada para te cobrar.'}</p>
-        <small>Sua carta de compromisso · dia 1</small>
+        <small>Sua promessa no dia 1</small>
       </section>
     </div>
   )

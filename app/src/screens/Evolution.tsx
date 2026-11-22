@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react'
 import { BeforeAfter } from '../components/BeforeAfter'
 import { Icon } from '../components/Icon'
 import { compress, putPhoto } from '../photos'
-import { type AppState, type WeeklyLog, bmi, fmtDayMonth, newId, parseYmd, setState, weekStartOf, ymd } from '../store'
+import { WeekBars } from '../components/WeekBars'
+import { type AppState, type WeeklyLog, fmtDayMonth, newId, parseYmd, setState, weekStartOf, weekStats, ymd } from '../store'
 
 const label = (w: WeeklyLog, i: number) => `Sem. ${i + 1} · ${fmtDayMonth(parseYmd(w.weekStart))}`
 
@@ -16,6 +17,7 @@ export function Evolution({ s }: { s: AppState }) {
   const B = withPhoto[Math.min(bIdx, withPhoto.length - 1)]
   const thisWeek = ymd(weekStartOf(new Date()))
   const hasThisWeek = !!s.weekly[thisWeek]
+  const ws = weekStats(s)
 
   if (form) return <WeeklyForm s={s} onClose={() => setForm(false)} />
 
@@ -71,30 +73,21 @@ export function Evolution({ s }: { s: AppState }) {
       <WeightChart s={s} weeks={weeks} />
 
       <section className="card block">
-        <h2>Semanas</h2>
-        <ul className="week-list">
-          {weeks
-            .slice()
-            .reverse()
-            .map((w) => {
-              const i = weeks.indexOf(w)
-              const prev = weeks[i - 1]
-              const d = prev ? +(w.weight - prev.weight).toFixed(1) : 0
-              return (
-                <li key={w.weekStart}>
-                  <span>
-                    <b>Semana {i + 1}</b>
-                    <small>{fmtDayMonth(parseYmd(w.weekStart))}</small>
-                  </span>
-                  <span className="wl-mid">
-                    {w.weight.toFixed(1)} kg
-                    {prev && <small className={d < 0 ? 'ok' : d > 0 ? 'bad' : ''}>{d > 0 ? `+${d}` : d}</small>}
-                  </span>
-                  <span className="wl-photo">{w.photoId ? <Icon name="camera" size={16} /> : <small>sem foto</small>}</span>
-                </li>
-              )
-            })}
-        </ul>
+        <div className="block-h">
+          <h2>Dieta na semana</h2>
+          <span className="soft-chip">meta: barra na linha</span>
+        </div>
+        <WeekBars days={ws.days} values={ws.logs.map((l) => (l ? l.dietScore : null))} max={10} unit="/10" goalLine={8} />
+      </section>
+
+      <section className="card block">
+        <div className="block-h">
+          <h2>Cardio na semana</h2>
+          <span className="soft-chip">
+            {ws.cardio} de {s.profile.cardioGoalMin} min
+          </span>
+        </div>
+        <WeekBars days={ws.days} values={ws.logs.map((l) => (l ? l.cardioMin : null))} max={60} unit="min" />
       </section>
     </div>
   )
@@ -123,9 +116,7 @@ function WeightChart({ s, weeks }: { s: AppState; weeks: WeeklyLog[] }) {
       <div className="block-h">
         <div>
           <h2>Peso</h2>
-          <p>
-            Início {p.weightStart} kg · meta {p.weightGoal} kg · IMC {bmi(last, p.height).toFixed(1)}
-          </p>
+          <p>Sua linha até a meta</p>
         </div>
         <b className="big-figure">
           {last.toFixed(1)}

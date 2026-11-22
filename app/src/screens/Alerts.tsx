@@ -4,98 +4,92 @@ import { enableNotifications, notifyStatus, show } from '../notify'
 import { dailySchedule, toneLabel } from '../psych'
 import { type AppState, type Tone, setState } from '../store'
 
+const TONE_EMOJI: Record<Tone, string> = { parceiro: '🤝', treinador: '📣', sargento: '🪖' }
+
 export function Alerts({ s }: { s: AppState }) {
   const [status, setStatus] = useState(notifyStatus())
   const now = new Date()
   const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
   const list = dailySchedule(s)
-  const past = list.filter((n) => n.time <= hhmm).reverse()
-  const next = list.filter((n) => n.time > hhmm)
+  const past = list.filter((n) => n.time <= hhmm)
+  const next = list.find((n) => n.time > hhmm)
 
   return (
     <div className="screen">
-      <header className="page-h">
-        <span className="eyebrow">Cobranças</span>
-        <h1>Ninguém vai te deixar em paz</h1>
+      <header className="chat-h">
+        <span className="coach-av lg">
+          <Icon name="flame" size={26} />
+        </span>
+        <div>
+          <b>Seu treinador</b>
+          <small>
+            {TONE_EMOJI[s.profile.tone]} modo {toneLabel[s.profile.tone].name.toLowerCase()}
+          </small>
+        </div>
       </header>
 
-      <section className="card block notif">
-        <div className="notif-h">
-          <span className={`notif-ic ${status === 'granted' ? 'on' : ''}`}>
+      <div className="tone-pick">
+        {(Object.keys(toneLabel) as Tone[]).map((t) => (
+          <button
+            key={t}
+            type="button"
+            className={`tone tone-${t} ${s.profile.tone === t ? 'on' : ''}`}
+            onClick={() => setState((st) => ({ ...st, profile: { ...st.profile, tone: t } }))}
+          >
+            <span className="tone-emo">{TONE_EMOJI[t]}</span>
+            <b>{toneLabel[t].name}</b>
+          </button>
+        ))}
+      </div>
+
+      {status !== 'granted' && (
+        <section className="card notif">
+          <span className="notif-ic">
             <Icon name="bell" />
           </span>
           <div>
-            <b>{status === 'granted' ? 'Notificações ativadas' : 'Ative as notificações no celular'}</b>
+            <b>Deixe eu te cobrar fora do app</b>
             <small>
-              {status === 'granted' && 'Você vai receber cada cobrança abaixo no horário.'}
-              {status === 'default' && 'Sem isso o app não consegue te cobrar fora da tela.'}
+              {status === 'default' && 'Ative as notificações.'}
               {status === 'denied' && 'Você bloqueou. Libere nas configurações do navegador.'}
-              {status === 'needs-install' && 'No iPhone: toque em Compartilhar e depois em "Adicionar à Tela de Início". Abra pelo ícone e volte aqui.'}
-              {status === 'unsupported' && 'Abra pelo app instalado (Chrome no Android ou Safari no iPhone) para ativar.'}
+              {status === 'needs-install' && 'No iPhone: Compartilhar e depois "Adicionar à Tela de Início".'}
+              {status === 'unsupported' && 'Instale o app no celular para ativar.'}
             </small>
           </div>
-        </div>
-        {status === 'default' && (
-          <button type="button" className="cta" onClick={async () => setStatus(await enableNotifications())}>
-            Ativar cobranças
-          </button>
-        )}
-        {status === 'granted' && (
-          <button type="button" className="ghost-btn" onClick={() => show(next[0]?.title ?? 'Teste', next[0]?.body ?? 'Funcionando.')}>
-            Enviar um teste agora
-          </button>
-        )}
-      </section>
-
-      <section className="card block">
-        <h2>Nível de dureza</h2>
-        <div className="tone-pick">
-          {(Object.keys(toneLabel) as Tone[]).map((t) => (
-            <button
-              key={t}
-              type="button"
-              className={`tone tone-${t} ${s.profile.tone === t ? 'on' : ''}`}
-              onClick={() => setState((st) => ({ ...st, profile: { ...st.profile, tone: t } }))}
-            >
-              <b>{toneLabel[t].name}</b>
-              <small>{toneLabel[t].desc}</small>
+          {status === 'default' && (
+            <button type="button" className="pill-btn sm" onClick={async () => setStatus(await enableNotifications())}>
+              Ativar
             </button>
-          ))}
-        </div>
-      </section>
-
-      {next.length > 0 && (
-        <section className="block-plain">
-          <h2 className="sec-title">Próximas hoje</h2>
-          <ul className="feed">
-            {next.map((n) => (
-              <li key={n.moment + n.time} className="card feed-item is-next">
-                <span className="feed-time">{n.time}</span>
-                <div>
-                  <b>{n.title}</b>
-                  <p>{n.body}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
+          )}
         </section>
       )}
 
-      <section className="block-plain">
-        <h2 className="sec-title">Já enviadas hoje</h2>
-        {past.length === 0 && <p className="muted">Nenhuma ainda. A primeira sai às {list[0]?.time}.</p>}
-        <ul className="feed">
-          {past.map((n) => (
-            <li key={n.moment + n.time} className={`card feed-item ${n.moment === 'checkin_atrasado' ? 'is-hot' : ''}`}>
-              <span className="feed-time">{n.time}</span>
-              <div>
-                <b>{n.title}</b>
-                <p>{n.body}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
+      <div className="chat">
+        <span className="chat-day">Hoje</span>
+        {past.length === 0 && <p className="muted center-txt">Ainda tá cedo. A primeira mensagem sai às {list[0]?.time}.</p>}
+        {past.map((n) => (
+          <div key={n.moment + n.time} className={`msg ${n.moment === 'checkin_atrasado' ? 'hot' : ''}`}>
+            <p>{n.body}</p>
+            <small>{n.time}</small>
+          </div>
+        ))}
+        {next && (
+          <div className="msg typing">
+            <span className="dots">
+              <i />
+              <i />
+              <i />
+            </span>
+            <small>próxima às {next.time}</small>
+          </div>
+        )}
+      </div>
+
+      {status === 'granted' && (
+        <button type="button" className="ghost-btn" onClick={() => show(next?.title ?? 'Teste', next?.body ?? 'Funcionando.')}>
+          <Icon name="bell" size={18} /> Testar notificação
+        </button>
+      )}
     </div>
   )
 }
