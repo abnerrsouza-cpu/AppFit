@@ -1,0 +1,737 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0b0d12" />
+<title>Dont Sorry IA</title>
+<meta name="description" content="A IA que te cobra o dia inteiro: treino, dieta, cardio e prestação de contas." />
+<link rel="icon" href="../favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<!-- Pixel/Analytics: cole aqui o código do Meta Pixel ou GA4. A página chama fbq('trackCustom', etapa) em cada etapa. -->
+<style>
+/* Funil em telas cheias. Antes da IA: cinza e apagado. Depois: azul vivo, igual ao app. */
+:root {
+  --bg: #0b0d12;
+  --ink: #f3f6ff;
+  --ink-2: #a5afc4;
+  --ink-3: #6c768c;
+  --gray-bg: #15171c;
+  --gray-card: #1e2027;
+  --blue-1: #3d8bff;
+  --blue-2: #1557d6;
+  --blue-soft: rgba(61, 139, 255, 0.14);
+  --good: #22c55e;
+  --bad: #ef4444;
+  --gold: #ffcf4a;
+  --font: 'Poppins', system-ui, -apple-system, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); -webkit-font-smoothing: antialiased; }
+body { min-height: 100dvh; overflow-x: hidden; }
+button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; padding: 0; }
+:focus-visible { outline: 2px solid var(--blue-1); outline-offset: 3px; }
+.step { display: none; min-height: 100dvh; padding: max(24px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(28px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left)); }
+.step.on { display: flex; flex-direction: column; align-items: center; animation: fadeIn .5s ease; }
+.wrap { width: 100%; max-width: 460px; display: flex; flex-direction: column; gap: 18px; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
+h1, h2 { margin: 0; letter-spacing: -0.04em; line-height: 1.08; text-wrap: balance; }
+h1 { font-size: clamp(2rem, 9vw, 2.7rem); font-weight: 800; }
+h2 { font-size: clamp(1.6rem, 7vw, 2.1rem); font-weight: 700; }
+p { margin: 0; line-height: 1.55; }
+.eyebrow { font-size: .72rem; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--ink-3); }
+.muted { color: var(--ink-2); }
+.cta { width: 100%; padding: 18px 22px; border-radius: 999px; background: linear-gradient(135deg, var(--blue-1), var(--blue-2)); color: #fff; font-weight: 700; font-size: 1.05rem; box-shadow: 0 16px 40px -14px rgba(61,139,255,.75); transition: transform .12s; }
+.cta:active { transform: scale(.97); }
+.cta:disabled { opacity: .4; }
+.ghost { color: var(--ink-3); font-size: .85rem; padding: 10px; align-self: center; }
+.brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: .95rem; }
+.brand i { width: 26px; height: 26px; border-radius: 9px; background: linear-gradient(140deg, var(--blue-1), var(--blue-2)); display: grid; place-items: center; font-style: normal; font-size: .8rem; }
+.input { width: 100%; padding: 16px 18px; border-radius: 18px; border: 1px solid #2a2f3b; background: #12151c; color: var(--ink); font: inherit; font-size: 1.05rem; outline: none; }
+.input:focus { border-color: var(--blue-1); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { padding: 12px 16px; border-radius: 999px; background: #161a23; border: 1px solid #2a2f3b; font-weight: 500; font-size: .92rem; }
+.chip.on { background: linear-gradient(135deg, var(--blue-1), var(--blue-2)); border-color: transparent; font-weight: 600; }
+
+/* ---------- 0. abertura ---------- */
+#s-intro { justify-content: center; background: radial-gradient(120% 70% at 50% 0%, #1a2340 0%, var(--bg) 60%); }
+.intro-q { font-size: 1.05rem; color: var(--ink-2); }
+
+/* ---------- 1. vida sem a IA ---------- */
+#s-sem { background: var(--gray-bg); }
+#s-sem .thoughts, #s-sem .clock, #s-sem .sem-head { filter: saturate(.3); }
+.sem-head { display: flex; justify-content: space-between; align-items: center; color: var(--ink-3); font-size: .8rem; }
+.clock { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 2.6rem; letter-spacing: -0.04em; color: #c9ced9; }
+.thoughts { display: flex; flex-direction: column; gap: 10px; min-height: 52vh; }
+.th { align-self: flex-start; max-width: 88%; padding: 12px 15px; border-radius: 6px 20px 20px 20px; background: var(--gray-card); color: #cfd3dc; font-size: .98rem; line-height: 1.45; animation: pop .35s ease; }
+.th small { display: block; color: var(--ink-3); font-size: .7rem; margin-top: 4px; }
+.th.me { align-self: flex-end; border-radius: 20px 6px 20px 20px; background: #2a2d36; }
+.th.typing { color: var(--ink-3); letter-spacing: .3em; }
+@keyframes pop { from { opacity: 0; transform: translateY(8px) scale(.97) } to { opacity: 1; transform: none } }
+.sem-end { display: none; flex-direction: column; gap: 14px; }
+.sem-end.on { display: flex; animation: fadeIn .6s ease; }
+.activate { position: relative; overflow: hidden; animation: glow 1.6s ease-in-out infinite; }
+@keyframes glow { 50% { box-shadow: 0 0 0 10px rgba(61,139,255,.15), 0 16px 50px -10px rgba(61,139,255,.9) } }
+
+/* ---------- 2. ativação ---------- */
+#s-ativa { justify-content: center; text-align: center; background: radial-gradient(80% 50% at 50% 45%, #10224d 0%, var(--bg) 70%); }
+.orb { width: 170px; height: 170px; margin: 0 auto; border-radius: 50%; position: relative; display: grid; place-items: center; }
+.orb::before, .orb::after { content: ''; position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--blue-1); animation: ring 1.8s ease-out infinite; }
+.orb::after { animation-delay: .9s; }
+@keyframes ring { from { transform: scale(.6); opacity: 1 } to { transform: scale(1.5); opacity: 0 } }
+.orb-core { width: 110px; height: 110px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #8cbcff, var(--blue-2) 70%); box-shadow: 0 0 60px rgba(61,139,255,.8); display: grid; place-items: center; font-size: 2.6rem; }
+.boot { font-family: ui-monospace, Menlo, monospace; font-size: .85rem; color: #8fb6ff; min-height: 7.5em; text-align: left; display: inline-block; }
+
+/* ---------- 3. dia com a IA ---------- */
+#s-dia .wrap { gap: 10px; }
+#s-dia { padding-top: max(14px, env(safe-area-inset-top)); padding-bottom: max(14px, env(safe-area-inset-bottom)); background: radial-gradient(120% 60% at 50% 0%, #0f1f45 0%, var(--bg) 55%); }
+.hud { display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; }
+.hud-pill { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 999px; background: rgba(255,255,255,.07); font-size: .82rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.hud-pill b { color: var(--gold); }
+.xpbar { height: 6px; border-radius: 6px; background: rgba(255,255,255,.08); overflow: hidden; }
+.xpbar span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--gold), #ff9f1c); transition: width .6s ease; }
+.mission { text-align: center; font-size: .92rem; color: var(--ink-2); min-height: 2.8em; }
+.mission b { color: var(--ink); }
+.xp-float { position: fixed; left: 50%; top: 40%; transform: translateX(-50%); font-weight: 800; font-size: 1.6rem; color: var(--gold); pointer-events: none; animation: floatUp 1.1s ease forwards; z-index: 30; text-shadow: 0 4px 20px rgba(0,0,0,.6); }
+@keyframes floatUp { from { opacity: 0; transform: translate(-50%, 20px) scale(.8) } 20% { opacity: 1 } to { opacity: 0; transform: translate(-50%, -60px) scale(1.1) } }
+
+/* celular */
+.phone { position: relative; height: min(660px, calc(100dvh - 150px)); min-height: 480px; aspect-ratio: 9 / 19; max-width: 100%; margin: 0 auto; border-radius: 44px; background: #05070b; padding: 10px; box-shadow: 0 0 0 2px #2b3040, 0 40px 80px -20px rgba(0,0,0,.9), 0 0 80px -20px rgba(61,139,255,.35); }
+.screen { position: relative; width: 100%; height: 100%; border-radius: 35px; overflow: hidden; background: #f3f6fb; color: #0e1a33; }
+.notch { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 34%; height: 24px; border-radius: 20px; background: #05070b; z-index: 20; }
+.lock { position: absolute; inset: 0; background: linear-gradient(160deg, #1f3a7a, #0a1430 60%, #050912); color: #fff; display: flex; flex-direction: column; align-items: center; padding: 46px 12px 12px; transition: opacity .4s, transform .4s; z-index: 5; }
+.lock.hide { opacity: 0; transform: scale(1.06); pointer-events: none; }
+.lock-date { font-size: .78rem; opacity: .85; }
+.lock-time { font-size: 3.6rem; font-weight: 700; letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+.notifs { width: 100%; margin-top: 18px; display: flex; flex-direction: column; gap: 8px; }
+.notif { display: flex; gap: 9px; padding: 10px 11px; border-radius: 18px; background: rgba(255,255,255,.18); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); text-align: left; animation: slideDown .45s cubic-bezier(.2,.9,.3,1.2); width: 100%; }
+.notif.hot { box-shadow: 0 0 0 2px var(--gold); animation: slideDown .45s cubic-bezier(.2,.9,.3,1.2), shake .5s .5s; }
+.notif-ic { width: 30px; height: 30px; flex: none; border-radius: 8px; background: linear-gradient(140deg, var(--blue-1), var(--blue-2)); display: grid; place-items: center; font-size: .85rem; }
+.notif b { display: flex; justify-content: space-between; font-size: .72rem; }
+.notif b span { font-weight: 400; opacity: .7; }
+.notif p { font-size: .76rem; line-height: 1.35; margin-top: 1px; }
+@keyframes slideDown { from { opacity: 0; transform: translateY(-30px) } to { opacity: 1; transform: none } }
+@keyframes shake { 25% { transform: translateX(-4px) } 75% { transform: translateX(4px) } }
+.tap-hint { margin-top: auto; margin-bottom: 8px; font-size: .75rem; opacity: .85; animation: blink 1.2s infinite; }
+@keyframes blink { 50% { opacity: .35 } }
+
+/* app dentro do celular */
+.app { position: absolute; inset: 0; padding: 40px 12px 12px; display: flex; flex-direction: column; gap: 9px; overflow: hidden; font-size: .8rem; }
+.app-top { display: flex; justify-content: space-between; align-items: center; }
+.app-top small { display: inline-block; padding: 3px 8px; border-radius: 99px; background: rgba(31,111,235,.12); color: #1f6feb; font-weight: 600; font-size: .62rem; }
+.app-top h3 { margin: 4px 0 0; font-size: 1.05rem; letter-spacing: -.03em; }
+.bell { width: 32px; height: 32px; border-radius: 50%; background: #fff; border: 1px solid #dde5f1; display: grid; place-items: center; position: relative; }
+.bell i { position: absolute; top: 6px; right: 7px; width: 7px; height: 7px; border-radius: 50%; background: var(--bad); }
+.now { border-radius: 18px; padding: 12px; background: linear-gradient(140deg, #1f6feb, #0a3d9e); color: #fff; display: flex; flex-direction: column; gap: 8px; transition: background .4s; }
+.now.done { background: linear-gradient(140deg, #16a34a, #065f46); }
+.now-l { align-self: flex-start; padding: 2px 8px; border-radius: 99px; background: rgba(255,255,255,.2); font-size: .58rem; font-weight: 700; letter-spacing: .08em; }
+.now-m { display: flex; gap: 10px; align-items: center; }
+.now-m span { width: 40px; height: 40px; flex: none; border-radius: 12px; background: rgba(255,255,255,.16); display: grid; place-items: center; font-size: 1.3rem; }
+.now-m b { font-size: .95rem; line-height: 1.15; }
+.now-m p { font-size: .68rem; opacity: .85; line-height: 1.3; }
+.now-btn { padding: 9px; border-radius: 99px; background: #fff; color: #0a3d9e; font-weight: 700; font-size: .78rem; text-align: center; transition: transform .15s; }
+.now-btn.press { transform: scale(.93); }
+.coach { display: flex; gap: 6px; align-items: flex-end; }
+.coach i { width: 24px; height: 24px; flex: none; border-radius: 50%; background: linear-gradient(140deg, var(--blue-1), var(--blue-2)); display: grid; place-items: center; font-style: normal; font-size: .7rem; color: #fff; }
+.coach p { padding: 8px 10px; border-radius: 14px 14px 14px 4px; background: #fff; border: 1px solid #dde5f1; font-size: .7rem; line-height: 1.35; font-weight: 500; }
+.list { border-radius: 16px; background: #fff; border: 1px solid #dde5f1; padding: 8px 10px; }
+.list-h { display: flex; align-items: center; gap: 8px; padding-bottom: 4px; }
+.list-h b { font-size: .82rem; }
+.list-h small { color: #8592ab; font-size: .62rem; display: block; }
+.row { display: grid; grid-template-columns: 34px 18px 1fr 20px; align-items: center; gap: 5px; padding: 5px 0; border-top: 1px solid #eef2f8; font-size: .7rem; }
+.row .tm { color: #8592ab; font-size: .62rem; }
+.row .tk { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #dde5f1; display: grid; place-items: center; font-size: .6rem; color: #fff; transition: all .3s; }
+.row.done .tk { border: 0; background: linear-gradient(135deg, var(--blue-1), var(--blue-2)); transform: scale(1.1); }
+.row.done .nm { color: #8592ab; text-decoration: line-through; }
+.row.cur .nm { color: #1f6feb; font-weight: 600; }
+.streak { border-radius: 16px; padding: 10px; background: linear-gradient(140deg, #1f6feb, #0a3d9e); color: #fff; display: flex; align-items: center; gap: 10px; }
+.streak b { font-size: 1.6rem; line-height: 1; }
+.flames { display: flex; gap: 3px; margin-left: auto; }
+.flames i { width: 16px; height: 16px; border-radius: 50%; background: rgba(255,255,255,.2); font-style: normal; font-size: .55rem; display: grid; place-items: center; }
+.flames i.lit { background: #fff; }
+
+/* check-in dentro do celular */
+.ci { position: absolute; inset: 0; background: #f3f6fb; padding: 40px 14px 14px; display: none; flex-direction: column; gap: 10px; z-index: 8; }
+.ci.on { display: flex; animation: fadeIn .35s; }
+.ci-bars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.ci-bars i { height: 3px; border-radius: 3px; background: #dde5f1; }
+.ci-bars i.on { background: #1557d6; }
+.ci h4 { margin: 6px 0 0; font-size: 1.15rem; letter-spacing: -.03em; line-height: 1.15; }
+.ci-opts { display: flex; flex-direction: column; gap: 7px; }
+.ci-opt { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 14px; background: #fff; border: 2px solid #dde5f1; font-weight: 600; font-size: .82rem; transition: all .25s; }
+.ci-opt span { font-size: 1.3rem; }
+.ci-opt.pick { border-color: #1557d6; background: rgba(31,111,235,.08); transform: scale(1.02); }
+.faces { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; }
+.faces span { text-align: center; font-size: 1.5rem; padding: 6px 0; border-radius: 12px; filter: grayscale(.8); opacity: .5; transition: all .25s; }
+.faces span.pick { filter: none; opacity: 1; background: #fff; box-shadow: 0 0 0 2px #1557d6; transform: scale(1.12); }
+.result { position: absolute; inset: 0; background: linear-gradient(160deg, #16a34a, #065f46); color: #fff; display: none; flex-direction: column; justify-content: center; align-items: flex-start; gap: 10px; padding: 24px 18px; z-index: 9; }
+.result.on { display: flex; animation: fadeIn .4s; }
+.result .big { font-size: 3.4rem; }
+.result h4 { margin: 0; font-size: 1.5rem; letter-spacing: -.03em; line-height: 1.1; }
+.result p { font-size: .8rem; opacity: .9; }
+
+/* ---------- 4. 90 dias ---------- */
+#s-90 { background: radial-gradient(120% 60% at 50% 0%, #102552 0%, var(--bg) 55%); }
+.counter { display: flex; justify-content: space-around; text-align: center; }
+.counter div { display: flex; flex-direction: column; }
+.counter b { font-size: 2.4rem; font-weight: 800; letter-spacing: -.04em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.counter small { color: var(--ink-2); font-size: .78rem; }
+.cal { display: grid; grid-template-columns: repeat(15, 1fr); gap: 4px; }
+.cal i { aspect-ratio: 1; border-radius: 4px; background: rgba(255,255,255,.07); transition: background .2s; }
+.cal i.lit { background: linear-gradient(135deg, #ff9f1c, var(--gold)); box-shadow: 0 0 8px rgba(255,180,40,.5); }
+.ba { position: relative; width: 100%; max-width: 100%; aspect-ratio: 4 / 5; border-radius: 24px; overflow: hidden; background: #111; touch-action: pan-y; user-select: none; }
+.ba canvas, .ba img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ba-top { position: absolute; inset: 0; }
+.ba-line { position: absolute; top: 0; bottom: 0; width: 3px; margin-left: -1.5px; background: #fff; box-shadow: 0 0 12px rgba(0,0,0,.5); pointer-events: none; }
+.ba-line::after { content: '⟷'; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, var(--blue-1), var(--blue-2)); border: 3px solid #fff; display: grid; place-items: center; font-weight: 700; }
+.ba-tag { position: absolute; bottom: 12px; padding: 6px 12px; border-radius: 99px; background: rgba(0,0,0,.6); font-size: .78rem; font-weight: 600; }
+.ba-tag.l { left: 12px } .ba-tag.r { right: 12px }
+.story { display: flex; gap: 12px; align-items: flex-start; padding: 16px; border-radius: 20px; background: rgba(255,255,255,.06); }
+.story-av { width: 46px; height: 46px; flex: none; border-radius: 50%; background: linear-gradient(140deg, var(--blue-1), var(--blue-2)); display: grid; place-items: center; font-weight: 700; }
+.story p { font-style: italic; }
+.story small { color: var(--ink-3); display: block; margin-top: 6px; }
+.disclaimer { font-size: .7rem; color: var(--ink-3); text-align: center; line-height: 1.5; }
+
+/* ---------- 5. quiz ---------- */
+#s-quiz { background: var(--bg); }
+.qbar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.qbar i { height: 5px; border-radius: 5px; background: rgba(255,255,255,.1); }
+.qbar i.on { background: linear-gradient(90deg, var(--blue-1), var(--blue-2)); }
+.qopts { display: flex; flex-direction: column; gap: 10px; }
+.qopt { display: flex; align-items: center; gap: 14px; padding: 18px; border-radius: 20px; background: #12151c; border: 2px solid #232836; text-align: left; font-weight: 600; font-size: 1rem; transition: all .2s; }
+.qopt:active { transform: scale(.98); }
+.qopt span { font-size: 1.6rem; }
+.qopt small { display: block; font-weight: 400; color: var(--ink-2); font-size: .8rem; }
+.qopt.on { border-color: var(--blue-1); background: var(--blue-soft); }
+.months { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.month { padding: 14px 6px; border-radius: 16px; background: #12151c; border: 2px solid #232836; font-weight: 600; text-transform: capitalize; font-size: .9rem; position: relative; }
+.month small { display: block; font-size: .65rem; font-weight: 500; color: var(--ink-3); }
+.month.ia { border-color: rgba(61,139,255,.5); }
+.month.ia::after { content: 'com a IA'; position: absolute; top: -9px; left: 50%; transform: translateX(-50%); padding: 1px 7px; border-radius: 99px; background: var(--blue-2); font-size: .58rem; font-weight: 700; white-space: nowrap; }
+.month.on { background: var(--blue-soft); border-color: var(--blue-1); }
+.diag { padding: 20px; border-radius: 24px; background: linear-gradient(160deg, #13244d, #0c1430); border: 1px solid rgba(61,139,255,.35); display: flex; flex-direction: column; gap: 12px; }
+.diag-row { display: flex; justify-content: space-between; gap: 10px; font-size: .9rem; padding: 8px 0; border-top: 1px solid rgba(255,255,255,.08); }
+.diag-row b { text-align: right; }
+
+/* ---------- 6. VSL ---------- */
+#s-vsl { background: var(--bg); }
+.vsl-box { width: 100%; border-radius: 20px; overflow: hidden; background: #000; }
+.vsl-empty { aspect-ratio: 9 / 16; max-height: 70vh; display: grid; place-items: center; text-align: center; padding: 24px; color: var(--ink-3); font-size: .85rem; border: 2px dashed #2a2f3b; border-radius: 20px; }
+.buy { display: none; flex-direction: column; gap: 12px; padding: 20px; border-radius: 24px; background: #fff; color: #0e1a33; }
+.buy.on { display: flex; animation: fadeIn .6s; }
+.price { display: flex; align-items: baseline; gap: 8px; }
+.price b { font-size: 2.4rem; letter-spacing: -.04em; }
+.price s { color: #8592ab; }
+.buy ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: .92rem; }
+.buy li::before { content: '✓ '; color: #16a34a; font-weight: 800; }
+.secure { font-size: .75rem; color: #5b6b86; text-align: center; }
+.wait { text-align: center; color: var(--ink-2); font-size: .85rem; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+
+<!-- 0. Abertura: nome e objetivo (personaliza tudo depois) -->
+<section class="step on" id="s-intro">
+  <div class="wrap">
+    <span class="brand"><i>🔥</i> Dont Sorry IA</span>
+    <h1>Quantas segundas-feiras você já prometeu começar?</h1>
+    <p class="intro-q">Antes, um teste rápido. Leva 2 minutos e é sobre você.</p>
+    <input class="input" id="nome" placeholder="Seu primeiro nome" autocomplete="given-name" maxlength="20" />
+    <div class="chips" id="goal">
+      <button class="chip on" data-v="perder gordura">Perder gordura</button>
+      <button class="chip" data-v="definir">Definir</button>
+      <button class="chip" data-v="ganhar massa">Ganhar massa</button>
+    </div>
+    <button class="cta" id="go-sem">Começar</button>
+  </div>
+</section>
+
+<!-- 1. Um dia sem a IA -->
+<section class="step" id="s-sem">
+  <div class="wrap">
+    <div class="sem-head"><span>Um dia normal seu</span><span id="sem-day">segunda-feira</span></div>
+    <div class="clock" id="sem-clock">06:30</div>
+    <div class="thoughts" id="thoughts"></div>
+    <div class="sem-end" id="sem-end">
+      <h2>Sozinho, você vira juiz e réu ao mesmo tempo. E sempre se absolve.</h2>
+      <button class="cta activate" id="ativar">⚡ Ativar Dont Sorry IA</button>
+    </div>
+  </div>
+</section>
+
+<!-- 2. Ativação -->
+<section class="step" id="s-ativa">
+  <div class="wrap">
+    <div class="orb"><div class="orb-core">🔥</div></div>
+    <div><div class="boot" id="boot"></div></div>
+  </div>
+</section>
+
+<!-- 3. O dia com a IA -->
+<section class="step" id="s-dia">
+  <div class="wrap">
+    <div class="hud">
+      <span class="hud-pill">📅 Dia <b id="hud-day">1</b></span>
+      <span class="hud-pill">⚡ <b id="hud-xp">0</b> XP</span>
+      <span class="hud-pill">🔥 <b id="hud-streak">0</b></span>
+    </div>
+    <div class="xpbar"><span id="xpbar"></span></div>
+    <div class="mission" id="mission">Seu celular vai vibrar. <b>Toque na notificação.</b></div>
+    <div class="phone">
+      <div class="screen">
+        <div class="notch"></div>
+        <div class="lock" id="lock">
+          <div class="lock-date" id="lock-date">segunda-feira</div>
+          <div class="lock-time" id="lock-time">06:30</div>
+          <div class="notifs" id="notifs"></div>
+          <div class="tap-hint" id="tap-hint">toque na notificação</div>
+        </div>
+        <div class="app" id="app">
+          <div class="app-top">
+            <div><small id="app-date">seg, hoje</small><h3 id="app-hello">Bom dia</h3></div>
+            <span class="bell">🔔<i></i></span>
+          </div>
+          <div class="now" id="now">
+            <span class="now-l" id="now-l">AGORA</span>
+            <div class="now-m"><span id="now-e">☀️</span><div><b id="now-t">Acordar e beber água</b><p id="now-d">Copo cheio antes do celular.</p></div></div>
+            <div class="now-btn" id="now-btn">✓ Feito</div>
+          </div>
+          <div class="coach"><i>🔥</i><p id="coach">Dia 1 de 90. Cada dia vale R$ 0,55. Não jogue fora o de hoje.</p></div>
+          <div class="list">
+            <div class="list-h"><span>⭕</span><div><b>Seu dia</b><small id="done-count">0 de 6 feitos</small></div></div>
+            <div id="rows"></div>
+          </div>
+          <div class="streak"><span>🔥</span><div><b id="app-streak">0</b><div style="font-size:.6rem;opacity:.85">dias sem falhar</div></div><div class="flames" id="app-flames"></div></div>
+        </div>
+        <div class="ci" id="ci">
+          <div class="ci-bars"><i class="on"></i><i></i><i></i><i></i></div>
+          <h4 id="ci-q">E o treino de hoje?</h4>
+          <div id="ci-body"></div>
+        </div>
+        <div class="result" id="result">
+          <div class="big">🏆</div>
+          <h4>Dia pago. Isso é disciplina.</h4>
+          <p id="result-p">Sequência: 1 dia. Faltam 89.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. 90 dias depois -->
+<section class="step" id="s-90">
+  <div class="wrap">
+    <span class="eyebrow">Agora imagine 90 dias assim</span>
+    <h2 id="t90">Isso foi 1 dia. Olha o que 90 fazem.</h2>
+    <div class="counter">
+      <div><b id="c-dias">0</b><small>dias cumpridos</small></div>
+      <div><b id="c-peso">0</b><small>kg</small></div>
+      <div><b id="c-cob">0</b><small>cobranças</small></div>
+    </div>
+    <div class="cal" id="cal"></div>
+    <div id="story-wrap" style="display:none;flex-direction:column;gap:14px">
+      <div class="ba" id="ba">
+        <div id="ba-after"></div>
+        <div class="ba-top" id="ba-top"><div id="ba-before"></div></div>
+        <div class="ba-line" id="ba-line" style="left:50%"></div>
+        <span class="ba-tag l" id="ba-l">Dia 1</span><span class="ba-tag r" id="ba-r">Dia 90</span>
+      </div>
+      <div class="story"><span class="story-av" id="story-av">R</span><div><p id="story-q"></p><small id="story-n"></small></div></div>
+      <p class="disclaimer" id="story-disc"></p>
+      <button class="cta" id="go-quiz">Quero a minha versão</button>
+    </div>
+  </div>
+</section>
+
+<!-- 5. Quiz -->
+<section class="step" id="s-quiz">
+  <div class="wrap">
+    <div class="qbar" id="qbar"><i></i><i></i><i></i></div>
+    <div id="quiz"></div>
+  </div>
+</section>
+
+<!-- 6. VSL obrigatória + compra -->
+<section class="step" id="s-vsl">
+  <div class="wrap">
+    <span class="eyebrow" id="vsl-eyebrow">Último passo</span>
+    <h2 id="vsl-title">Assista antes de continuar</h2>
+    <div class="vsl-box" id="vsl">
+      <!-- ============ COLE AQUI O EMBED DA VTURB (div + script) ============ -->
+
+      <!-- ===================================================================== -->
+      <div class="vsl-empty" id="vsl-empty">Espaço da VSL.<br />Cole o código de incorporação da VTurb no arquivo vendas/index.html, no local marcado.</div>
+    </div>
+    <p class="wait" id="wait">O botão de acesso aparece no fim do vídeo.</p>
+    <div class="buy" id="buy">
+      <b>Dont Sorry IA · ciclo de 90 dias</b>
+      <div class="price"><s id="price-old"></s><b id="price">R$ 49,90</b></div>
+      <ul>
+        <li>Cobrança o dia inteiro no seu celular</li>
+        <li>Prestação de contas toda noite</li>
+        <li>Antes e depois semanal</li>
+        <li>Seu Projetinho: metas, promessas e desabafo</li>
+      </ul>
+      <a class="cta" id="buy-btn" href="#" style="text-align:center;text-decoration:none">Ativar minha Dont Sorry IA</a>
+      <p class="secure">🔒 Pagamento seguro pela Stripe. Garantia de 7 dias.</p>
+    </div>
+  </div>
+</section>
+
+<script>
+// ======================= CONFIGURAÇÃO (edite aqui) =======================
+const CONFIG = {
+  stripeLink: 'https://buy.stripe.com/SEU_LINK_AQUI', // link de pagamento da Stripe
+  price: 'R$ 49,90',
+  priceOld: '', // preço antigo riscado: só preencha se o produto já foi vendido por esse valor
+  ctaDelaySeconds: 90, // botão de compra aparece depois desse tempo na VSL (use o mesmo tempo do pitch)
+  // Cliente real (com autorização por escrito). Enquanto realCustomer for false,
+  // a página mostra uma ilustração e avisa que é simulação.
+  story: {
+    realCustomer: false,
+    name: 'Rafael',
+    age: 34,
+    city: 'Campinas, SP',
+    from: 98, // kg no dia 1
+    to: 81, // kg no dia 90
+    beforeImg: '', // ex.: '../img/rafael-antes.jpg'
+    afterImg: '', // ex.: '../img/rafael-depois.jpg'
+    quote: 'Eu sempre soube o que fazer. O que eu nunca tive foi alguém me cobrando às 21h30 quando eu queria pedir lanche.',
+  },
+}
+// ==========================================================================
+
+const $ = (id) => document.getElementById(id)
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+const track = (ev) => { try { window.fbq && fbq('trackCustom', ev); window.gtag && gtag('event', ev) } catch (e) {} }
+const state = { nome: '', goal: 'perder gordura', xp: 0, streak: 0, quiz: {} }
+const WD = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado']
+const today = WD[new Date().getDay()]
+
+function show(id) {
+  document.querySelectorAll('.step').forEach((s) => s.classList.remove('on'))
+  $(id).classList.add('on')
+  window.scrollTo(0, 0)
+  track('funil_' + id.replace('s-', ''))
+}
+
+// som de notificação (WebAudio, liberado depois do primeiro toque) + vibração
+let actx
+function ding(strong) {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)()
+    const t = actx.currentTime
+    ;[880, 1320].forEach((f, i) => {
+      const o = actx.createOscillator(), g = actx.createGain()
+      o.type = 'sine'; o.frequency.value = f
+      g.gain.setValueAtTime(0, t + i * 0.12)
+      g.gain.linearRampToValueAtTime(strong ? 0.18 : 0.1, t + i * 0.12 + 0.01)
+      g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.12 + 0.35)
+      o.connect(g).connect(actx.destination); o.start(t + i * 0.12); o.stop(t + i * 0.12 + 0.4)
+    })
+  } catch (e) {}
+  try { navigator.vibrate && navigator.vibrate(strong ? [120, 60, 120] : 80) } catch (e) {}
+}
+
+// ---------- 0. abertura ----------
+$('goal').addEventListener('click', (e) => {
+  const b = e.target.closest('.chip'); if (!b) return
+  document.querySelectorAll('#goal .chip').forEach((c) => c.classList.remove('on'))
+  b.classList.add('on'); state.goal = b.dataset.v
+})
+$('go-sem').addEventListener('click', () => {
+  state.nome = ($('nome').value.trim().split(' ')[0] || 'você')
+  state.nome = state.nome.charAt(0).toUpperCase() + state.nome.slice(1)
+  ding(false)
+  show('s-sem'); runSem()
+})
+
+// ---------- 1. vida sem a IA ----------
+const SEM = [
+  ['06:30', 'Despertador. Soneca. Só mais 10 minutos.', 'me'],
+  ['06:50', 'Hoje eu vou acordar e treinar cedo... amanhã. Amanhã com certeza.'],
+  ['07:40', 'Café? Um pão com manteiga. Ninguém vai saber.', 'me'],
+  ['12:30', 'Será que um refrigerante estraga tanto assim? Só hoje.'],
+  ['15:10', 'Sobremesa da firma. Seria falta de educação recusar.', 'me'],
+  ['18:30', 'Tô cansado. Treino amanhã rende mais.'],
+  ['21:40', 'Pedir um lanche? Semana que vem eu começo de verdade.', 'me'],
+  ['23:50', 'Rolando o feed vendo shape dos outros. Por que eu não consigo?'],
+  ['00:30', 'Segunda que vem eu começo. Dessa vez é sério.', 'me'],
+]
+async function runSem() {
+  $('sem-day').textContent = today
+  const box = $('thoughts')
+  box.innerHTML = ''
+  for (const [h, txt, me] of SEM) {
+    $('sem-clock').textContent = h
+    const typing = document.createElement('div')
+    typing.className = 'th typing' + (me ? ' me' : '')
+    typing.textContent = '•••'
+    box.appendChild(typing)
+    await sleep(650)
+    typing.className = 'th' + (me ? ' me' : '')
+    typing.innerHTML = txt.replace('Por que eu', `${state.nome}, por que você`) + `<small>${h} · você pra você</small>`
+    typing.scrollIntoView({ block: 'end', behavior: 'smooth' })
+    await sleep(900)
+  }
+  await sleep(400)
+  $('sem-end').classList.add('on')
+  $('sem-end').scrollIntoView({ block: 'end', behavior: 'smooth' })
+}
+$('ativar').addEventListener('click', () => { ding(true); show('s-ativa'); runBoot() })
+
+// ---------- 2. ativação ----------
+async function runBoot() {
+  const lines = [
+    `> perfil: ${state.nome}`,
+    `> objetivo: ${state.goal}`,
+    '> carregando rotina... ok',
+    '> modo de cobrança: TREINADOR',
+    '> ciclo: 90 dias',
+    '> Dont Sorry IA ativada ✓',
+  ]
+  const el = $('boot'); el.textContent = ''
+  for (const l of lines) { el.textContent += l + '\n'; el.style.whiteSpace = 'pre'; await sleep(420) }
+  await sleep(500)
+  show('s-dia'); runDia()
+}
+
+// ---------- 3. o dia com a IA ----------
+const TASKS = [
+  { id: 'wake', tm: '06:30', e: '☀️', nm: 'Acordar e beber água', d: 'Copo cheio antes do celular.' },
+  { id: 'cafe', tm: '07:00', e: '🍳', nm: 'Café da manhã', d: '3 ovos, 1 pão integral, café sem açúcar' },
+  { id: 'almoco', tm: '12:30', e: '🍽️', nm: 'Almoço', d: '150g frango, arroz, feijão, salada' },
+  { id: 'treino', tm: '18:30', e: '🏋️', nm: 'Peito e tríceps', d: '5 exercícios · 50 min' },
+  { id: 'jantar', tm: '20:00', e: '🥗', nm: 'Jantar', d: '150g carne magra, batata-doce, legumes' },
+  { id: 'ci', tm: '21:30', e: '📝', nm: 'Prestar contas do dia', d: 'Leva menos de 1 minuto.' },
+]
+const SCRIPT = () => [
+  { tm: '06:30', task: 'wake', title: 'Bom dia, ' + state.nome, body: `Dia 1 de 90. Faltam 89. Cada dia vale R$ 0,55. Não jogue fora o de hoje.`, coach: `Dia 1 de 90. Cada dia vale R$ 0,55. Não jogue fora o de hoje.`, mission: 'Missão 1: <b>abrir o dia com a IA</b>' },
+  { tm: '07:00', task: 'cafe', title: 'Café da manhã', body: '3 ovos, 1 pão integral, café sem açúcar. Seguiu? À noite você vai ter que contar.', coach: 'Comer o que está no plano é um carinho com você mesmo.', mission: 'Missão 2: <b>seguir a refeição</b>' },
+  { tm: '12:30', task: 'almoco', title: 'Almoço agora', body: 'Refrigerante não está no plano. Você pagou pra mudar, não pra repetir.', coach: 'Ninguém vê isso além de você. Mentir aqui é mentir pra você mesmo.', mission: 'Missão 3: <b>resistir ao "só hoje"</b>' },
+  { tm: '17:30', task: 'treino', title: 'Treino em 1 hora', body: `${state.nome}, gente disciplinada não negocia com a preguiça. Qual das duas você é hoje?`, coach: 'A vontade não vem antes. Ela vem depois que você começa.', mission: 'Missão 4: <b>ir treinar cansado</b>', hot: true },
+  { tm: '20:00', task: 'jantar', title: 'Jantar', body: 'Lanche no delivery? Não. É o plano que você aceitou.', coach: 'A dor da disciplina pesa gramas. A do arrependimento pesa toneladas.', mission: 'Missão 5: <b>não pedir lanche</b>' },
+  { tm: '21:30', task: 'ci', title: 'Prestação de contas', body: 'Hora da verdade. Abre e conta como foi. Tudo. Inclusive o que você queria esconder.', coach: 'Leva 1 minuto. Seja sincero, é só você aqui.', mission: 'Missão final: <b>prestar contas</b>', hot: true },
+]
+const done = new Set()
+let waitTap = null
+
+function renderRows(curId) {
+  $('rows').innerHTML = TASKS.map((t) => `<div class="row ${done.has(t.id) ? 'done' : ''} ${t.id === curId ? 'cur' : ''}"><span class="tm">${t.tm}</span><span>${t.e}</span><span class="nm">${t.nm}</span><span class="tk">${done.has(t.id) ? '✓' : ''}</span></div>`).join('')
+  $('done-count').textContent = `${done.size} de ${TASKS.length} feitos`
+}
+function renderFlames(n) { $('app-flames').innerHTML = Array.from({ length: 7 }, (_, i) => `<i class="${i < n ? 'lit' : ''}">${i < n ? '🔥' : ''}</i>`).join('') }
+function addXP(n) {
+  state.xp += n
+  $('hud-xp').textContent = state.xp
+  $('xpbar').style.width = Math.min(100, (state.xp / 600) * 100) + '%'
+  const f = document.createElement('div'); f.className = 'xp-float'; f.textContent = `+${n} XP`
+  document.body.appendChild(f); setTimeout(() => f.remove(), 1200)
+}
+function greet(tm) { const h = +tm.slice(0, 2); return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite' }
+
+async function notify(ev) {
+  $('lock').classList.remove('hide')
+  $('lock-time').textContent = ev.tm
+  $('lock-date').textContent = today
+  const n = document.createElement('button')
+  n.className = 'notif' + (ev.hot ? ' hot' : '')
+  n.innerHTML = `<span class="notif-ic">🔥</span><div><b>Dont Sorry IA <span>agora</span></b><b style="font-weight:700">${ev.title}</b><p>${ev.body}</p></div>`
+  $('notifs').prepend(n)
+  while ($('notifs').children.length > 2) $('notifs').lastChild.remove()
+  ding(ev.hot)
+  $('mission').innerHTML = ev.mission + ' · toque na notificação'
+  await new Promise((res) => {
+    const go = () => { clearTimeout(timer); res() }
+    n.addEventListener('click', go, { once: true })
+    const timer = setTimeout(go, 6500) // segue sozinho se a pessoa não tocar
+  })
+}
+
+async function openApp(ev) {
+  const t = TASKS.find((x) => x.id === ev.task)
+  $('lock').classList.add('hide')
+  $('app-hello').textContent = `${greet(ev.tm)}, ${state.nome}`
+  $('app-date').textContent = today.slice(0, 3) + ', hoje · ' + ev.tm
+  $('now').classList.remove('done')
+  $('now-l').textContent = 'AGORA'
+  $('now-e').textContent = t.e; $('now-t').textContent = t.nm; $('now-d').textContent = t.d
+  $('now-btn').textContent = t.id === 'ci' ? 'Prestar contas' : '✓ Feito'
+  $('coach').textContent = ev.coach
+  renderRows(t.id)
+  await sleep(1300)
+  $('now-btn').classList.add('press'); await sleep(180); $('now-btn').classList.remove('press')
+  if (t.id === 'ci') { await runCheckin(); return }
+  done.add(t.id); renderRows(null)
+  $('now').classList.add('done'); $('now-l').textContent = 'FEITO'
+  addXP(t.id === 'treino' ? 150 : 60)
+  await sleep(1100)
+}
+
+async function runCheckin() {
+  const ci = $('ci'); ci.classList.add('on')
+  const bars = ci.querySelectorAll('.ci-bars i')
+  const steps = [
+    { q: 'E o treino de hoje?', html: `<div class="ci-opts"><div class="ci-opt" data-p>💪 Fiz tudo</div><div class="ci-opt">😮‍💨 Fiz uma parte</div><div class="ci-opt">🛋️ Não fiz</div></div>` },
+    { q: 'Seguiu as refeições?', html: `<div class="ci-opts"><div class="ci-opt" data-p>✅ Segui todas</div><div class="ci-opt">❌ Furei alguma</div></div>` },
+    { q: 'Como foi a dieta?', html: `<div class="faces"><span>😫</span><span>😕</span><span>😐</span><span>🙂</span><span data-p>🔥</span></div>` },
+    { q: 'Fui 100% honesto comigo', html: `<div class="ci-opts"><div class="ci-opt" data-p>🔒 Confirmo</div></div>` },
+  ]
+  for (let i = 0; i < steps.length; i++) {
+    bars.forEach((b, j) => b.classList.toggle('on', j <= i))
+    $('ci-q').textContent = steps[i].q; $('ci-body').innerHTML = steps[i].html
+    await sleep(900)
+    const p = $('ci-body').querySelector('[data-p]'); p && p.classList.add('pick')
+    ding(false); await sleep(800)
+  }
+  done.add('ci'); renderRows(null)
+  ci.classList.remove('on')
+  state.streak = 1; $('hud-streak').textContent = 1; $('app-streak').textContent = 1; renderFlames(1)
+  $('result-p').textContent = `Sequência: 1 dia. Faltam 89. ${state.nome}, o R$ 0,55 de hoje foi bem investido.`
+  $('result').classList.add('on')
+  addXP(200)
+  await sleep(2600)
+}
+
+async function runDia() {
+  done.clear(); state.xp = 0; renderRows(null); renderFlames(0)
+  for (const ev of SCRIPT()) {
+    await notify(ev)
+    await openApp(ev)
+  }
+  $('mission').innerHTML = '🏆 <b>Dia 1 cumprido.</b> Agora acelera…'
+  await sleep(1200)
+  show('s-90'); run90()
+}
+
+// ---------- 4. 90 dias ----------
+function drawFigure(c, fat) {
+  const W = c.width = 600, H = c.height = 750, g = c.getContext('2d')
+  const bg = g.createLinearGradient(0, 0, 0, H)
+  bg.addColorStop(0, fat ? '#3a3f4a' : '#20335f'); bg.addColorStop(1, fat ? '#1a1c22' : '#0b1430')
+  g.fillStyle = bg; g.fillRect(0, 0, W, H)
+  const skin = fat ? '#c9a58c' : '#c69a7c', waist = fat ? 132 : 86, sh = fat ? 150 : 162
+  g.fillStyle = skin
+  g.beginPath(); g.arc(W / 2, 150, 52, 0, 7); g.fill()
+  g.fillRect(W / 2 - 22, 190, 44, 40)
+  g.beginPath(); g.moveTo(W / 2 - sh, 250); g.quadraticCurveTo(W / 2, 214, W / 2 + sh, 250)
+  g.lineTo(W / 2 + waist + (fat ? 26 : 0), 450); g.lineTo(W / 2 + waist - 6, 520); g.lineTo(W / 2 - waist + 6, 520); g.lineTo(W / 2 - waist - (fat ? 26 : 0), 450); g.closePath(); g.fill()
+  g.strokeStyle = skin; g.lineCap = 'round'; g.lineWidth = fat ? 50 : 56
+  g.beginPath(); g.moveTo(W / 2 - sh + 10, 270); g.lineTo(W / 2 - sh - 28, 480); g.moveTo(W / 2 + sh - 10, 270); g.lineTo(W / 2 + sh + 28, 480); g.stroke()
+  g.fillStyle = '#111'; g.fillRect(W / 2 - waist + 2, 510, waist * 2 - 4, 120)
+  g.fillStyle = skin; g.fillRect(W / 2 - waist + 12, 630, waist - 24, 110); g.fillRect(W / 2 + 12, 630, waist - 24, 110)
+  if (!fat) {
+    g.strokeStyle = 'rgba(80,40,25,.35)'; g.lineWidth = 3; g.beginPath(); g.moveTo(W / 2, 290); g.lineTo(W / 2, 500)
+    ;[360, 405, 450].forEach((y) => { g.moveTo(W / 2 - 40, y); g.lineTo(W / 2 + 40, y) })
+    g.moveTo(W / 2 - 95, 310); g.quadraticCurveTo(W / 2 - 48, 340, W / 2 - 4, 310); g.moveTo(W / 2 + 95, 310); g.quadraticCurveTo(W / 2 + 48, 340, W / 2 + 4, 310); g.stroke()
+  }
+  g.fillStyle = 'rgba(255,255,255,.75)'; g.font = '600 26px Poppins, sans-serif'; g.fillText('ILUSTRAÇÃO', 24, 46)
+}
+function mountBA() {
+  const S = CONFIG.story
+  const make = (src, fat) => {
+    if (src) { const i = new Image(); i.src = src; i.alt = ''; return i }
+    const c = document.createElement('canvas'); drawFigure(c, fat); return c
+  }
+  $('ba-before').replaceChildren(make(S.beforeImg, true))
+  $('ba-after').replaceChildren(make(S.afterImg, false))
+  const box = $('ba'), top = $('ba-top'), line = $('ba-line')
+  const set = (x) => { const r = box.getBoundingClientRect(); const p = Math.max(0, Math.min(100, ((x - r.left) / r.width) * 100)); top.style.clipPath = `inset(0 ${100 - p}% 0 0)`; line.style.left = p + '%' }
+  let drag = false
+  box.addEventListener('pointerdown', (e) => { drag = true; box.setPointerCapture(e.pointerId); set(e.clientX) })
+  box.addEventListener('pointermove', (e) => drag && set(e.clientX))
+  box.addEventListener('pointerup', () => (drag = false))
+  top.style.clipPath = 'inset(0 50% 0 0)'
+  $('ba-l').textContent = `Dia 1 · ${S.from} kg`; $('ba-r').textContent = `Dia 90 · ${S.to} kg`
+  $('story-av').textContent = S.name.charAt(0)
+  $('story-q').textContent = '"' + S.quote + '"'
+  $('story-n').textContent = `${S.name}, ${S.age} anos · ${S.city}`
+  $('story-disc').textContent = S.realCustomer
+    ? 'Resultado real de cliente, divulgado com autorização. Resultados variam de pessoa para pessoa e dependem de dieta, treino e constância.'
+    : 'Simulação ilustrativa. Não representa um cliente real. Resultados variam de pessoa para pessoa e dependem de dieta, treino e constância.'
+}
+async function run90() {
+  const S = CONFIG.story
+  $('t90').textContent = `${state.nome}, isso foi 1 dia. Olha o que 90 fazem.`
+  const cal = $('cal'); cal.innerHTML = Array.from({ length: 90 }, () => '<i></i>').join('')
+  const cells = cal.children
+  for (let d = 1; d <= 90; d++) {
+    cells[d - 1].classList.add('lit')
+    $('c-dias').textContent = d
+    $('c-peso').textContent = (S.from - ((S.from - S.to) * d) / 90).toFixed(1).replace('.', ',')
+    $('c-cob').textContent = d * 9
+    if (d % 10 === 0) ding(false)
+    await sleep(d < 10 ? 120 : 35)
+  }
+  $('c-peso').textContent = `−${S.from - S.to}`
+  mountBA()
+  $('story-wrap').style.display = 'flex'
+  $('story-wrap').scrollIntoView({ behavior: 'smooth' })
+}
+$('go-quiz').addEventListener('click', () => { show('s-quiz'); quiz(0) })
+
+// ---------- 5. quiz ----------
+const MONTHS = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro']
+function quiz(i) {
+  document.querySelectorAll('#qbar i').forEach((b, j) => b.classList.toggle('on', j <= i))
+  const q = $('quiz')
+  const next = (k, v) => { state.quiz[k] = v; ding(false); setTimeout(() => (i < 2 ? quiz(i + 1) : diag()), 280) }
+  if (i === 0) {
+    q.innerHTML = `<div class="wrap" style="gap:16px"><span class="eyebrow">Pergunta 1 de 3</span><h2>Quantas vezes você já tentou ser fitness?</h2><div class="qopts">
+      ${[['1️⃣', '1 ou 2 vezes', 'Ainda acredito em mim'], ['🔁', '3 a 5 vezes', 'Começo bem e paro'], ['😩', '6 a 10 vezes', 'Já perdi a fé no "segunda eu começo"'], ['♾️', 'Perdi a conta', 'Sempre volto pro zero']]
+        .map(([e, t, s]) => `<button class="qopt" data-v="${t}"><span>${e}</span><div>${t}<small>${s}</small></div></button>`).join('')}</div></div>`
+    q.querySelectorAll('.qopt').forEach((b) => b.onclick = () => { b.classList.add('on'); next('tentativas', b.dataset.v) })
+  }
+  if (i === 1) {
+    const now = new Date()
+    const ia = new Date(now.getFullYear(), now.getMonth() + 3, 1)
+    const opts = Array.from({ length: 9 }, (_, k) => new Date(now.getFullYear(), now.getMonth() + 1 + k, 1))
+    q.innerHTML = `<div class="wrap" style="gap:16px"><span class="eyebrow">Pergunta 2 de 3</span><h2>Em que mês você vai atingir o corpo que quer?</h2><p class="muted">Com 90 dias de cobrança, a IA projeta <b style="color:#fff">${MONTHS[ia.getMonth()]}</b>.</p><div class="months">
+      ${opts.map((d) => `<button class="month ${d.getMonth() === ia.getMonth() && d.getFullYear() === ia.getFullYear() ? 'ia' : ''}" data-v="${MONTHS[d.getMonth()]} de ${d.getFullYear()}">${MONTHS[d.getMonth()].slice(0, 3)}<small>${d.getFullYear()}</small></button>`).join('')}</div></div>`
+    q.querySelectorAll('.month').forEach((b) => b.onclick = () => { b.classList.add('on'); next('mes', b.dataset.v) })
+  }
+  if (i === 2) {
+    q.innerHTML = `<div class="wrap" style="gap:16px"><span class="eyebrow">Pergunta 3 de 3</span><h2>O quanto você quer investir no seu corpo?</h2><div class="qopts">
+      ${[['🪙', 'Até R$ 50', 'Quero algo acessível'], ['💵', 'Até R$ 100', 'Um investimento razoável'], ['💎', 'O que for preciso', 'Cansei de tentar sozinho'], ['🤷', 'Nada', 'Vou continuar tentando sozinho']]
+        .map(([e, t, s]) => `<button class="qopt" data-v="${t}"><span>${e}</span><div>${t}<small>${s}</small></div></button>`).join('')}</div></div>`
+    q.querySelectorAll('.qopt').forEach((b) => b.onclick = () => { b.classList.add('on'); next('investir', b.dataset.v) })
+  }
+}
+function diag() {
+  const Q = state.quiz
+  const nada = Q.investir === 'Nada'
+  $('quiz').innerHTML = `<div class="wrap" style="gap:16px">
+    <span class="eyebrow">Seu diagnóstico</span>
+    <h2>${state.nome}, o problema nunca foi saber o que fazer.</h2>
+    <p class="muted">Foi não ter ninguém te cobrando na hora que a vontade some. ${nada ? 'Sozinho de graça, você já tentou ' + Q.tentativas.toLowerCase() + '. O resultado você conhece.' : ''}</p>
+    <div class="diag">
+      <div class="diag-row"><span>Tentativas sozinho</span><b>${Q.tentativas}</b></div>
+      <div class="diag-row"><span>Meta</span><b>${state.goal}</b></div>
+      <div class="diag-row"><span>Mês do corpo novo</span><b>${Q.mes}</b></div>
+      <div class="diag-row"><span>Cobranças até lá</span><b>~810</b></div>
+      <div class="diag-row"><span>Investimento por dia</span><b>R$ 0,55</b></div>
+    </div>
+    <button class="cta" id="go-vsl">Ver como funciona por dentro</button>
+  </div>`
+  $('go-vsl').onclick = () => { show('s-vsl'); vsl() }
+}
+
+// ---------- 6. VSL ----------
+function vsl() {
+  $('vsl-title').textContent = `${state.nome}, assista antes de continuar`
+  $('price').textContent = CONFIG.price; $('price-old').textContent = CONFIG.priceOld; $('price-old').hidden = !CONFIG.priceOld
+  const hasEmbed = !!document.querySelector('#vsl [id^="vid"], #vsl vturb-smartplayer, #vsl iframe')
+  $('vsl-empty').style.display = hasEmbed ? 'none' : 'grid'
+  const url = new URL(CONFIG.stripeLink)
+  if (window.location.search) new URLSearchParams(window.location.search).forEach((v, k) => url.searchParams.set(k, v)) // repassa UTMs
+  $('buy-btn').href = url.toString()
+  $('buy-btn').onclick = () => track('funil_checkout')
+  setTimeout(() => { $('buy').classList.add('on'); $('wait').style.display = 'none'; track('funil_oferta') }, CONFIG.ctaDelaySeconds * 1000)
+}
+</script>
+</body>
+</html>
