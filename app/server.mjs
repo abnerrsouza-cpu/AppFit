@@ -1,9 +1,8 @@
 // Servidor do app em produção (Railway).
-// Entrega o app (pasta dist) e atualiza os vídeos dos canais ao iniciar e a cada 12 horas.
+// Entrega o app (pasta dist).
 import { createServer } from 'node:http'
 import { readFile, stat } from 'node:fs/promises'
 import { extname, join, normalize } from 'node:path'
-import { spawn } from 'node:child_process'
 
 const DIST = join(import.meta.dirname, 'dist')
 const PORT = Number(process.env.PORT) || 3000
@@ -35,11 +34,3 @@ createServer(async (req, res) => {
     res.writeHead(404).end('Não encontrado')
   }
 }).listen(PORT, () => console.log(`App no ar na porta ${PORT}`))
-
-// Atualização dos vídeos: grava em dist/content.json (o app busca esse arquivo ao abrir).
-function refresh() {
-  const p = spawn(process.execPath, ['scripts/fetch-content.mjs', '--out', 'dist/content.json'], { cwd: import.meta.dirname, stdio: 'inherit' })
-  p.on('error', (e) => console.warn('falha ao atualizar vídeos', e.message))
-}
-refresh()
-setInterval(refresh, 12 * 60 * 60 * 1000)

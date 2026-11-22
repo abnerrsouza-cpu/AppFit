@@ -9,7 +9,6 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "build:single": "vite build --mode single",
-    "content": "node scripts/fetch-content.mjs",
     "start": "node server.mjs",
     "i18n:check": "node scripts/i18n-check.mjs",
     "i18n:build": "python3 scripts/i18n/build.py"

@@ -26,7 +26,12 @@ for (const f of files) {
   addAll(src, new RegExp(`\\bl="([^"]+)"`, 'g'))
 }
 const block = (file, start) => {
-  const src = readFileSync(join(root, file), 'utf8')
+  let src = ''
+  try {
+    src = readFileSync(join(root, file), 'utf8')
+  } catch {
+    return ''
+  }
   const i = src.indexOf(start)
   if (i < 0) return ''
   let depth = 0

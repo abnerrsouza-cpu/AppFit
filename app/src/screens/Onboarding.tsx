@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Icon } from '../components/Icon'
+import { Info, WithInfo } from '../components/Info'
 import { enableNotifications, notifyStatus } from '../notify'
 import { toneLabel } from '../psych'
 import { t } from '../i18n'
@@ -62,7 +63,10 @@ export function Onboarding({ p0, s }: { p0: Profile; s: AppState }) {
 
       {step === 1 && (
         <div className="onb-body">
-          <h1>{t('Quem está assumindo esse compromisso?')}</h1>
+          <h1>
+            {t('Quem está assumindo esse compromisso?')}
+            <Info text={t('Seus dados básicos. O peso de hoje e a meta definem o seu caminho no app.')} />
+          </h1>
           <div className="card field">
             <label>
               {t('Seu nome')}
@@ -102,7 +106,10 @@ export function Onboarding({ p0, s }: { p0: Profile; s: AppState }) {
 
       {step === 2 && (
         <div className="onb-body">
-          <h1>{t('Sua rotina')}</h1>
+          <h1>
+            {t('Sua rotina')}
+            <Info text={t('Os horários em que você acorda, treina, presta contas e dorme. As cobranças chegam nesses horários.')} />
+          </h1>
           <p className="lead">{t('É nesses horários que eu vou aparecer.')}</p>
           <div className="card field">
             <div className="row2">
@@ -132,7 +139,10 @@ export function Onboarding({ p0, s }: { p0: Profile; s: AppState }) {
 
       {step === 3 && (
         <div className="onb-body">
-          <h1>{t('Quão duro eu posso ser?')}</h1>
+          <h1>
+            {t('Quão duro eu posso ser?')}
+            <Info text={t('O tom das mensagens do treinador. Dá para trocar depois, no sino da tela Hoje.')} />
+          </h1>
           <p className="lead">{t('Dá para mudar depois. A maioria escolhe Treinador.')}</p>
           <div className="tone-pick col">
             {(Object.keys(toneLabel()) as Tone[]).map((tn) => (
@@ -156,7 +166,10 @@ export function Onboarding({ p0, s }: { p0: Profile; s: AppState }) {
 
       {step === 4 && (
         <div className="onb-body">
-          <h1>{t('Carta para o seu eu de daqui a {n} dias', { n: p.cycleDays })}</h1>
+          <h1>
+            {t('Carta para o seu eu de daqui a {n} dias', { n: p.cycleDays })}
+            <Info text={t('Escreva por que você está começando. Nos dias em que quiser desistir, o app mostra essa carta.')} />
+          </h1>
           <p className="lead">{t('Por que você começou? O que você não aguenta mais? Nos dias em que você quiser desistir, eu vou te mostrar isso aqui.')}</p>
           <div className="card field">
             <textarea id="ob-letter" rows={7} value={p.letter} onChange={(e) => upd({ letter: e.target.value })} placeholder={t('Cansei de...')} />
@@ -176,13 +189,17 @@ export function Onboarding({ p0, s }: { p0: Profile; s: AppState }) {
 
       <div className="onb-foot">
         {step < total - 1 ? (
-          <button type="button" className="cta" disabled={!canNext} onClick={() => setStep(step + 1)}>
-            {step === 0 ? t('Aceito ser cobrado') : t('Continuar')}
-          </button>
+          <WithInfo text={step === 0 ? t('Começa o cadastro. São 6 passos rápidos.') : t('Vai para o próximo passo do cadastro.')}>
+            <button type="button" className="cta" disabled={!canNext} onClick={() => setStep(step + 1)}>
+              {step === 0 ? t('Aceito ser cobrado') : t('Continuar')}
+            </button>
+          </WithInfo>
         ) : (
-          <button type="button" className="cta" onClick={finish}>
-            {t('Começar o dia 1')}
-          </button>
+          <WithInfo text={t('Termina o cadastro e abre a tela Hoje. A contagem dos dias começa agora.')}>
+            <button type="button" className="cta" onClick={finish}>
+              {t('Começar o dia 1')}
+            </button>
+          </WithInfo>
         )}
         {step === 0 && (
           <button type="button" className="link center" onClick={resetToDemo}>
@@ -199,7 +216,10 @@ function NotifStep() {
   const [st, setSt] = useState(notifyStatus())
   return (
     <div className="onb-body">
-      <h1>{t('Me deixa te cobrar fora do app')}</h1>
+      <h1>
+        {t('Me deixa te cobrar fora do app')}
+        <Info text={t('Instale o app na tela de início e ative as notificações para receber as cobranças no celular.')} />
+      </h1>
       <p className="lead">{t('Sem notificação, eu sou só mais um app esquecido na tela.')}</p>
       <div className="card field">
         <ol className="steps">

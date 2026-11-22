@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { BottomNav, type Tab } from './components/BottomNav'
 import { Icon } from './components/Icon'
+import { Info } from './components/Info'
 import { registerSW, startScheduler } from './notify'
 import { Alerts } from './screens/Alerts'
 import { Checkin } from './screens/Checkin'
 import { Evolution } from './screens/Evolution'
 import { Menu } from './screens/Menu'
-import { News } from './screens/News'
 import { Onboarding } from './screens/Onboarding'
 import { Projeto } from './screens/Projeto'
 import { Today } from './screens/Today'
@@ -42,7 +42,10 @@ export default function App() {
     <div className="app">
       {s.demo && (
         <div className="demo-bar">
-          <span>{t('Você está vendo dados de exemplo.')}</span>
+          <span className="ttl">
+            {t('Você está vendo dados de exemplo.')}
+            <Info text={t('O app está preenchido com uma pessoa fictícia para você conhecer. Toque em Começar o meu para usar com os seus dados.')} />
+          </span>
           <button type="button" onClick={resetToBlank}>
             {t('Começar o meu')} <Icon name="arrow" size={14} />
           </button>
@@ -51,7 +54,6 @@ export default function App() {
       {tab === 'inicio' && <Today s={s} go={setTab} openCheckin={() => setCheckin(true)} owes={owes} />}
       {tab === 'evolucao' && <Evolution s={s} />}
       {tab === 'cobrancas' && <Alerts s={s} onBack={() => setTab('inicio')} />}
-      {tab === 'noticias' && <News />}
       {tab === 'projeto' && <Projeto s={s} />}
       {tab === 'menu' && <Menu s={s} />}
       <BottomNav tab={tab} onTab={setTab} dots={{}} />

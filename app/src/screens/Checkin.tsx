@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Icon } from '../components/Icon'
+import { Info, WithInfo } from '../components/Info'
 import { feedback, nudge } from '../psych'
 import { t } from '../i18n'
 import { type AppState, type DailyLog, type Trained, setState, today, workoutFor } from '../store'
@@ -88,7 +89,10 @@ export function Checkin({ s, onClose }: { s: AppState; onClose: () => void }) {
         <button type="button" className="round-btn" onClick={step ? () => setStep(step - 1) : onClose} aria-label={step ? t('Voltar') : t('Fechar')}>
           <Icon name={step ? 'back' : 'x'} />
         </button>
-        <span className="eyebrow">{t('Prestação de contas')}</span>
+        <span className="eyebrow ttl">
+          {t('Prestação de contas')}
+          <Info text={t('O resumo honesto do seu dia em 6 perguntas rápidas. Leva menos de 1 minuto. No fim, o treinador responde.')} />
+        </span>
       </div>
 
       <div className="story-body">
@@ -219,9 +223,11 @@ export function Checkin({ s, onClose }: { s: AppState; onClose: () => void }) {
       </div>
 
       <div className="story-foot">
-        <button type="button" className="cta" onClick={next} disabled={step === STEPS - 1 && !honest}>
-          {step === STEPS - 1 ? t('Enviar') : t('Próximo')}
-        </button>
+        <WithInfo text={step === STEPS - 1 ? t('Envia sua prestação de contas e mantém sua sequência. Só libera depois que você confirmar que foi honesto.') : t('Vai para a próxima pergunta. Dá para voltar pela seta no topo.')}>
+          <button type="button" className="cta" onClick={next} disabled={step === STEPS - 1 && !honest}>
+            {step === STEPS - 1 ? t('Enviar') : t('Próximo')}
+          </button>
+        </WithInfo>
       </div>
     </div>
   )

@@ -6,12 +6,10 @@ com psicologia nas notificações e nas respostas.
 ## No ar
 
 Publicado no GitHub Pages pelo workflow `.github/workflows/publicar.yml`:
-a cada push e todo dia às 6h17 (Brasília), quando também busca vídeos novos dos canais.
 
 Ativar uma única vez: GitHub > Settings > Pages > Source: **GitHub Actions**.
 Endereço: https://abnerrsouza-cpu.github.io/AppFit/
 
-Para trocar os canais de vídeo, edite `content/channels.json`.
 
 ## Rodar
 

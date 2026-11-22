@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Icon } from '../components/Icon'
+import { Info, WithInfo } from '../components/Info'
 import { t } from '../i18n'
 import { compress, getPhoto, putPhoto } from '../photos'
 import {
@@ -58,12 +59,16 @@ export function Projeto({ s }: { s: AppState }) {
   return (
     <div className="screen">
       <header className="page-h">
-        <h1>{t('Meu projetinho')}</h1>
+        <h1 className="ttl">
+          {t('Meu projetinho')}
+          <Info text={t('Seu espaço pessoal do projeto: o resultado que você quer, suas promessas, metas, desabafos e fotos.')} />
+        </h1>
       </header>
 
       <section className="pj-hero" style={visionUrl ? { backgroundImage: `linear-gradient(180deg, rgba(5,15,40,.15), rgba(5,15,40,.85)), url(${visionUrl})` } : undefined}>
         <span className="pj-count">
           <b>{left}</b> {t('dias')}
+          <Info light text={t('Dias que faltam até a data da sua meta. Você define a data na aba Expectativa.')} />
         </span>
         <p className="pj-result">{pj.vision.result || t('Defina o resultado que você quer na aba Expectativa.')}</p>
         <div className="pj-stats">
@@ -74,6 +79,10 @@ export function Projeto({ s }: { s: AppState }) {
         </div>
       </section>
 
+      <p className="ttl hint">
+        {t('Seções')}
+        <Info text={t('Expectativa: o corpo que você quer. Promessas: compromissos para cumprir. Metas: objetivos com prazo. Desabafo: diário privado. Fotos: momentos do projeto.')} />
+      </p>
       <div className="cat-row">
         {SECS.map((x) => (
           <button key={x.id} type="button" className={`cat ${sec === x.id ? 'on' : ''}`} onClick={() => setSec(x.id)}>
@@ -114,7 +123,10 @@ function Expectativa({ s, visionUrl }: { s: AppState; visionUrl?: string }) {
         ) : (
           <span>
             <span className="big-emo">🖼️</span>
-            <b>{busy ? t('Salvando...') : t('Foto da expectativa')}</b>
+            <b className="ttl">
+              {busy ? t('Salvando...') : t('Foto da expectativa')}
+              <Info text={t('Uma imagem do resultado que você quer. Ela vira o fundo do topo do Projetinho, para você ver todo dia.')} />
+            </b>
             <small>{t('O shape que você quer ter. Uma referência, um print, uma foto sua antiga.')}</small>
           </span>
         )}
@@ -123,19 +135,31 @@ function Expectativa({ s, visionUrl }: { s: AppState; visionUrl?: string }) {
 
       <div className="card field">
         <label>
-          🎯 {t('Resultado que eu quero (meu foco)')}
+          <span className="ttl">
+            🎯 {t('Resultado que eu quero (meu foco)')}
+            <Info text={t('Escreva em uma frase o resultado que você quer. Aparece em destaque no topo da tela.')} />
+          </span>
           <textarea id="pj-result" rows={2} value={v.result} onChange={(e) => upd({ result: e.target.value })} placeholder={t('Ex.: 80 kg, abdômen aparecendo')} />
         </label>
         <label>
-          😌 {t('Como vou me sentir quando chegar lá')}
+          <span className="ttl">
+            😌 {t('Como vou me sentir quando chegar lá')}
+            <Info text={t('Imaginar o sentimento ajuda a não desistir. Escreva como você vai se sentir no dia que chegar.')} />
+          </span>
           <textarea id="pj-feeling" rows={2} value={v.feeling} onChange={(e) => upd({ feeling: e.target.value })} placeholder={t('Ex.: confiante, leve, orgulhoso')} />
         </label>
         <label>
-          ❤️ {t('Por que isso importa pra mim')}
+          <span className="ttl">
+            ❤️ {t('Por que isso importa pra mim')}
+            <Info text={t('O motivo verdadeiro. É ele que segura você nos dias sem vontade.')} />
+          </span>
           <textarea id="pj-why" rows={2} value={v.why} onChange={(e) => upd({ why: e.target.value })} placeholder={t('O motivo real, sem filtro')} />
         </label>
         <label>
-          📅 {t('Até quando')}
+          <span className="ttl">
+            📅 {t('Até quando')}
+            <Info text={t('A data em que você quer chegar no resultado. A contagem de dias do topo usa essa data.')} />
+          </span>
           <input id="pj-date" type="date" value={v.targetDate} onChange={(e) => upd({ targetDate: e.target.value })} />
         </label>
       </div>
@@ -159,11 +183,16 @@ function Promessas({ s }: { s: AppState }) {
           setText('')
         }}
       >
-        <span className="pj-add-pre">{t('Eu prometo que')}</span>
+        <span className="pj-add-pre">
+          {t('Eu prometo que')}
+          <Info text={t('Escreva um compromisso com você mesmo. Depois marque Cumpri ou Quebrei. Promessas cumpridas aparecem no topo.')} />
+        </span>
         <textarea id="pj-new-promise" rows={2} value={text} onChange={(e) => setText(e.target.value)} placeholder={t('vou treinar amanhã mesmo cansado')} />
-        <button type="submit" className="cta sm-cta">
-          {t('Fazer promessa')}
-        </button>
+        <WithInfo text={t('Salva a promessa na lista abaixo com a data de hoje.')}>
+          <button type="submit" className="cta sm-cta">
+            {t('Fazer promessa')}
+          </button>
+        </WithInfo>
       </form>
       {list.map((p) => (
         <div key={p.id} className={`card promise is-${p.status}`}>
@@ -171,7 +200,7 @@ function Promessas({ s }: { s: AppState }) {
           <small>{t('Prometido em {d}', { d: dm(p.date) })}</small>
           {p.status === 'aberta' ? (
             <div className="promise-actions">
-              <button type="button" className="pa ok" onClick={() => set(p.id, 'cumprida')}>
+              <button type="button" className="pa ok" title={t('Cumpri')} onClick={() => set(p.id, 'cumprida')}>
                 <Icon name="check" size={16} stroke={3} /> {t('Cumpri')}
               </button>
               <button type="button" className="pa no" onClick={() => set(p.id, 'quebrada')}>
@@ -236,7 +265,10 @@ function Metas({ s }: { s: AppState }) {
           setDue('')
         }}
       >
-        <span className="pj-add-pre">{t('Nova meta')}</span>
+        <span className="pj-add-pre">
+          {t('Nova meta')}
+          <Info text={t('Crie um objetivo com prazo, como correr 5 km. Escolha um emoji, escreva a meta e a data. Marque o círculo quando bater.')} />
+        </span>
         <div className="emo-pick">
           {GOAL_EMOJI.map((e) => (
             <button key={e} type="button" className={emoji === e ? 'on' : ''} onClick={() => setEmoji(e)}>
@@ -249,9 +281,11 @@ function Metas({ s }: { s: AppState }) {
           {t('Prazo')}
           <input id="pj-goal-due" type="date" value={due} onChange={(e) => setDue(e.target.value)} />
         </label>
-        <button type="submit" className="cta sm-cta">
-          {t('Adicionar meta')}
-        </button>
+        <WithInfo text={t('Salva a meta na lista. O app mostra quantos dias faltam até o prazo.')}>
+          <button type="submit" className="cta sm-cta">
+            {t('Adicionar meta')}
+          </button>
+        </WithInfo>
       </form>
     </div>
   )
@@ -286,6 +320,7 @@ function Desabafo({ s }: { s: AppState }) {
       >
         <span className="pj-add-pre">
           <Icon name="lock" size={14} /> {t('Só você lê isso')}
+          <Info text={t('Um diário privado. Escolha a carinha do seu humor e escreva o que está sentindo. O treinador responde na hora.')} />
         </span>
         <div className="emo-pick mood">
           {MOODS.map((m) => (
@@ -295,9 +330,11 @@ function Desabafo({ s }: { s: AppState }) {
           ))}
         </div>
         <textarea id="pj-vent" rows={4} value={text} onChange={(e) => setText(e.target.value)} placeholder={t('Fala o que tá pesando. Sem filtro.')} />
-        <button type="submit" className="cta sm-cta">
-          {t('Desabafar')}
-        </button>
+        <WithInfo text={t('Salva o desabafo com a data de hoje. Ninguém além de você vê.')}>
+          <button type="submit" className="cta sm-cta">
+            {t('Desabafar')}
+          </button>
+        </WithInfo>
       </form>
       {reply && (
         <div className="coach">
@@ -340,6 +377,7 @@ function Fotos({ s }: { s: AppState }) {
           }}
         />
         <Icon name="camera" size={22} /> {busy ? t('Salvando...') : t('Adicionar foto')}
+        <Info text={t('Guarde qualquer momento do projeto: treino, prato, espelho. Toque numa foto para ver em tela cheia.')} />
       </label>
       {list.length === 0 ? (
         <p className="muted center-txt">{t('Treino, prato, espelho, conquista. Guarde aqui os momentos do projeto.')}</p>

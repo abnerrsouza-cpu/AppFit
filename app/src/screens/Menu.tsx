@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Icon } from '../components/Icon'
+import { Info, WithInfo } from '../components/Info'
 import { LANGS, t, weekday } from '../i18n'
 import { type AppState, type Profile, bmi, currentWeight, newId, resetToBlank, resetToDemo, setLang, setState } from '../store'
 
@@ -49,7 +50,10 @@ export function Menu({ s }: { s: AppState }) {
       <div className="card profile-card">
         <span className="avatar">{(p.name || '?').slice(0, 1).toUpperCase()}</span>
         <span>
-          <b>{p.name || t('Sem nome')}</b>
+          <b className="ttl">
+            {p.name || t('Sem nome')}
+            <Info text={t('Seu perfil. Aqui você ajusta seus dados, sua rotina, seus planos, o tema e o idioma do app.')} />
+          </b>
           <small>
             {t(p.goal)} · {p.height} cm · {currentWeight(s).toFixed(1)} kg
           </small>
@@ -57,24 +61,37 @@ export function Menu({ s }: { s: AppState }) {
       </div>
 
       <div className="card menu-group">
-        <span className="group-label">{t('Seus dados')}</span>
+        <span className="group-label ttl">
+          {t('Seus dados')}
+          <Info text={t('Peso, altura e objetivo; os horários da sua rotina; e a carta que o treinador usa para te cobrar.')} />
+        </span>
         <Row id="perfil" icon="user" title={t('Perfil e medidas')} sub={t('Peso, altura, idade, objetivo')} />
         <Row id="rotina" icon="sun" title={t('Rotina')} sub={t('Acorda {a} · treina {b} · dorme {c}', { a: p.wake, b: p.trainTime, c: p.sleep })} />
         <Row id="carta" icon="quote" title={t('Carta de compromisso')} sub={t('Usada nas cobranças')} />
       </div>
 
       <div className="card menu-group">
-        <span className="group-label">{t('Planos')}</span>
+        <span className="group-label ttl">
+          {t('Planos')}
+          <Info text={t('Seu treino de cada dia da semana e suas refeições. Cada refeição vira uma cobrança no horário.')} />
+        </span>
         <Row id="treino" icon="dumbbell" title={t('Ficha de treino')} sub={t('{n} dias por semana', { n: p.workouts.length })} />
         <Row id="dieta" icon="food" title={t('Plano alimentar')} sub={t('{n} refeições por dia', { n: p.meals.length })} />
       </div>
 
       <div className="card menu-group">
-        <span className="group-label">{t('Conexões')}</span>
+        <span className="group-label ttl">
+          {t('Conexões')}
+          <Info text={t('Ligue sua agenda do Google e, em breve, seu relógio de treino, para o app cobrar com base neles.')} />
+        </span>
         <Row id="agenda" icon="calendar" title={t('Google Agenda')} sub={p.icalUrl ? t('Conectada') : t('Colar link público')} />
         <Row id="relogio" icon="watch" title={t('Relógio de treino')} sub={t('Strava · em breve')} />
       </div>
 
+      <p className="ttl hint">
+        {t('Tema')}
+        <Info text={t('Claro deixa o app branco. Escuro deixa o app preto, melhor à noite.')} />
+      </p>
       <div className="theme-switch" role="group" aria-label={t('Tema')}>
         <button type="button" className={s.theme === 'light' ? 'on' : ''} onClick={() => setState((st) => ({ ...st, theme: 'light' }))}>
           <Icon name="sun" size={18} /> {t('Claro')}
@@ -85,9 +102,11 @@ export function Menu({ s }: { s: AppState }) {
       </div>
 
       {s.demo ? (
-        <button type="button" className="cta" onClick={resetToBlank}>
-          {t('Sair do exemplo e começar o meu desafio')}
-        </button>
+        <WithInfo text={t('Apaga os dados de exemplo e começa o seu cadastro do zero.')}>
+          <button type="button" className="cta" onClick={resetToBlank}>
+            {t('Sair do exemplo e começar o meu desafio')}
+          </button>
+        </WithInfo>
       ) : confirm ? (
         <div className="card confirm">
           <b>{t('Apagar todos os seus dados?')}</b>
@@ -102,9 +121,11 @@ export function Menu({ s }: { s: AppState }) {
           </div>
         </div>
       ) : (
-        <button type="button" className="ghost-btn" onClick={() => setConfirm(true)}>
-          <Icon name="logout" size={18} /> {t('Recomeçar do zero')}
-        </button>
+        <WithInfo text={t('Apaga todos os seus dados deste celular e volta para o cadastro. Pede confirmação antes.')}>
+          <button type="button" className="ghost-btn" onClick={() => setConfirm(true)}>
+            <Icon name="logout" size={18} /> {t('Recomeçar do zero')}
+          </button>
+        </WithInfo>
       )}
       {!s.demo && (
         <button type="button" className="link center" onClick={resetToDemo}>
@@ -122,7 +143,10 @@ function Perfil({ p, upd, weight }: { p: Profile; upd: Upd; weight: number }) {
   const b = bmi(weight, p.height)
   return (
     <form className="form" onSubmit={(e) => e.preventDefault()}>
-      <h1>{t('Perfil e medidas')}</h1>
+      <h1 className="ttl">
+        {t('Perfil e medidas')}
+        <Info text={t('Seus dados básicos. O peso inicial e o peso meta desenham a trilha em Rumo à meta.')} />
+      </h1>
       <div className="card field">
         <label>
           {t('Nome')}
@@ -185,7 +209,10 @@ function Rotina({ p, upd }: { p: Profile; upd: Upd }) {
   )
   return (
     <form className="form" onSubmit={(e) => e.preventDefault()}>
-      <h1>{t('Rotina')}</h1>
+      <h1 className="ttl">
+        {t('Rotina')}
+        <Info text={t('Os horários do seu dia. O app manda as cobranças nesses horários.')} />
+      </h1>
       <p className="lead">{t('Esses horários definem quando o app te cobra.')}</p>
       <div className="card field">
         <div className="row2">
@@ -210,7 +237,10 @@ function Treino({ p, upd }: { p: Profile; upd: Upd }) {
   }
   return (
     <form className="form" onSubmit={(e) => e.preventDefault()}>
-      <h1>{t('Ficha de treino')}</h1>
+      <h1 className="ttl">
+        {t('Ficha de treino')}
+        <Info text={t('Ligue os dias em que você treina e escreva os exercícios, um por linha. A ficha aparece na tela Hoje.')} />
+      </h1>
       <p className="lead">{t('Um exercício por linha. Dias desligados são descanso.')}</p>
       {[1, 2, 3, 4, 5, 6, 0].map((wd) => {
         const w = p.workouts.find((x) => x.weekday === wd)
@@ -239,7 +269,10 @@ function Dieta({ p, upd }: { p: Profile; upd: Upd }) {
   const set = (id: string, patch: Partial<Profile['meals'][number]>) => upd({ meals: p.meals.map((m) => (m.id === id ? { ...m, ...patch } : m)) })
   return (
     <form className="form" onSubmit={(e) => e.preventDefault()}>
-      <h1>{t('Plano alimentar')}</h1>
+      <h1 className="ttl">
+        {t('Plano alimentar')}
+        <Info text={t('Suas refeições do dia com horário e o que comer. Cada uma vira uma tarefa na tela Hoje e uma cobrança.')} />
+      </h1>
       <p className="lead">{t('Cada refeição vira uma notificação no horário.')}</p>
       {p.meals
         .slice()
@@ -266,7 +299,10 @@ function Dieta({ p, upd }: { p: Profile; upd: Upd }) {
 function Agenda({ p, upd }: { p: Profile; upd: Upd }) {
   return (
     <form className="form" onSubmit={(e) => e.preventDefault()}>
-      <h1>{t('Google Agenda')}</h1>
+      <h1 className="ttl">
+        {t('Google Agenda')}
+        <Info text={t('Cole o link secreto da sua agenda. O app vai usar seus compromissos para te cobrar.')} />
+      </h1>
       <p className="lead">{t('O app lê seus compromissos e cobra com base neles: "Você tinha Academia às 18h. Foi?"')}</p>
       <div className="card field">
         <label>
@@ -287,7 +323,10 @@ function Agenda({ p, upd }: { p: Profile; upd: Upd }) {
 function Relogio() {
   return (
     <div className="form">
-      <h1>{t('Relógio de treino')}</h1>
+      <h1 className="ttl">
+        {t('Relógio de treino')}
+        <Info text={t('Em breve: o cardio do seu relógio entra sozinho na prestação de contas.')} />
+      </h1>
       <div className="card field">
         <p>
           {t('A conexão vai ser pelo Strava, que recebe dados de Garmin, Amazfit, Polar, Coros, Apple Watch e outros. O cardio entra sozinho na prestação de contas.')}
@@ -304,7 +343,10 @@ function Relogio() {
 function Carta({ p, upd }: { p: Profile; upd: Upd }) {
   return (
     <form className="form" onSubmit={(e) => e.preventDefault()}>
-      <h1>{t('Carta de compromisso')}</h1>
+      <h1 className="ttl">
+        {t('Carta de compromisso')}
+        <Info text={t('Uma carta sua para você mesmo. Nos dias ruins, o treinador mostra trechos dela.')} />
+      </h1>
       <p className="lead">{t('Escreva para você mesmo daqui a {n} dias. Por que você começou? O que você não aguenta mais? O app vai te lembrar disso nos dias difíceis.', { n: p.cycleDays })}</p>
       <div className="card field">
         <textarea id="ct-letter" rows={8} value={p.letter} onChange={(e) => upd({ letter: e.target.value })} placeholder={t('Cansei de...')} />
@@ -316,6 +358,11 @@ function Carta({ p, upd }: { p: Profile; upd: Upd }) {
 export function LangPicker({ s }: { s: AppState }) {
   const cur = s.lang ?? 'pt'
   return (
+    <>
+    <p className="ttl hint">
+      {t('Idioma')}
+      <Info text={t('Muda o idioma de todo o app: telas, cobranças e notificações.')} />
+    </p>
     <div className="lang-pick" role="group" aria-label="Idioma / Language / Idioma">
       {LANGS.map((l) => (
         <button key={l.id} type="button" className={cur === l.id ? 'on' : ''} onClick={() => setLang(l.id)}>
@@ -323,5 +370,6 @@ export function LangPicker({ s }: { s: AppState }) {
         </button>
       ))}
     </div>
+    </>
   )
 }

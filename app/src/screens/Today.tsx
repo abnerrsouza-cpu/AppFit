@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Icon } from '../components/Icon'
+import { Info, WithInfo } from '../components/Info'
 import { Rings } from '../components/Rings'
 import type { Tab } from '../components/BottomNav'
 import { headline } from '../psych'
@@ -82,18 +83,23 @@ export function Today({ s, go, openCheckin, owes }: { s: AppState; go: (tab: Tab
           </span>
           <h1 className="hi">
             {greeting()}, {p.name || t('você')}
+            <Info text={t('Sua tela principal. Mostra o que fazer agora, sua lista do dia e sua sequência.')} />
           </h1>
         </div>
-        <button type="button" className="bell-btn" onClick={() => go('cobrancas')} aria-label={t('Mensagens do treinador')}>
+        <button type="button" className="bell-btn" title={t('Mensagens do treinador')} onClick={() => go('cobrancas')} aria-label={t('Mensagens do treinador')}>
           <Icon name="bell" size={22} />
           {owes && <i className="bnav-dot" />}
         </button>
+        <Info text={t('O sino abre as mensagens do seu treinador e as cobranças que você mesmo escreveu. Bolinha vermelha: você está devendo a prestação de contas.')} />
       </header>
 
       {current ? (
         <section className={`now-card ${late ? 'is-late' : ''}`}>
           <div className="now-top">
-            <span className="now-label">{late ? t('Agora') : `${t('Próximo')} · ${current.time}`}</span>
+            <span className="ttl">
+              <span className="now-label">{late ? t('Agora') : `${t('Próximo')} · ${current.time}`}</span>
+              <Info light text={t('A tarefa que você deve fazer agora. Toque em Feito quando cumprir. O card muda sozinho para a próxima.')} />
+            </span>
             {late && current.time !== hhmm && <span className="now-time">{t('desde {h}', { h: current.time })}</span>}
           </div>
           <div className="now-main">
@@ -131,12 +137,14 @@ export function Today({ s, go, openCheckin, owes }: { s: AppState; go: (tab: Tab
         </section>
       )}
 
-      <button type="button" className="coach" onClick={() => go('cobrancas')}>
-        <span className="coach-av">
-          <Icon name="flame" size={20} />
-        </span>
-        <span className="coach-bubble">{headline(s)}</span>
-      </button>
+      <WithInfo text={t('Recado do seu treinador. Muda conforme a hora e o que você já fez. Toque para ver todas as mensagens.')}>
+        <button type="button" className="coach" onClick={() => go('cobrancas')}>
+          <span className="coach-av">
+            <Icon name="flame" size={20} />
+          </span>
+          <span className="coach-bubble">{headline(s)}</span>
+        </button>
+      </WithInfo>
 
       <section className="card day-list">
         <div className="day-list-h">
@@ -149,7 +157,10 @@ export function Today({ s, go, openCheckin, owes }: { s: AppState; go: (tab: Tab
             ]}
           />
           <div>
-            <h2>{t('Seu dia')}</h2>
+            <h2 className="ttl">
+              {t('Seu dia')}
+              <Info text={t('Todas as tarefas de hoje. Toque no círculo para marcar como feita. Os anéis enchem: azul é treino, azul-claro é dieta, verde é cardio.')} />
+            </h2>
             <small>
               {t('{a} de {b} feitos', { a: doneCount, b: tasks.length })}
             </small>
@@ -182,7 +193,10 @@ export function Today({ s, go, openCheckin, owes }: { s: AppState; go: (tab: Tab
           </span>
           <div>
             <b className="streak-n">{st}</b>
-            <span>{t('dias sem falhar')}</span>
+            <span className="ttl">
+              {t('dias sem falhar')}
+              <Info light text={t('Quantos dias seguidos você prestou contas. Se pular um dia, volta para zero.')} />
+            </span>
           </div>
         </div>
         <div className="flames">

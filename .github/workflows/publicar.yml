@@ -1,12 +1,10 @@
 # Publica o app no GitHub Pages (https://abnerrsouza-cpu.github.io/AppFit/).
-# Roda a cada push, todo dia às 6h17 (horário de Brasília) para trazer vídeos novos, ou manualmente.
+# Roda a cada push ou manualmente.
 name: Publicar app
 
 on:
   push:
     branches: [claude/fitness-accountability-app-19wlg7, main]
-  schedule:
-    - cron: '17 9 * * *'
   workflow_dispatch:
 
 permissions:
@@ -32,9 +30,6 @@ jobs:
           cache: npm
           cache-dependency-path: app/package-lock.json
       - run: npm ci
-      - name: Buscar vídeos novos dos canais
-        run: npm run content
-        continue-on-error: true
       - run: npm run build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { BeforeAfter } from '../components/BeforeAfter'
 import { Icon } from '../components/Icon'
+import { Info, WithInfo } from '../components/Info'
 import { compress, putPhoto } from '../photos'
 import { WeekBars } from '../components/WeekBars'
 import { t } from '../i18n'
@@ -26,7 +27,10 @@ export function Evolution({ s }: { s: AppState }) {
     <div className="screen">
       <header className="page-h">
         <span className="eyebrow">{t('Evolução')}</span>
-        <h1>{t('Antes x Depois')}</h1>
+        <h1 className="ttl">
+          {t('Antes x Depois')}
+          <Info text={t('Suas fotos semanais lado a lado. Arraste a linha do meio para comparar. Escolha as semanas logo abaixo.')} />
+        </h1>
       </header>
 
       <section className="card block">
@@ -65,7 +69,10 @@ export function Evolution({ s }: { s: AppState }) {
       <button type="button" className={`card alert-card ${hasThisWeek ? 'is-ok' : ''}`} onClick={() => setForm(true)}>
         <Icon name={hasThisWeek ? 'check' : 'camera'} />
         <span>
-          <b>{hasThisWeek ? t('Check-in semanal feito') : t('Check-in semanal pendente')}</b>
+          <b className="ttl">
+            {hasThisWeek ? t('Check-in semanal feito') : t('Check-in semanal pendente')}
+            <Info text={t('Uma vez por semana: foto, peso, cintura e uma avaliação da semana. É daqui que vêm o antes e depois e o gráfico de peso.')} />
+          </b>
           <small>{hasThisWeek ? t('Toque para revisar foto, peso e notas.') : t('Foto, peso e a verdade sobre a semana.')}</small>
         </span>
         <Icon name="chevR" />
@@ -77,7 +84,10 @@ export function Evolution({ s }: { s: AppState }) {
 
       <section className="card block">
         <div className="block-h">
-          <h2>{t('Dieta na semana')}</h2>
+          <h2 className="ttl">
+            {t('Dieta na semana')}
+            <Info text={t('A nota que você deu para a sua dieta em cada dia. A linha tracejada é a meta (8). Toque numa barra para ver o valor.')} />
+          </h2>
           <span className="soft-chip">{t('meta: barra na linha')}</span>
         </div>
         <WeekBars days={ws.days} values={ws.logs.map((l) => (l ? l.dietScore : null))} max={10} unit="/10" goalLine={8} />
@@ -85,7 +95,10 @@ export function Evolution({ s }: { s: AppState }) {
 
       <section className="card block">
         <div className="block-h">
-          <h2>{t('Cardio na semana')}</h2>
+          <h2 className="ttl">
+            {t('Cardio na semana')}
+            <Info text={t('Minutos de cardio que você informou em cada dia. Ao lado, quanto já fez da sua meta semanal.')} />
+          </h2>
           <span className="soft-chip">
             {t('{a} de {b} min', { a: ws.cardio, b: s.profile.cardioGoalMin })}
           </span>
@@ -118,7 +131,10 @@ function WeightChart({ s, weeks }: { s: AppState; weeks: WeeklyLog[] }) {
     <section className="card block">
       <div className="block-h">
         <div>
-          <h2>{t('Peso')}</h2>
+          <h2 className="ttl">
+            {t('Peso')}
+            <Info text={t('Seu peso semana a semana, desde o início. A linha verde tracejada é o seu peso meta.')} />
+          </h2>
           <p>{t('Sua linha até a meta')}</p>
         </div>
         <b className="big-figure">
@@ -222,7 +238,10 @@ function WeeklyForm({ s, onClose }: { s: AppState; onClose: () => void }) {
           onClose()
         }}
       >
-        <h1>{t('Fechamento da semana')}</h1>
+        <h1 className="ttl">
+          {t('Fechamento da semana')}
+          <Info text={t('O check-in semanal. Preencha uma vez por semana, de preferência no mesmo dia e horário.')} />
+        </h1>
         <p className="lead">{t('Foto sem filtro e sem ângulo esperto. Mesma luz, mesma pose, mesmo lugar toda semana.')}</p>
 
         <label className="card photo-drop">
@@ -232,7 +251,10 @@ function WeeklyForm({ s, onClose }: { s: AppState; onClose: () => void }) {
           ) : (
             <span>
               <Icon name="camera" size={30} />
-              <b>{busy ? t('Processando...') : f.photoId ? t('Foto enviada. Toque para trocar') : t('Tirar ou enviar foto')}</b>
+              <b className="ttl">
+                {busy ? t('Processando...') : f.photoId ? t('Foto enviada. Toque para trocar') : t('Tirar ou enviar foto')}
+                <Info text={t('Foto de corpo inteiro para o antes e depois. Use sempre a mesma luz, pose e lugar para a comparação ser justa.')} />
+              </b>
               <small>{t('A foto fica guardada só no seu aparelho.')}</small>
             </span>
           )}
@@ -241,6 +263,7 @@ function WeeklyForm({ s, onClose }: { s: AppState; onClose: () => void }) {
         <fieldset className="card field">
           <legend>
             <Icon name="scale" size={18} /> {t('Medidas')}
+            <Info text={t('Peso e cintura de hoje. A cintura mostra perda de gordura mesmo quando a balança trava.')} />
           </legend>
           <div className="row2">
             <label>
@@ -257,6 +280,7 @@ function WeeklyForm({ s, onClose }: { s: AppState; onClose: () => void }) {
         <fieldset className="card field">
           <legend>
             <Icon name="target" size={18} /> {t('Nota da semana')}
+            <Info text={t('Dê de 1 a 5 para como foi sua dieta, seu treino e seu cardio na semana.')} />
           </legend>
           <Rate k="dietRate" l={t('Dieta')} />
           <Rate k="trainRate" l={t('Treino')} />
@@ -266,6 +290,7 @@ function WeeklyForm({ s, onClose }: { s: AppState; onClose: () => void }) {
         <fieldset className="card field">
           <legend>
             <Icon name="quote" size={18} /> {t('Sem enrolação')}
+            <Info text={t('Três respostas curtas: o que deu certo, onde você se sabotou e um compromisso para a próxima semana.')} />
           </legend>
           <label>
             {t('Sua maior vitória da semana')}
@@ -281,9 +306,11 @@ function WeeklyForm({ s, onClose }: { s: AppState; onClose: () => void }) {
           </label>
         </fieldset>
 
-        <button type="submit" className="cta">
-          {t('Fechar a semana')}
-        </button>
+        <WithInfo text={t('Salva o check-in da semana. A foto entra no antes e depois e o peso entra no gráfico.')}>
+          <button type="submit" className="cta">
+            {t('Fechar a semana')}
+          </button>
+        </WithInfo>
       </form>
     </div>
   )
@@ -297,7 +324,10 @@ function Journey({ s }: { s: AppState }) {
   return (
     <section className="card block">
       <div className="block-h">
-        <h2>{t('Rumo à meta')}</h2>
+        <h2 className="ttl">
+          {t('Rumo à meta')}
+          <Info text={t('A bolinha com sua inicial mostra quanto do caminho até o peso meta você já percorreu.')} />
+        </h2>
         <span className="soft-chip">{left > 0 ? t('faltam {n} kg', { n: String(left).replace('.', ',') }) : t('meta batida')}</span>
       </div>
       <div className="journey">
