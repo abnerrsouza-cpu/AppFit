@@ -157,35 +157,3 @@ export const ARTICLES: Article[] = [
     takeaway: ['Feche os três anéis todo dia.'],
   },
 ]
-
-export interface Video {
-  title: string
-  tag: string
-  minutes: string
-  query: string // busca no YouTube
-}
-
-export const VIDEOS: Video[] = [
-  { title: 'Agachamento livre: técnica correta', tag: 'Treino', minutes: '8 min', query: 'agachamento livre técnica correta' },
-  { title: 'Supino reto sem dor no ombro', tag: 'Treino', minutes: '10 min', query: 'supino reto técnica ombro' },
-  { title: 'Marmitas da semana em 1 hora', tag: 'Nutrição', minutes: '15 min', query: 'marmitas fitness semana' },
-  { title: 'Cardio em casa sem equipamento', tag: 'Cardio', minutes: '20 min', query: 'cardio em casa sem equipamento 20 minutos' },
-  { title: 'Alongamento para depois do treino', tag: 'Mobilidade', minutes: '10 min', query: 'alongamento pós treino' },
-]
-
-export interface Channel {
-  name: string
-  about: string
-  query: string
-}
-
-// Sugestões de canais conhecidos. Trocar ou ampliar à vontade.
-export const CHANNELS: Channel[] = [
-  { name: 'Leandro Twin', about: 'Treino e nutrição', query: 'Leandro Twin' },
-  { name: 'Renato Cariani', about: 'Musculação', query: 'Renato Cariani' },
-  { name: 'Paulo Muzy', about: 'Saúde e treino', query: 'Paulo Muzy' },
-  { name: 'Jeff Nippard', about: 'Treino com ciência (EN)', query: 'Jeff Nippard' },
-  { name: 'Renaissance Periodization', about: 'Hipertrofia (EN)', query: 'Renaissance Periodization' },
-]
-
-export const yt = (q: string) => `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`

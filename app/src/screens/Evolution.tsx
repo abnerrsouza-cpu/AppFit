@@ -3,7 +3,7 @@ import { BeforeAfter } from '../components/BeforeAfter'
 import { Icon } from '../components/Icon'
 import { compress, putPhoto } from '../photos'
 import { WeekBars } from '../components/WeekBars'
-import { type AppState, type WeeklyLog, fmtDayMonth, newId, parseYmd, setState, weekStartOf, weekStats, ymd } from '../store'
+import { type AppState, type WeeklyLog, currentWeight, fmtDayMonth, newId, parseYmd, setState, weekStartOf, weekStats, ymd } from '../store'
 
 const label = (w: WeeklyLog, i: number) => `Sem. ${i + 1} · ${fmtDayMonth(parseYmd(w.weekStart))}`
 
@@ -69,6 +69,8 @@ export function Evolution({ s }: { s: AppState }) {
         </span>
         <Icon name="chevR" />
       </button>
+
+      <Journey s={s} />
 
       <WeightChart s={s} weeks={weeks} />
 
@@ -283,5 +285,40 @@ function WeeklyForm({ s, onClose }: { s: AppState; onClose: () => void }) {
         </button>
       </form>
     </div>
+  )
+}
+
+function Journey({ s }: { s: AppState }) {
+  const p = s.profile
+  const weight = currentWeight(s)
+  const walked = Math.max(0, Math.min(1, (p.weightStart - weight) / (p.weightStart - p.weightGoal || 1)))
+  const left = Math.max(0, +(weight - p.weightGoal).toFixed(1))
+  return (
+    <section className="card block">
+      <div className="block-h">
+        <h2>Rumo à meta</h2>
+        <span className="soft-chip">{left > 0 ? `faltam ${String(left).replace('.', ',')} kg` : 'meta batida'}</span>
+      </div>
+      <div className="journey">
+        <div className="journey-track">
+          <span className="journey-fill" style={{ width: `${walked * 100}%` }} />
+          <span className="journey-me" style={{ left: `${walked * 100}%` }}>
+            {(p.name || '?').slice(0, 1).toUpperCase()}
+          </span>
+          <span className="journey-flag">
+            <Icon name="target" size={18} />
+          </span>
+        </div>
+        <div className="journey-ends">
+          <small>{p.weightStart} kg</small>
+          <small>{p.weightGoal} kg</small>
+        </div>
+      </div>
+      {p.letter && (
+        <p className="journey-letter">
+          <Icon name="quote" size={18} /> {p.letter}
+        </p>
+      )}
+    </section>
   )
 }

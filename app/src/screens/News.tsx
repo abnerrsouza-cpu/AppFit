@@ -1,123 +1,113 @@
 import { useEffect, useState } from 'react'
 import { Icon } from '../components/Icon'
-import { ARTICLES, type Article, CATS, CAT_STYLE, CHANNELS, VIDEOS, yt } from '../content'
+import { ARTICLES, type Article, CATS, CAT_STYLE } from '../content'
+import { type LiveVideo, ago, thumb, useLiveContent } from '../live'
 
-const VIDEO_GRADS = [
-  'linear-gradient(140deg,#1f6feb,#0a3d9e)',
-  'linear-gradient(140deg,#0ea5e9,#1e40af)',
-  'linear-gradient(140deg,#10b981,#065f46)',
-  'linear-gradient(140deg,#6366f1,#312e81)',
-  'linear-gradient(140deg,#f59e0b,#b45309)',
-]
-const VIDEO_EMOJI = ['🏋️', '💪', '🍱', '🔥', '🧘']
+type Mode = 'videos' | 'artigos'
 
 export function News() {
-  const [cat, setCat] = useState<string>('tudo')
+  const live = useLiveContent()
+  const [mode, setMode] = useState<Mode>('videos')
+  const [channel, setChannel] = useState('todos')
+  const [cat, setCat] = useState('tudo')
   const [open, setOpen] = useState<Article | null>(null)
 
   useEffect(() => {
     if (!open) window.scrollTo(0, 0)
-  }, [open])
+  }, [open, mode])
 
   if (open) return <Reader a={open} onBack={() => setOpen(null)} onOpen={setOpen} />
 
-  const list = cat === 'tudo' ? ARTICLES : ARTICLES.filter((a) => a.cat === cat)
-  const [hero, ...rest] = list
-  const showVideos = cat === 'tudo' || cat === 'videos'
+  const vids = channel === 'todos' ? live.videos : live.videos.filter((v) => v.channel === channel)
+  const [top, ...more] = vids
+  const arts = cat === 'tudo' ? ARTICLES : ARTICLES.filter((a) => a.cat === cat)
 
   return (
     <div className="screen">
       <header className="page-h">
-        <span className="eyebrow">Notícias</span>
-        <h1>Conteúdo para não parar</h1>
+        <h1>Conteúdo</h1>
       </header>
 
-      <div className="cat-row" role="tablist">
-        {CATS.map((c) => (
-          <button key={c.id} type="button" role="tab" aria-selected={cat === c.id} className={`cat ${cat === c.id ? 'on' : ''}`} onClick={() => setCat(c.id)}>
-            <span>{c.emoji}</span> {c.label}
-          </button>
-        ))}
+      <div className="seg-tabs" role="tablist">
+        <button type="button" role="tab" aria-selected={mode === 'videos'} className={mode === 'videos' ? 'on' : ''} onClick={() => setMode('videos')}>
+          <Icon name="play" size={16} /> Vídeos
+        </button>
+        <button type="button" role="tab" aria-selected={mode === 'artigos'} className={mode === 'artigos' ? 'on' : ''} onClick={() => setMode('artigos')}>
+          <Icon name="news" size={16} /> Artigos
+        </button>
       </div>
 
-      {cat !== 'videos' && hero && (
-        <button type="button" className="feat" style={{ background: CAT_STYLE[hero.cat].grad }} onClick={() => setOpen(hero)}>
-          <span className="feat-emoji">{hero.emoji}</span>
-          <span className="tag light">{CAT_STYLE[hero.cat].name}</span>
-          <b>{hero.title}</b>
-          <small>
-            {hero.minutes} min de leitura · {hero.date}
-          </small>
-        </button>
-      )}
-
-      {showVideos && (
-        <section className="rail-sec">
-          <div className="rail-h">
-            <h2 className="sec-title">Vídeos</h2>
-            <small>abre no YouTube</small>
-          </div>
-          <div className={`rail ${cat === 'videos' ? 'rail-col' : ''}`}>
-            {VIDEOS.map((v, i) => (
-              <a key={v.title} className="vid" href={yt(v.query)} target="_blank" rel="noreferrer">
-                <span className="vid-cover" style={{ background: VIDEO_GRADS[i % VIDEO_GRADS.length] }}>
-                  <span className="vid-emoji">{VIDEO_EMOJI[i % VIDEO_EMOJI.length]}</span>
-                  <span className="play">
-                    <Icon name="play" size={20} />
-                  </span>
-                  <span className="vid-dur">{v.minutes}</span>
-                </span>
-                <b>{v.title}</b>
-                <small>{v.tag}</small>
-              </a>
+      {mode === 'videos' && (
+        <>
+          <div className="cat-row">
+            {['todos', ...live.channels.map((c) => c.name)].map((n) => (
+              <button key={n} type="button" className={`cat ${channel === n ? 'on' : ''}`} onClick={() => setChannel(n)}>
+                {n === 'todos' ? 'Todos' : n}
+              </button>
             ))}
           </div>
-        </section>
-      )}
 
-      {cat !== 'videos' && rest.length > 0 && (
-        <section className="art-list">
-          {rest.map((a) => (
-            <button key={a.id} type="button" className="card art" onClick={() => setOpen(a)}>
-              <span className="art-cover" style={{ background: CAT_STYLE[a.cat].grad }}>
-                {a.emoji}
-              </span>
-              <span className="art-txt">
-                <span className="tag">{CAT_STYLE[a.cat].name}</span>
-                <b>{a.title}</b>
-                <small>{a.minutes} min de leitura</small>
-              </span>
-            </button>
-          ))}
-        </section>
-      )}
-
-      {(cat === 'tudo' || cat === 'videos') && (
-        <section className="rail-sec">
-          <div className="rail-h">
-            <h2 className="sec-title">Canais para seguir</h2>
-          </div>
-          <div className="rail">
-            {CHANNELS.map((c, i) => (
-              <a key={c.name} className="chan" href={yt(c.query)} target="_blank" rel="noreferrer">
-                <span className="chan-av" style={{ background: VIDEO_GRADS[i % VIDEO_GRADS.length] }}>
-                  {c.name
-                    .split(' ')
-                    .slice(0, 2)
-                    .map((w) => w[0])
-                    .join('')}
-                </span>
-                <b>{c.name}</b>
-                <small>{c.about}</small>
-                <span className="chan-btn">
-                  <Icon name="play" size={12} /> Ver canal
-                </span>
-              </a>
+          {top && <VideoCard v={top} big />}
+          <div className="vgrid">
+            {more.map((v) => (
+              <VideoCard key={v.id} v={v} />
             ))}
           </div>
-        </section>
+          <p className="foot-note center">
+            <Icon name="refresh" size={14} /> Atualizado {ago(live.updatedAt)} · novos vídeos chegam todo dia
+          </p>
+        </>
+      )}
+
+      {mode === 'artigos' && (
+        <>
+          <div className="cat-row">
+            {CATS.filter((c) => c.id !== 'videos').map((c) => (
+              <button key={c.id} type="button" className={`cat ${cat === c.id ? 'on' : ''}`} onClick={() => setCat(c.id)}>
+                <span>{c.emoji}</span> {c.label}
+              </button>
+            ))}
+          </div>
+          <section className="art-list">
+            {arts.map((a) => (
+              <button key={a.id} type="button" className="card art" onClick={() => setOpen(a)}>
+                <span className="art-cover" style={{ background: CAT_STYLE[a.cat].grad }}>
+                  {a.emoji}
+                </span>
+                <span className="art-txt">
+                  <span className="tag">{CAT_STYLE[a.cat].name}</span>
+                  <b>{a.title}</b>
+                  <small>{a.minutes} min de leitura</small>
+                </span>
+              </button>
+            ))}
+          </section>
+        </>
       )}
     </div>
+  )
+}
+
+function VideoCard({ v, big = false }: { v: LiveVideo; big?: boolean }) {
+  const [broken, setBroken] = useState(false)
+  return (
+    <a className={`vcard ${big ? 'big' : ''}`} href={v.url} target="_blank" rel="noreferrer">
+      <span className="vthumb">
+        {!broken && <img src={thumb(v.id)} alt="" loading="lazy" onError={() => setBroken(true)} />}
+        {broken && <span className="vthumb-fallback">▶</span>}
+        <span className="play">
+          <Icon name="play" size={big ? 22 : 16} />
+        </span>
+        <span className="vbadges">
+          {v.short && <i>Short</i>}
+          {v.lang === 'en' && <i>EN</i>}
+        </span>
+      </span>
+      <b>{v.title.replace(/#\S+/g, '').trim()}</b>
+      <small>
+        {v.channel} · {ago(v.published)}
+      </small>
+    </a>
   )
 }
 
@@ -125,7 +115,9 @@ function Reader({ a, onBack, onOpen }: { a: Article; onBack: () => void; onOpen:
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [a.id])
-  const more = ARTICLES.filter((x) => x.id !== a.id && x.cat === a.cat).concat(ARTICLES.filter((x) => x.id !== a.id && x.cat !== a.cat)).slice(0, 2)
+  const more = ARTICLES.filter((x) => x.id !== a.id && x.cat === a.cat)
+    .concat(ARTICLES.filter((x) => x.id !== a.id && x.cat !== a.cat))
+    .slice(0, 2)
   return (
     <div className="reader">
       <div className="reader-cover" style={{ background: CAT_STYLE[a.cat].grad }}>
@@ -137,9 +129,7 @@ function Reader({ a, onBack, onOpen }: { a: Article; onBack: () => void; onOpen:
       <article className="reader-body">
         <span className="tag">{CAT_STYLE[a.cat].name}</span>
         <h1>{a.title}</h1>
-        <small className="muted">
-          {a.minutes} min de leitura · {a.date}
-        </small>
+        <small className="muted">{a.minutes} min de leitura</small>
         {a.body.map((b, i) => (
           <div key={i} className="para">
             {b.h && <h2>{b.h}</h2>}

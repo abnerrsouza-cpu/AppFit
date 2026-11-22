@@ -4,12 +4,11 @@ import { Icon } from './components/Icon'
 import { registerSW, startScheduler } from './notify'
 import { Alerts } from './screens/Alerts'
 import { Checkin } from './screens/Checkin'
-import { Day } from './screens/Day'
 import { Evolution } from './screens/Evolution'
-import { Home } from './screens/Home'
 import { Menu } from './screens/Menu'
 import { News } from './screens/News'
 import { Onboarding } from './screens/Onboarding'
+import { Today } from './screens/Today'
 import { resetToBlank, today, useAppState } from './store'
 
 export default function App() {
@@ -47,13 +46,12 @@ export default function App() {
           </button>
         </div>
       )}
-      {tab === 'inicio' && <Home s={s} go={setTab} openCheckin={() => setCheckin(true)} owes={owes} />}
-      {tab === 'dia' && <Day s={s} openCheckin={() => setCheckin(true)} />}
+      {tab === 'inicio' && <Today s={s} go={setTab} openCheckin={() => setCheckin(true)} owes={owes} />}
       {tab === 'evolucao' && <Evolution s={s} />}
       {tab === 'cobrancas' && <Alerts s={s} onBack={() => setTab('inicio')} />}
       {tab === 'noticias' && <News />}
       {tab === 'menu' && <Menu s={s} />}
-      <BottomNav tab={tab} onTab={setTab} dots={{ dia: !s.daily[today()] }} />
+      <BottomNav tab={tab} onTab={setTab} dots={{}} />
     </div>
   )
 }

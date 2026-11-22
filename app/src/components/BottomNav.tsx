@@ -1,13 +1,12 @@
 import { Icon } from './Icon'
 
-export type Tab = 'inicio' | 'dia' | 'noticias' | 'evolucao' | 'cobrancas' | 'menu'
+export type Tab = 'inicio' | 'noticias' | 'evolucao' | 'cobrancas' | 'menu'
 
 const ITEMS: { id: Tab; label: string; icon: string }[] = [
-  { id: 'inicio', label: 'Início', icon: 'home' },
-  { id: 'dia', label: 'Seu dia', icon: 'sun' },
-  { id: 'noticias', label: 'Notícias', icon: 'news' },
+  { id: 'inicio', label: 'Hoje', icon: 'sun' },
   { id: 'evolucao', label: 'Evolução', icon: 'photo' },
-  { id: 'menu', label: 'Menu', icon: 'menu' },
+  { id: 'noticias', label: 'Conteúdo', icon: 'play' },
+  { id: 'menu', label: 'Perfil', icon: 'user' },
 ]
 
 export function BottomNav({ tab, onTab, dots }: { tab: Tab; onTab: (t: Tab) => void; dots: Partial<Record<Tab, boolean>> }) {
