@@ -8333,3 +8333,18 @@ textarea {
   color: var(--fg-3);
   line-height: 1.35;
 }
+
+/* faixa fixa atrás do relógio/bateria do iPhone: o conteúdo rola por baixo sem sobrepor a barra de status */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 140;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(14px) saturate(1.4);
+}
