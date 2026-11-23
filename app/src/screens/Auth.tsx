@@ -5,7 +5,9 @@ import { Icon } from '../components/Icon'
 import { PhotoButtons } from '../components/PhotoButtons'
 import { Info } from '../components/Info'
 import { getLang, t } from '../i18n'
-import { enableNotifications, notifyStatus } from '../notify'
+import { isStandalone, notifyStatus } from '../notify'
+import { InstallStep, NotifyStep } from '../components/InstallGuide'
+import { toast } from '../components/Toast'
 import { compress } from '../photos'
 import type { AppState } from '../store'
 import { LangPicker } from './Menu'
@@ -192,7 +194,6 @@ export function Auth({ s, onUser }: { s: AppState; onUser: (u: User) => void }) 
 
 /** Conta criada, aguardando o admin aprovar (ou recusada). */
 export function Pending({ user, onUser, onLogout }: { user: User; onUser: (u: User) => void; onLogout: () => void }) {
-  const [st, setSt] = useState(notifyStatus())
   useEffect(() => {
     const check = () => api.me().then((r) => r.user.status !== user.status && onUser(r.user)).catch(() => {})
     const id = window.setInterval(check, 20_000)
@@ -205,38 +206,75 @@ export function Pending({ user, onUser, onLogout }: { user: User; onUser: (u: Us
   }, [user.status, onUser])
 
   const rejected = user.status === 'rejected'
+  const installed = isStandalone()
+  const notifOn = notifyStatus() === 'granted'
+  const [checking, setChecking] = useState(false)
+  const first = user.name.split(' ')[0]
+  if (rejected)
+    return (
+      <div className="onb auth">
+        <div className="onb-body pending">
+          <span className="avatar-big lg">{user.hasAvatar ? <img src={avatarUrl(user.id)} alt="" /> : (user.name || '?').slice(0, 1).toUpperCase()}</span>
+          <h1>{t('Seu acesso não foi aprovado')}</h1>
+          <p className="lead">{t('Se você acha que isso é um engano, fale com quem te indicou o app.')}</p>
+          <button type="button" className="link center" onClick={onLogout}>
+            {t('Sair desta conta')}
+          </button>
+        </div>
+      </div>
+    )
+  const Step = ({ n, state, title, children }: { n: number; state: 'done' | 'now' | 'todo'; title: string; children?: React.ReactNode }) => (
+    <li className={`tl-step ${state}`}>
+      <span className="tl-dot">{state === 'done' ? <Icon name="check" size={14} stroke={3} /> : n}</span>
+      <div className="tl-body">
+        <b>{title}</b>
+        {children}
+      </div>
+    </li>
+  )
   return (
     <div className="onb auth">
       <div className="onb-body pending">
         <span className="avatar-big lg">{user.hasAvatar ? <img src={avatarUrl(user.id)} alt="" /> : (user.name || '?').slice(0, 1).toUpperCase()}</span>
-        <h1>{rejected ? t('Seu acesso não foi aprovado') : t('Solicitação enviada, {nome}', { nome: user.name.split(' ')[0] })}</h1>
-        <p className="lead">
-          {rejected
-            ? t('Se você acha que isso é um engano, fale com quem te indicou o app.')
-            : t('Sua conta está aguardando aprovação. Assim que for liberada, você entra direto no app.')}
-        </p>
-        {!rejected && (
-          <div className="card field">
-            <b className="ttl">
-              {t('Quer ser avisado quando for aprovado?')}
-              <Info text={t('Ative as notificações e você recebe um aviso no celular assim que a sua conta for liberada.')} />
-            </b>
-            {st === 'granted' ? (
-              <p className="ok-line">
-                <Icon name="check" size={18} stroke={3} /> {t('Notificações ativadas')}
-              </p>
-            ) : st === 'default' ? (
-              <button type="button" className="ghost-btn" onClick={async () => setSt(await enableNotifications())}>
-                <Icon name="bell" size={18} /> {t('Ativar notificações')}
-              </button>
-            ) : (
-              <p className="muted">{t('No iPhone: Compartilhar e depois "Adicionar à Tela de Início". Abra pelo ícone e ative aqui.')}</p>
-            )}
-          </div>
-        )}
-        <button type="button" className="ghost-btn" onClick={() => api.me().then((r) => onUser(r.user)).catch(() => {})}>
-          <Icon name="refresh" size={18} /> {t('Verificar agora')}
-        </button>
+        <h1>{t('Conta criada, {nome}!', { nome: first })}</h1>
+        <p className="lead">{t('Falta só a liberação do seu acesso. Enquanto isso, deixe o app pronto no seu celular seguindo os passos abaixo.')}</p>
+        <ol className="timeline card">
+          <Step n={1} state="done" title={t('Conta criada')}>
+            <small>{t('Seus dados já estão salvos.')}</small>
+          </Step>
+          <Step n={2} state="now" title={t('Aguardando liberação')}>
+            <small>{t('A gente confere cada conta antes de liberar. Você não precisa fazer nada nesta etapa.')}</small>
+          </Step>
+          <Step n={3} state={installed ? 'done' : 'now'} title={t('Coloque o app na tela de início do celular')}>
+            <small>{t('Assim ele abre como um aplicativo e pode te mandar as cobranças.')}</small>
+            <InstallStep />
+          </Step>
+          <Step n={4} state={notifOn ? 'done' : installed ? 'now' : 'todo'} title={t('Ative os avisos')}>
+            <small>{t('Você recebe "Acesso liberado" no celular assim que for aprovado.')}</small>
+            <NotifyStep okText={t('Avisos ativados. Pode fechar o app: a gente te avisa.')} />
+          </Step>
+          <Step n={5} state="todo" title={t('Entre no app')}>
+            <small>{t('Quando liberar, é só abrir o app: você entra direto. Já recebeu o aviso? Toque abaixo.')}</small>
+            <button
+              type="button"
+              className="ghost-btn ig-btn"
+              disabled={checking}
+              onClick={async () => {
+                setChecking(true)
+                try {
+                  const r = await api.me()
+                  if (r.user.status !== user.status) onUser(r.user)
+                  else toast(t('Ainda não foi liberado'), t('Assim que for, você recebe o aviso.'))
+                } catch {
+                  /* sem conexão */
+                }
+                setChecking(false)
+              }}
+            >
+              <Icon name="refresh" size={18} /> {checking ? t('Verificando...') : t('Já fui aprovado? Verificar')}
+            </button>
+          </Step>
+        </ol>
         <button type="button" className="link center" onClick={onLogout}>
           {t('Sair desta conta')}
         </button>

@@ -9,8 +9,8 @@ import { defaultCustom, getState, today } from './store'
 
 export type NotifyStatus = 'unsupported' | 'denied' | 'granted' | 'default' | 'needs-install'
 
-const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent)
-const isStandalone = () =>
+export const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent)
+export const isStandalone = () =>
   window.matchMedia?.('(display-mode: standalone)').matches ||
   (navigator as unknown as { standalone?: boolean }).standalone === true
 

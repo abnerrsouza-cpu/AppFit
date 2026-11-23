@@ -8026,3 +8026,140 @@ textarea {
   align-self: flex-start;
   font-weight: 800;
 }
+
+/* ---------- passo a passo (aguardando aprovação / notificações) ---------- */
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+.tl-step {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  padding-bottom: 18px;
+}
+.tl-step:last-child {
+  padding-bottom: 0;
+}
+.tl-step:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 13px;
+  top: 30px;
+  bottom: 2px;
+  width: 2px;
+  background: var(--line);
+}
+.tl-dot {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+  background: var(--surface-2);
+  color: var(--fg-3);
+  border: 2px solid var(--line);
+  z-index: 1;
+}
+.tl-step.done .tl-dot {
+  background: var(--good);
+  border-color: var(--good);
+  color: #fff;
+}
+.tl-step.now .tl-dot {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+.tl-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 3px;
+}
+.tl-body > b {
+  font-size: 1rem;
+  line-height: 1.25;
+}
+.tl-step.todo .tl-body > b {
+  color: var(--fg-2);
+}
+.tl-body > small {
+  color: var(--fg-2);
+  line-height: 1.4;
+}
+.ig-sub {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 12px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ig-sub li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  line-height: 1.4;
+  font-size: 0.92rem;
+}
+.ig-sub li > span {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.75rem;
+  margin-top: 1px;
+}
+.ig-key {
+  display: inline-grid;
+  place-items: center;
+  min-width: 24px;
+  height: 22px;
+  padding: 0 5px;
+  border-radius: 7px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--accent);
+  font-weight: 800;
+  vertical-align: middle;
+}
+.ig-url {
+  word-break: break-all;
+  color: var(--accent);
+}
+.ig-ok {
+  margin: 2px 0 0;
+  color: var(--good);
+  font-weight: 700;
+}
+.ig-wait {
+  margin: 2px 0 0;
+  color: var(--fg-3);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+.ig-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 2px;
+}

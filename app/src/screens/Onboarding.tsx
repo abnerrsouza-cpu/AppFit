@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { RoutineTasks } from '../components/RoutineTasks'
 import { Icon } from '../components/Icon'
 import { Info, WithInfo } from '../components/Info'
-import { enableNotifications, notifyStatus } from '../notify'
+import { isStandalone, notifyStatus } from '../notify'
+import { InstallStep, NotifyStep } from '../components/InstallGuide'
 import { toneLabel } from '../psych'
 import { t } from '../i18n'
 import { type AppState, type Profile, type Tone, resetToDemo, setState, today } from '../store'
@@ -217,7 +218,7 @@ export function Onboarding({ p0, s, userId, hasServerAvatar }: { p0: Profile; s:
 }
 
 function NotifStep() {
-  const [st, setSt] = useState(notifyStatus())
+  const installed = isStandalone()
   return (
     <div className="onb-body">
       <h1>
@@ -225,28 +226,23 @@ function NotifStep() {
         <Info text={t('Instale o app na tela de início e ative as notificações para receber as cobranças no celular.')} />
       </h1>
       <p className="lead">{t('Sem notificação, eu sou só mais um app esquecido na tela.')}</p>
-      <div className="card field">
-        <ol className="steps">
-          <li>
-            <b>iPhone:</b> {t('no Safari, toque em Compartilhar e depois em "Adicionar à Tela de Início". Abra pelo ícone.')}
-          </li>
-          <li>
-            <b>Android:</b> {t('no Chrome, toque em "Instalar app".')}
-          </li>
-          <li>{t('Depois, ative as notificações abaixo.')}</li>
-        </ol>
-        {st === 'granted' ? (
-          <p className="ok-line">
-            <Icon name="check" size={18} stroke={3} /> {t('Notificações ativadas')}
-          </p>
-        ) : st === 'default' ? (
-          <button type="button" className="ghost-btn" onClick={async () => setSt(await enableNotifications())}>
-            <Icon name="bell" size={18} /> {t('Ativar notificações')}
-          </button>
-        ) : (
-          <p className="muted">{t('Instale o app primeiro e ative depois no sininho da tela Hoje.')}</p>
-        )}
-      </div>
+      <ol className="timeline card">
+        <li className={`tl-step ${installed ? 'done' : 'now'}`}>
+          <span className="tl-dot">{installed ? <Icon name="check" size={14} stroke={3} /> : 1}</span>
+          <div className="tl-body">
+            <b>{t('Coloque o app na tela de início do celular')}</b>
+            <InstallStep />
+          </div>
+        </li>
+        <li className={`tl-step ${notifyStatus() === 'granted' ? 'done' : installed ? 'now' : 'todo'}`}>
+          <span className="tl-dot">{notifyStatus() === 'granted' ? <Icon name="check" size={14} stroke={3} /> : 2}</span>
+          <div className="tl-body">
+            <b>{t('Ative os avisos')}</b>
+            <NotifyStep okText={t('Avisos ativados. As cobranças vão chegar no seu celular.')} />
+          </div>
+        </li>
+      </ol>
+      {!installed && <p className="muted">{t('Pode tocar em "Começar o dia 1" agora e fazer isso depois: o app lembra você na tela Hoje.')}</p>}
     </div>
   )
 }
