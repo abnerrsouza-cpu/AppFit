@@ -169,7 +169,7 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission }: { s
                 <li>
                   <i className="dot" style={{ background: 'var(--ring-1)' }} />
                   <span>{t('Treino')}</span>
-                  <b>{prog.rest ? t('Descanso') : prog.train >= 1 ? t('Feito') : t('Falta')}</b>
+                  <b>{prog.rest ? (s.profile.workouts.some((w) => w.items.trim()) ? t('Descanso') : t('Sem ficha')) : prog.train >= 1 ? t('Feito') : t('Falta')}</b>
                 </li>
                 <li>
                   <i className="dot" style={{ background: 'var(--ring-2)' }} />
@@ -606,7 +606,7 @@ function PlanCard({ s, go }: { s: AppState; go: (tab: Tab) => void }) {
         </span>
         <span>
           <small>{t('Treino')}</small>
-          <b>{wk ? `${wk.title} · ${p.trainTime}` : t('Descanso')}</b>
+          <b>{wk ? `${wk.title} · ${p.trainTime}` : p.workouts.some((w) => w.items.trim()) ? t('Descanso') : t('Ficha não cadastrada')}</b>
         </span>
       </span>
       <span className="plan-card-row">

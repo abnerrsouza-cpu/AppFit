@@ -26,7 +26,7 @@ export function Checkin({ s, onClose }: { s: AppState; onClose: () => void }) {
   const [f, setF] = useState<DailyLog>(
     prev ?? {
       date: key,
-      trained: wk ? (checks.train ? 'sim' : 'nao') : 'descanso',
+      trained: wk || !p.workouts.some((w) => w.items.trim()) ? (checks.train ? 'sim' : 'nao') : 'descanso',
       cardioMin: 0,
       cardioType: 'Esteira',
       dietScore: 8,
@@ -84,7 +84,8 @@ export function Checkin({ s, onClose }: { s: AppState; onClose: () => void }) {
     )
   }
 
-  const trainOpts: { v: Trained; l: string }[] = wk
+  const noPlan = !p.workouts.some((w) => w.items.trim())
+  const trainOpts: { v: Trained; l: string }[] = wk || noPlan
     ? [
         { v: 'sim', l: t('Fiz tudo') },
         { v: 'parcial', l: t('Fiz uma parte') },
@@ -117,7 +118,7 @@ export function Checkin({ s, onClose }: { s: AppState; onClose: () => void }) {
       <div className="story-body">
         {step === 0 && (
           <>
-            <h1>{wk ? t('Você fez o treino de hoje?') : t('Hoje era dia de descanso. Você treinou?')}</h1>
+            <h1>{wk ? t('Você fez o treino de hoje?') : noPlan ? t('Você treinou hoje?') : t('Hoje era dia de descanso. Você treinou?')}</h1>
             {wk && <p className="lead">{wk.title}</p>}
             <div className="big-opts">
               {trainOpts.map((o) => (

@@ -35,6 +35,10 @@ export function Auth({ s, onUser }: { s: AppState; onUser: (u: User) => void }) 
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
   const [forgot, setForgot] = useState(false)
+  const [prov, setProv] = useState<{ google?: boolean; strava?: boolean }>({})
+  useEffect(() => {
+    fetch('/api/auth/providers').then((r) => r.json()).then(setProv, () => {})
+  }, [])
 
   // erro vindo do login com Google/Strava (volta como ?auth_error=...)
   useEffect(() => {
@@ -97,18 +101,24 @@ export function Auth({ s, onUser }: { s: AppState; onUser: (u: User) => void }) 
           </button>
         </div>
 
+        {(prov.google || prov.strava) && (
         <div className="social">
+          {prov.google && (
           <a className="social-btn google" href="/api/auth/google">
             <GoogleLogo /> {mode === 'criar' ? t('Criar conta com Google') : t('Entrar com Google')}
           </a>
+          )}
+          {prov.strava && (
           <a className="social-btn strava" href="/api/auth/strava">
             <StravaLogo /> {mode === 'criar' ? t('Criar conta com Strava') : t('Entrar com Strava')}
           </a>
+          )}
           <p className="hint center-txt ttl">
             {t('ou com e-mail e senha')}
             <Info text={t('Com Google ou Strava você não precisa criar senha. Quem entra pelo Strava já deixa o relógio conectado ao app. Em todos os casos, a conta passa pela aprovação.')} />
           </p>
         </div>
+        )}
 
         <form className="card field" onSubmit={submit}>
           {mode === 'criar' && (

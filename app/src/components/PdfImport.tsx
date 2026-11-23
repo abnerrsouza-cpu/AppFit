@@ -155,6 +155,8 @@ export function PdfImport({ kind, online, lang, upd }: { kind: Kind; online: boo
     )
   }
 
+  // leitura de PDF desligada no servidor: o cliente não precisa ver aviso técnico, só não vê o cartão
+  if (online && ready !== true) return null
   const blocked = !online ? 'login' : ready === false ? (kind === 'routine' ? t('A leitura de PDF ainda não foi ativada. Por enquanto, adicione os afazeres acima.') : t('A leitura de PDF ainda não foi ativada. Por enquanto, preencha abaixo.')) : ''
   return (
     <div className={`card pdf-card ${blocked ? 'off' : ''}`}>

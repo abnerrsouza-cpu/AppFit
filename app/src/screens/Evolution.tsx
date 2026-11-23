@@ -23,7 +23,8 @@ export function Evolution({ s, openCheckin, openWeekly = false }: { s: AppState;
     ...weeks.map((w, i) => ({ w, i })).filter((x) => x.w.photoId).map((x) => ({ id: x.w.photoId!, label: label(x.w, x.i) })),
   ]
   const [aIdx, setA] = useState(0)
-  const [bIdx, setB] = useState(Math.max(0, withPhoto.length - 1))
+  const [bSel, setB] = useState<number | null>(null)
+  const bIdx = bSel ?? Math.max(0, withPhoto.length - 1)
   const [form, setForm] = useState(openWeekly)
   const A = withPhoto[Math.min(aIdx, withPhoto.length - 1)]
   const B = withPhoto[Math.min(bIdx, withPhoto.length - 1)]
