@@ -10,7 +10,7 @@ import { type AppState, type Profile, bmi, currentWeight, newId, resetToBlank, r
 
 type Section = null | 'perfil' | 'rotina' | 'treino' | 'dieta' | 'agenda' | 'relogio' | 'carta' | 'integracoes'
 
-export function Menu({ s, user = null, onUser, onLogout, onHow, onConquistas, initialSec = null, onOpened }: { s: AppState; user?: User | null; onUser?: (u: User) => void; onLogout?: () => void; onHow?: () => void; onConquistas?: () => void; initialSec?: string | null; onOpened?: () => void }) {
+export function Menu({ s, user = null, onUser, onLogout, onHow, onConquistas, onRanking, initialSec = null, onOpened }: { s: AppState; user?: User | null; onUser?: (u: User) => void; onLogout?: () => void; onHow?: () => void; onConquistas?: () => void; onRanking?: () => void; initialSec?: string | null; onOpened?: () => void }) {
   const [sec, setSec] = useState<Section>(initialSec as Section)
   useEffect(() => {
     if (initialSec) onOpened?.()
@@ -99,6 +99,16 @@ export function Menu({ s, user = null, onUser, onLogout, onHow, onConquistas, in
 
       <div className="card menu-group">
         <span className="group-label">{t('Ajuda')}</span>
+        <button type="button" className="menu-row" onClick={onRanking}>
+          <span className="menu-ic">
+            <Icon name="flame" size={20} />
+          </span>
+          <span>
+            <b>{t('Ranking')}</b>
+            <small>{t('Dispute pontos com seus amigos na semana')}</small>
+          </span>
+          <Icon name="chevR" size={18} />
+        </button>
         <button type="button" className="menu-row" onClick={onConquistas}>
           <span className="menu-ic">
             <Icon name="star" size={20} />

@@ -2,7 +2,7 @@ import { Icon } from '../components/Icon'
 import { Info, WithInfo } from '../components/Info'
 import { Locked } from '../components/Locked'
 import { notifyStatus } from '../notify'
-import type { User } from '../api'
+import { type RankRow, type User, api } from '../api'
 import { useLatestPhoto, useRefPhoto } from '../usePhotos'
 import { type Mission, levelOf, missions, nextStreakMedal, totalXP } from '../game'
 import { getEvents, hhmmOf, onEvents, refreshEvents, ymdOf } from '../calendar'
@@ -42,7 +42,7 @@ export function todayProgress(s: AppState) {
   if (log) {
     return {
       train: log.trained === 'sim' || log.trained === 'descanso' ? 1 : log.trained === 'parcial' ? 0.5 : 0,
-      diet: Object.values(log.mealsOk).filter(Boolean).length / meals,
+      diet: Object.values(log.mealsOk || {}).filter(Boolean).length / meals,
       cardio: log.cardioMin / dailyCardio,
       rest: !wk,
     }
@@ -249,6 +249,8 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission }: { s
 
           <Setup s={s} go={go} goMenu={goMenu} />
 
+
+          <RankCard online={!!user} go={go} />
 
           <button type="button" className="level-card" onClick={() => go('conquistas')}>
             <span className="level-badge">
@@ -546,5 +548,38 @@ function Setup({ s, go, goMenu }: { s: AppState; go: (tab: Tab) => void; goMenu:
       </div>
       {items.filter((i) => !i.done).map((i) => i.el)}
     </section>
+  )
+}
+
+/** Cartão do ranking: posição entre amigos ou convite para chamar amigos. */
+function RankCard({ online, go }: { online: boolean; go: (tab: Tab) => void }) {
+  const [rows, setRows] = useState<RankRow[] | null>(null)
+  useEffect(() => {
+    if (!online) return
+    let alive = true
+    api.ranking('friends').then((r) => alive && setRows(r.rows), () => {})
+    return () => {
+      alive = false
+    }
+  }, [online])
+  if (!online || !rows) return null
+  const me = rows.find((r) => r.me)
+  const solo = rows.length < 2
+  const ahead = me && me.pos > 1 ? rows[me.pos - 2] : null
+  return (
+    <button type="button" className="card rank-card" onClick={() => go('ranking')}>
+      <span className="rank-pos">{solo ? <Icon name="user" size={22} /> : <b>{me?.pos}º</b>}</span>
+      <span className="rank-txt">
+        <b>{solo ? t('Desafie seus amigos') : t('{p}º de {n} no ranking da semana', { p: me?.pos ?? 1, n: rows.length })}</b>
+        <small>
+          {solo
+            ? t('Convide amigos e vejam quem cumpre mais a semana.')
+            : ahead
+              ? t('Faltam {n} pontos para passar {name}.', { n: ahead.points - (me?.points ?? 0) + 1, name: ahead.name.split(' ')[0] })
+              : t('Você está na frente. Não deixe ninguém passar.')}
+        </small>
+      </span>
+      <Icon name="chevR" />
+    </button>
   )
 }

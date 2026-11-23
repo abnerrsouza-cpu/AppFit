@@ -41,6 +41,30 @@ async function call<T>(method: string, path: string, body?: unknown): Promise<T>
   return data as T
 }
 
+export interface RankRow {
+  id: number
+  name: string
+  hasAvatar: boolean
+  points: number
+  level: number
+  streak: number
+  me: boolean
+  pos: number
+}
+export interface SocialGroup {
+  id: number
+  name: string
+  code: string
+  mine: boolean
+  members: number
+}
+export interface SocialInfo {
+  inviteCode: string
+  friends: number
+  groups: SocialGroup[]
+  public: boolean
+}
+
 export type Boot = { mode: 'local' } | { mode: 'server'; user: User | null }
 
 /** Descobre se há servidor e quem está logado. */
@@ -79,6 +103,14 @@ export const api = {
   calendarTest: (url: string) => call<{ url: string; events: CalEvent[] }>('POST', '/api/calendar/test', { url }),
   calendar: () => call<{ events: CalEvent[]; error?: string }>('GET', '/api/calendar'),
   disconnectStrava: () => call('DELETE', '/api/me/strava'),
+  social: () => call<SocialInfo>('GET', '/api/social'),
+  ranking: (scope: string) => call<{ rows: RankRow[]; total: number }>('GET', `/api/ranking?scope=${encodeURIComponent(scope)}`),
+  joinFriend: (code: string) => call<{ ok: boolean; name: string }>('POST', '/api/friends/join', { code }),
+  removeFriend: (id: number) => call('DELETE', `/api/friends/${id}`),
+  createGroup: (name: string) => call<{ group: { id: number; name: string; code: string } }>('POST', '/api/groups', { name }),
+  joinGroup: (code: string) => call<{ ok: boolean; group: { id: number; name: string } }>('POST', '/api/groups/join', { code }),
+  leaveGroup: (id: number) => call('DELETE', `/api/groups/${id}`),
+  setRankingPublic: (pub: boolean) => call('PUT', '/api/me/ranking', { public: pub }),
   planReady: () => call<{ ready: boolean }>('GET', '/api/plan/ready'),
   planParse: <T,>(kind: 'diet' | 'workout', pdf: string, lang: string) => call<T>('POST', '/api/plan/parse', { kind, pdf, lang }),
   pushKey: () => call<{ key: string }>('GET', '/api/push/key'),

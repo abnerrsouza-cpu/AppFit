@@ -19,6 +19,7 @@ import { Menu } from './screens/Menu'
 import { Onboarding } from './screens/Onboarding'
 import { Projeto, type Sec as PjSec } from './screens/Projeto'
 import { Today } from './screens/Today'
+import { Ranking } from './screens/Ranking'
 import { resetToBlank, setState, today, useAppState } from './store'
 import { startSync } from './sync'
 import { refreshEvents } from './calendar'
@@ -38,6 +39,7 @@ export default function App() {
   const [openWeekly, setOpenWeekly] = useState(false)
   const [pjSec, setPjSec] = useState<PjSec | undefined>(undefined)
   const [howAgain, setHowAgain] = useState(false)
+  const [rankNotice, setRankNotice] = useState<string | null>(null)
 
   // abertura de novo ao voltar para o app depois de 30 minutos fora
   useEffect(() => {
@@ -55,6 +57,34 @@ export default function App() {
     setTab('menu')
   }
 
+  // convite de amigo ou grupo (?amigo=CODIGO / ?grupo=CODIGO): guarda até a conta estar aprovada
+  const acceptInvite = useCallback(async () => {
+    let inv: { kind: 'amigo' | 'grupo'; code: string } | null = null
+    try {
+      inv = JSON.parse(localStorage.getItem('sd:invite') || 'null')
+    } catch {
+      /* ignora */
+    }
+    if (!inv) return
+    try {
+      if (inv.kind === 'amigo') {
+        const r = await api.joinFriend(inv.code)
+        setRankNotice(t('Agora você e {n} estão no mesmo ranking.', { n: r.name.split(' ')[0] }))
+      } else {
+        const r = await api.joinGroup(inv.code)
+        setRankNotice(t('Você entrou no grupo {g}.', { g: r.group.name }))
+      }
+      setTab('ranking')
+    } catch {
+      /* convite inválido ou próprio: ignora */
+    }
+    try {
+      localStorage.removeItem('sd:invite')
+    } catch {
+      /* ignora */
+    }
+  }, [])
+
   const enter = useCallback(async (u: User | null) => {
     setUser(u)
     if (!u) return setPhase('auth')
@@ -71,12 +101,27 @@ export default function App() {
       setMenuSec('integracoes')
       setTab('menu')
     }
+    void acceptInvite()
     if (u.role === 'admin') api.admin.users().then((r) => setPendingCount(r.users.filter((x) => x.status === 'pending').length)).catch(() => {})
     setPhase('ready')
-  }, [])
+  }, [acceptInvite])
 
   useEffect(() => {
     void registerSW()
+    {
+      const sp = new URL(location.href).searchParams
+      const code = sp.get('amigo') || sp.get('grupo')
+      if (code) {
+        try {
+          localStorage.setItem('sd:invite', JSON.stringify({ kind: sp.get('amigo') ? 'amigo' : 'grupo', code }))
+        } catch {
+          /* ignora */
+        }
+        sp.delete('amigo')
+        sp.delete('grupo')
+        history.replaceState(null, '', location.pathname + (sp.toString() ? `?${sp}` : ''))
+      }
+    }
     boot().then((b) => {
       if (b.mode === 'local') {
         setPhase('local')
@@ -209,7 +254,8 @@ export default function App() {
       {tab === 'cobrancas' && <Alerts s={s} onBack={() => setTab('inicio')} />}
       {tab === 'projeto' && <Projeto key={pjSec || 'x'} s={s} initialSec={pjSec} />}
       {tab === 'conquistas' && <Conquistas s={s} onBack={() => setTab('inicio')} />}
-      {tab === 'menu' && <Menu s={s} user={user} onUser={setUser} onHow={() => setHowAgain(true)} onConquistas={() => setTab('conquistas')} onLogout={user ? logout : undefined} initialSec={menuSec} onOpened={() => setMenuSec(null)} />}
+      {tab === 'ranking' && <Ranking online={!!user} onBack={() => setTab('inicio')} notice={rankNotice} />}
+      {tab === 'menu' && <Menu s={s} user={user} onUser={setUser} onHow={() => setHowAgain(true)} onConquistas={() => setTab('conquistas')} onRanking={() => setTab('ranking')} onLogout={user ? logout : undefined} initialSec={menuSec} onOpened={() => setMenuSec(null)} />}
       {tab === 'admin' && isAdmin && <Admin onPending={setPendingCount} />}
       <BottomNav
         tab={tab}

@@ -10,6 +10,7 @@ import { initPush, notifyAdmins, sendToUser, startScheduler, vapidPublicKey } fr
 import { authorizeUrl, exchange, fetchPicture, newState, providers } from './oauth.mjs'
 import { eventsFor, normalizeUrl } from './calendar.mjs'
 import { parsePlan, planReady } from './plan.mjs'
+import { canSeeAvatar, migrateSocial, registerSocial, startRankScheduler } from './social.mjs'
 
 const DIST = join(import.meta.dirname, '..', 'dist')
 const PORT = Number(process.env.PORT) || 3000
@@ -276,7 +277,7 @@ route('PUT', '/api/me/avatar', async (req, res) => {
 
 route('GET', '/api/avatar/:id', async (req, res, p) => {
   const me = await requireUser(req, { approved: false })
-  if (String(me.id) !== p.id && me.role !== 'admin') throw new HttpError(403, 'Sem acesso')
+  if (String(me.id) !== p.id && me.role !== 'admin' && !(me.status === 'approved' && (await canSeeAvatar(me.id, Number(p.id))))) throw new HttpError(403, 'Sem acesso')
   const r = await q('select avatar, avatar_type from users where id = $1', [p.id])
   const a = r.rows[0]
   if (!a?.avatar) throw new HttpError(404, 'Sem foto')
@@ -335,6 +336,8 @@ route('POST', '/api/plan/parse', async (req, res) => {
     throw new HttpError(502, 'Não consegui ler o PDF agora. Tente de novo.')
   }
 })
+
+registerSocial({ route, send, readJson, requireUser, HttpError })
 
 route('GET', '/api/push/key', async (req, res) => send(res, 200, { key: vapidPublicKey() }))
 
@@ -486,7 +489,9 @@ const server = createServer(async (req, res) => {
 })
 
 await migrate()
+await migrateSocial()
 await ensureAdmin()
 await initPush()
 startScheduler()
+startRankScheduler()
 server.listen(PORT, () => console.log(`Dont Sorry IA no ar na porta ${PORT}`))
