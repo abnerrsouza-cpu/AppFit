@@ -251,6 +251,7 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission }: { s
           <Setup s={s} go={go} goMenu={goMenu} />
 
 
+          <PlanCard s={s} go={go} />
           <RankCard online={!!user} go={go} />
 
           <button type="button" className="level-card" onClick={() => go('conquistas')}>
@@ -581,6 +582,42 @@ function RankCard({ online, go }: { online: boolean; go: (tab: Tab) => void }) {
         </small>
       </span>
       <Icon name="chevR" />
+    </button>
+  )
+}
+
+/** Atalho para Treino e dieta: o treino de hoje e a próxima refeição. */
+function PlanCard({ s, go }: { s: AppState; go: (tab: Tab) => void }) {
+  const p = s.profile
+  const now = new Date()
+  const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+  const wk = workoutFor(p, now)
+  const checks = s.checks[today()] || {}
+  const next = p.meals.slice().sort((a, b) => a.time.localeCompare(b.time)).find((m) => !checks[m.id] && m.time >= hhmm)
+  return (
+    <button type="button" className="card plan-card" onClick={() => go('plano')}>
+      <span className="plan-card-h">
+        <b>{t('Treino e dieta de hoje')}</b>
+        <Icon name="chevR" />
+      </span>
+      <span className="plan-card-row">
+        <span className="plan-ic">
+          <Icon name="dumbbell" size={18} />
+        </span>
+        <span>
+          <small>{t('Treino')}</small>
+          <b>{wk ? `${wk.title} · ${p.trainTime}` : t('Descanso')}</b>
+        </span>
+      </span>
+      <span className="plan-card-row">
+        <span className="plan-ic food">
+          <Icon name="food" size={18} />
+        </span>
+        <span>
+          <small>{t('Próxima refeição')}</small>
+          <b>{next ? `${next.name} · ${next.time}` : t('Nenhuma pendente')}</b>
+        </span>
+      </span>
     </button>
   )
 }

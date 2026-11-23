@@ -11,7 +11,7 @@ import { type AppState, type Profile, bmi, currentWeight, newId, resetToBlank, r
 
 type Section = null | 'perfil' | 'rotina' | 'treino' | 'dieta' | 'agenda' | 'relogio' | 'carta' | 'integracoes'
 
-export function Menu({ s, user = null, onUser, onLogout, onHow, onConquistas, onRanking, initialSec = null, onOpened }: { s: AppState; user?: User | null; onUser?: (u: User) => void; onLogout?: () => void; onHow?: () => void; onConquistas?: () => void; onRanking?: () => void; initialSec?: string | null; onOpened?: () => void }) {
+export function Menu({ s, user = null, onUser, onLogout, onHow, onConquistas, onRanking, onPlano, initialSec = null, onOpened }: { s: AppState; user?: User | null; onUser?: (u: User) => void; onLogout?: () => void; onHow?: () => void; onConquistas?: () => void; onRanking?: () => void; onPlano?: () => void; initialSec?: string | null; onOpened?: () => void }) {
   const [sec, setSec] = useState<Section>(initialSec as Section)
   useEffect(() => {
     if (initialSec) onOpened?.()
@@ -86,6 +86,16 @@ export function Menu({ s, user = null, onUser, onLogout, onHow, onConquistas, on
           {t('Planos')}
           <Info text={t('Seu treino de cada dia da semana e suas refeições. Cada refeição vira uma cobrança no horário.')} />
         </span>
+        <button type="button" className="menu-row" onClick={onPlano}>
+          <span className="menu-ic">
+            <Icon name="dumbbell" size={20} />
+          </span>
+          <span>
+            <b>{t('Ver treino e dieta')}</b>
+            <small>{t('Seu plano detalhado de cada dia')}</small>
+          </span>
+          <Icon name="chevR" size={18} />
+        </button>
         <Row id="treino" icon="dumbbell" title={t('Ficha de treino')} sub={t('{n} dias por semana', { n: p.workouts.length })} />
         <Row id="dieta" icon="food" title={t('Plano alimentar')} sub={t('{n} refeições por dia', { n: p.meals.length })} />
       </div>

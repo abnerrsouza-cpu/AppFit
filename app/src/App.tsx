@@ -20,6 +20,7 @@ import { Onboarding } from './screens/Onboarding'
 import { Projeto, type Sec as PjSec } from './screens/Projeto'
 import { Today } from './screens/Today'
 import { Ranking } from './screens/Ranking'
+import { Plano } from './screens/Plano'
 import { Toaster } from './components/Toast'
 import { resetToBlank, setState, today, useAppState } from './store'
 import { startSync } from './sync'
@@ -255,8 +256,9 @@ export default function App() {
       {tab === 'cobrancas' && <Alerts s={s} onBack={() => setTab('inicio')} />}
       {tab === 'projeto' && <Projeto key={pjSec || 'x'} s={s} initialSec={pjSec} />}
       {tab === 'conquistas' && <Conquistas s={s} onBack={() => setTab('inicio')} />}
+      {tab === 'plano' && <Plano s={s} goMenu={goMenu} />}
       {tab === 'ranking' && <Ranking online={!!user} notice={rankNotice} />}
-      {tab === 'menu' && <Menu s={s} user={user} onUser={setUser} onHow={() => setHowAgain(true)} onConquistas={() => setTab('conquistas')} onRanking={() => setTab('ranking')} onLogout={user ? logout : undefined} initialSec={menuSec} onOpened={() => setMenuSec(null)} />}
+      {tab === 'menu' && <Menu s={s} user={user} onUser={setUser} onHow={() => setHowAgain(true)} onConquistas={() => setTab('conquistas')} onRanking={() => setTab('ranking')} onPlano={() => setTab('plano')} onLogout={user ? logout : undefined} initialSec={menuSec} onOpened={() => setMenuSec(null)} />}
       {tab === 'admin' && isAdmin && <Admin onPending={setPendingCount} />}
       <Toaster />
       <BottomNav

@@ -7082,3 +7082,365 @@ textarea {
   padding-right: 6px;
   font-size: 0.95rem;
 }
+
+/* ---------- treino e dieta ---------- */
+.pl-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+.pl-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 0 8px;
+  border-radius: 16px;
+  background: var(--glass, var(--surface));
+  border: 1px solid var(--glass-line, var(--line));
+  text-transform: capitalize;
+}
+.pl-day small {
+  font-weight: 700;
+  font-size: 0.78rem;
+}
+.pl-day i {
+  font-style: normal;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--fg-3);
+}
+.pl-day i.train {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent);
+}
+.pl-day.today small {
+  color: var(--accent);
+}
+.pl-day.on {
+  background: var(--ink, #111318);
+  border-color: transparent;
+  color: #fff;
+}
+.pl-day.on small {
+  color: #fff;
+}
+.pl-day.on i.train {
+  background: var(--accent);
+  color: #fff;
+}
+.plano .seg-tabs button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.pl-empty,
+.pl-rest {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+  border-radius: 24px;
+}
+.pl-empty {
+  border: 2px solid var(--bad);
+}
+.pl-empty > b,
+.pl-rest > b {
+  font-size: 1.1rem;
+}
+.pl-empty > p,
+.pl-rest > p {
+  margin: 0 0 4px;
+  color: var(--fg-2);
+  line-height: 1.4;
+}
+.pl-rest-ic {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+}
+.pl-train {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 24px;
+}
+.pl-train-h {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.pl-train-h > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pl-train-h small {
+  color: var(--fg-2);
+  font-weight: 700;
+  text-transform: capitalize;
+}
+.pl-train-h b {
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+.pl-count {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--accent);
+}
+.pl-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  overflow: hidden;
+}
+.pl-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width 0.3s;
+}
+.pl-ex {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.pl-ex li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+}
+.pl-ex li + li {
+  border-top: 1px solid var(--line);
+}
+.pl-ex li.done .pl-ex-t b {
+  text-decoration: line-through;
+  color: var(--fg-3);
+}
+.pl-ex-n {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  font-weight: 800;
+  font-size: 0.8rem;
+  color: var(--fg-2);
+}
+.pl-ex li.done .pl-ex-n {
+  background: var(--good);
+  color: #fff;
+}
+.pl-ex-t {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pl-ex-t small {
+  color: var(--fg-2);
+}
+.pl-sets {
+  flex: none;
+  padding: 5px 10px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+.rest {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 16px;
+  background: var(--surface-2);
+}
+.rest.on {
+  background: var(--accent);
+  color: #fff;
+}
+.rest-l {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.rest.on .rest-l {
+  font-size: 1.3rem;
+}
+.rest-b {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: var(--surface);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.rest-b.stop {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+.pl-edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  align-self: center;
+}
+.pl-sum {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 20px;
+}
+.pl-sum > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pl-sum small {
+  color: var(--fg-2);
+}
+.pl-meals {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pl-meal {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 20px;
+  border-left: 4px solid transparent;
+}
+.pl-meal.next {
+  border-left-color: var(--accent);
+}
+.pl-meal.late {
+  border-left-color: var(--bad);
+}
+.pl-meal.done {
+  opacity: 0.75;
+  border-left-color: var(--good);
+}
+.pl-meal-h {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pl-meal-h b {
+  flex: 1;
+}
+.pl-time {
+  padding: 4px 9px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  font-weight: 800;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+.pl-badge {
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #fff;
+}
+.pl-badge.next {
+  background: var(--accent);
+}
+.pl-badge.late {
+  background: var(--bad);
+}
+.pl-food {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  line-height: 1.35;
+}
+.pl-ate {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1.5px solid var(--good);
+  color: var(--good);
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+.pl-ate.on {
+  background: var(--good);
+  color: #fff;
+}
+.plan-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 16px;
+  border-radius: 24px;
+}
+.plan-card-h {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.plan-card-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.plan-card-row > span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.plan-card-row small {
+  color: var(--fg-2);
+}
+.plan-ic {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+}
+.plan-ic.food {
+  background: color-mix(in srgb, var(--good) 15%, transparent);
+  color: var(--good);
+}
