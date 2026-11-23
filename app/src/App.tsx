@@ -3,6 +3,7 @@ import { type User, api, boot } from './api'
 import { BottomNav, type Tab } from './components/BottomNav'
 import { Icon } from './components/Icon'
 import { Info } from './components/Info'
+import { Intro } from './components/Intro'
 import { getLang, t } from './i18n'
 import { registerSW, setServerMode, startScheduler, subscribePush } from './notify'
 import { Admin } from './screens/Admin'
@@ -28,6 +29,18 @@ export default function App() {
   const [menuSec, setMenuSec] = useState<string | null>(null)
   const [pendingCount, setPendingCount] = useState(0)
   const synced = useRef(false)
+  const [intro, setIntro] = useState(true)
+
+  // abertura de novo ao voltar para o app depois de 30 minutos fora
+  useEffect(() => {
+    let hiddenAt = 0
+    const vis = () => {
+      if (document.visibilityState === 'hidden') hiddenAt = Date.now()
+      else if (hiddenAt && Date.now() - hiddenAt > 30 * 60_000) setIntro(true)
+    }
+    document.addEventListener('visibilitychange', vis)
+    return () => document.removeEventListener('visibilitychange', vis)
+  }, [])
 
   const goMenu = (sec: string) => {
     setMenuSec(sec)
@@ -115,6 +128,7 @@ export default function App() {
 
   return (
     <div className="app">
+      {intro && <Intro s={s} userId={user?.id} hasAvatar={user?.hasAvatar} onDone={() => setIntro(false)} />}
       {s.demo && phase === 'local' && (
         <div className="demo-bar">
           <span className="ttl">
