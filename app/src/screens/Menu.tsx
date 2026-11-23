@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 import { Icon } from '../components/Icon'
 import { Info, WithInfo } from '../components/Info'
 import { type User, showEmail } from '../api'
 import { LANGS, t, weekday } from '../i18n'
 import { Integracoes } from './Integracoes'
 import { AvatarPicker } from '../components/AvatarPicker'
+import { PdfImport } from '../components/PdfImport'
 import { type AppState, type Profile, bmi, currentWeight, newId, resetToBlank, resetToDemo, setLang, setState } from '../store'
 
 type Section = null | 'perfil' | 'rotina' | 'treino' | 'dieta' | 'agenda' | 'relogio' | 'carta' | 'integracoes'
@@ -30,8 +31,8 @@ export function Menu({ s, user = null, onUser, onLogout, onHow, onConquistas, in
         </div>
         {sec === 'perfil' && <Perfil p={p} upd={upd} weight={currentWeight(s)} />}
         {sec === 'rotina' && <Rotina p={p} upd={upd} />}
-        {sec === 'treino' && <Treino p={p} upd={upd} />}
-        {sec === 'dieta' && <Dieta p={p} upd={upd} />}
+        {sec === 'treino' && <Treino p={p} upd={upd} pdf={<PdfImport kind="workout" online={!!user} lang={s.lang || 'pt'} upd={upd} />} />}
+        {sec === 'dieta' && <Dieta p={p} upd={upd} pdf={<PdfImport kind="diet" online={!!user} lang={s.lang || 'pt'} upd={upd} />} />}
         {sec === 'agenda' && <Agenda p={p} upd={upd} />}
         {sec === 'relogio' && <Relogio />}
         {sec === 'carta' && <Carta p={p} upd={upd} />}
@@ -267,7 +268,7 @@ function Rotina({ p, upd }: { p: Profile; upd: Upd }) {
   )
 }
 
-function Treino({ p, upd }: { p: Profile; upd: Upd }) {
+function Treino({ p, upd, pdf }: { p: Profile; upd: Upd; pdf: ReactNode }) {
   const set = (wd: number, patch: { title?: string; items?: string } | null) => {
     const others = p.workouts.filter((w) => w.weekday !== wd)
     if (patch === null) return upd({ workouts: others })
@@ -281,6 +282,7 @@ function Treino({ p, upd }: { p: Profile; upd: Upd }) {
         <Info text={t('Ligue os dias em que você treina e escreva os exercícios, um por linha. A ficha aparece na tela Hoje.')} />
       </h1>
       <p className="lead">{t('Um exercício por linha. Dias desligados são descanso.')}</p>
+      {pdf}
       {[1, 2, 3, 4, 5, 6, 0].map((wd) => {
         const w = p.workouts.find((x) => x.weekday === wd)
         return (
@@ -304,7 +306,7 @@ function Treino({ p, upd }: { p: Profile; upd: Upd }) {
   )
 }
 
-function Dieta({ p, upd }: { p: Profile; upd: Upd }) {
+function Dieta({ p, upd, pdf }: { p: Profile; upd: Upd; pdf: ReactNode }) {
   const set = (id: string, patch: Partial<Profile['meals'][number]>) => upd({ meals: p.meals.map((m) => (m.id === id ? { ...m, ...patch } : m)) })
   return (
     <form className="form" onSubmit={(e) => e.preventDefault()}>
@@ -313,6 +315,7 @@ function Dieta({ p, upd }: { p: Profile; upd: Upd }) {
         <Info text={t('Suas refeições do dia com horário e o que comer. Cada uma vira uma tarefa na tela Hoje e uma cobrança.')} />
       </h1>
       <p className="lead">{t('Cada refeição vira uma notificação no horário.')}</p>
+      {pdf}
       {p.meals
         .slice()
         .sort((a, b) => a.time.localeCompare(b.time))

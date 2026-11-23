@@ -5864,3 +5864,125 @@ textarea {
     animation: none;
   }
 }
+
+/* ---------- enviar PDF (dieta / treino) ---------- */
+.pdf-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 22px;
+  border: 1.5px dashed color-mix(in srgb, var(--accent) 45%, transparent);
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface));
+}
+.pdf-card.preview {
+  border-style: solid;
+}
+.pdf-card.off {
+  opacity: 0.7;
+}
+.pdf-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.pdf-row > div,
+.pdf-list li > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.pdf-row small,
+.pdf-list small {
+  color: var(--fg-2);
+  line-height: 1.35;
+}
+.pdf-ic {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: #fff;
+}
+.pdf-h {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent);
+  font-size: 1.05rem;
+}
+.pdf-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pdf-list li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.pdf-list small {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.pdf-tag {
+  flex: none;
+  min-width: 54px;
+  text-align: center;
+  padding: 4px 8px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+}
+.pdf-notes {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--fg-2);
+  border-left: 3px solid var(--accent);
+  padding-left: 10px;
+}
+.pdf-busy {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.pdf-busy .spin {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 3px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  border-top-color: var(--accent);
+  animation: pdfspin 0.8s linear infinite;
+}
+@keyframes pdfspin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.pdf-msg {
+  color: var(--fg-2);
+}
+.pdf-msg.bad-msg {
+  color: var(--bad);
+  font-weight: 600;
+}
+.pdf-msg.ok-msg {
+  color: var(--good);
+  font-weight: 600;
+}
+.pdf-card .link {
+  align-self: center;
+}

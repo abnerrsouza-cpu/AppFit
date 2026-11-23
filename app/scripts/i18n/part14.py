@@ -1,0 +1,26 @@
+# Traduções (parte 14): enviar PDF da dieta e da ficha de treino.
+D = {
+ 'A leitura de PDF ainda não foi ativada.': ('PDF reading is not turned on yet.', 'La lectura de PDF aún no está activada.'),
+ 'Confira. Ao usar, este plano substitui o que está abaixo.': ('Check it. Using it replaces the plan below.', 'Revísalo. Al usarlo, este plan reemplaza lo que está abajo.'),
+ 'Disponível no app com login.': ('Available in the app with login.', 'Disponible en la app con inicio de sesión.'),
+ 'Enviar PDF': ('Upload PDF', 'Subir PDF'),
+ 'Envie o PDF do nutricionista. O app lê e preenche suas refeições e horários.': ("Upload your nutritionist's PDF. The app reads it and fills in your meals and times.", 'Sube el PDF de tu nutricionista. La app lo lee y completa tus comidas y horarios.'),
+ 'Envie o PDF do personal. O app lê e distribui os treinos pelos dias da semana.': ("Upload your trainer's PDF. The app reads it and spreads the workouts across the week.", 'Sube el PDF de tu entrenador. La app lo lee y reparte los entrenamientos por los días de la semana.'),
+ 'Escolha um arquivo PDF.': ('Choose a PDF file.', 'Elige un archivo PDF.'),
+ 'Lendo seu PDF. Isso pode levar até 1 minuto.': ('Reading your PDF. This can take up to 1 minute.', 'Leyendo tu PDF. Puede tardar hasta 1 minuto.'),
+ 'Não consegui ler o PDF agora. Tente de novo.': ("Couldn't read the PDF right now. Try again.", 'No pude leer el PDF ahora. Inténtalo de nuevo.'),
+ 'Não encontrei refeições nesse PDF. Confira se é o plano alimentar.': ("I didn't find any meals in this PDF. Check that it's your meal plan.", 'No encontré comidas en este PDF. Revisa que sea tu plan de alimentación.'),
+ 'Não encontrei treinos nesse PDF. Confira se é a ficha de treino.': ("I didn't find any workouts in this PDF. Check that it's your workout plan.", 'No encontré entrenamientos en este PDF. Revisa que sea tu rutina de entrenamiento.'),
+ 'O PDF passa de {n} MB. Envie um arquivo menor.': ('The PDF is over {n} MB. Upload a smaller file.', 'El PDF supera los {n} MB. Sube un archivo más pequeño.'),
+ 'Pronto. Plano atualizado. Confira e ajuste abaixo se precisar.': ('Done. Plan updated. Check it and adjust below if needed.', 'Listo. Plan actualizado. Revísalo y ajusta abajo si hace falta.'),
+ 'Tem a ficha em PDF?': ('Have your workout as a PDF?', '¿Tienes la rutina en PDF?'),
+ 'Tem o plano em PDF?': ('Have your meal plan as a PDF?', '¿Tienes el plan en PDF?'),
+ 'Usar este plano': ('Use this plan', 'Usar este plan'),
+ '{n} dias de treino encontrados': ('{n} workout days found', '{n} días de entrenamiento encontrados'),
+ '{n} refeições encontradas': ('{n} meals found', '{n} comidas encontradas'),
+ # mensagens do servidor
+ 'Limite de leituras de hoje atingido. Tente amanhã.': ("Today's reading limit reached. Try tomorrow.", 'Límite de lecturas de hoy alcanzado. Inténtalo mañana.'),
+ 'Leitura de PDF ainda não configurada': ('PDF reading is not set up yet', 'La lectura de PDF aún no está configurada'),
+ 'Arquivo não é PDF': ('The file is not a PDF', 'El archivo no es un PDF'),
+ 'Conteúdo grande demais': ('File too large', 'Archivo demasiado grande'),
+}

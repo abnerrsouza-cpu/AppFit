@@ -9,6 +9,7 @@ import { getSetting, migrate, q, setSetting } from './db.mjs'
 import { initPush, notifyAdmins, sendToUser, startScheduler, vapidPublicKey } from './push.mjs'
 import { authorizeUrl, exchange, fetchPicture, newState, providers } from './oauth.mjs'
 import { eventsFor, normalizeUrl } from './calendar.mjs'
+import { parsePlan, planReady } from './plan.mjs'
 
 const DIST = join(import.meta.dirname, '..', 'dist')
 const PORT = Number(process.env.PORT) || 3000
@@ -310,6 +311,29 @@ route('PUT', '/api/state', async (req, res) => {
     [u.id, b.data, JSON.stringify(Array.isArray(b.schedule) ? b.schedule.slice(0, 600) : [])],
   )
   send(res, 200, { ok: true })
+})
+
+// leitura de PDF (dieta / treino): no máximo 15 por pessoa por dia
+const planUses = new Map()
+route('GET', '/api/plan/ready', async (req, res) => send(res, 200, { ready: planReady() }))
+route('POST', '/api/plan/parse', async (req, res) => {
+  const u = await requireUser(req)
+  if (!planReady()) throw new HttpError(503, 'Leitura de PDF ainda não configurada')
+  const b = await readJson(req, 14_000_000)
+  if (b.kind !== 'diet' && b.kind !== 'workout') throw new HttpError(400, 'Tipo inválido')
+  const pdf = typeof b.pdf === 'string' ? b.pdf.replace(/^data:application\/pdf;base64,/, '') : ''
+  if (!pdf || !Buffer.from(pdf.slice(0, 8), 'base64').toString('latin1').startsWith('%PDF')) throw new HttpError(400, 'Arquivo não é PDF')
+  const day = new Date().toISOString().slice(0, 10)
+  const key = `${u.id}:${day}`
+  const used = planUses.get(key) || 0
+  if (used >= 15) throw new HttpError(429, 'Limite de leituras de hoje atingido. Tente amanhã.')
+  planUses.set(key, used + 1)
+  try {
+    send(res, 200, await parsePlan(b.kind, pdf, ['pt', 'en', 'es'].includes(b.lang) ? b.lang : 'pt'))
+  } catch (e) {
+    console.error('plan parse', e)
+    throw new HttpError(502, 'Não consegui ler o PDF agora. Tente de novo.')
+  }
 })
 
 route('GET', '/api/push/key', async (req, res) => send(res, 200, { key: vapidPublicKey() }))

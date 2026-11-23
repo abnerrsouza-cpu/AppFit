@@ -14,6 +14,7 @@
     "i18n:build": "python3 scripts/i18n/build.py"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.12.0",
     "bcryptjs": "^3.0.3",
     "node-ical": "^0.27.6",
     "pg": "^8.23.1",
