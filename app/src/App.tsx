@@ -146,7 +146,7 @@ export default function App() {
           </button>
         </div>
       )}
-      {tab === 'inicio' && <Today s={s} go={setTab} goMenu={goMenu} openCheckin={() => setCheckin(true)} owes={owes} />}
+      {tab === 'inicio' && <Today s={s} user={user} go={setTab} goMenu={goMenu} openCheckin={() => setCheckin(true)} owes={owes} />}
       {tab === 'evolucao' && <Evolution s={s} openCheckin={() => setCheckin(true)} />}
       {tab === 'cobrancas' && <Alerts s={s} onBack={() => setTab('inicio')} />}
       {tab === 'projeto' && <Projeto s={s} />}

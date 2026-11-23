@@ -2,13 +2,15 @@ import { Icon } from '../components/Icon'
 import { Info, WithInfo } from '../components/Info'
 import { Locked } from '../components/Locked'
 import { notifyStatus } from '../notify'
+import type { User } from '../api'
+import { useLatestPhoto, useRefPhoto } from '../usePhotos'
 import { getEvents, hhmmOf, onEvents, refreshEvents, ymdOf } from '../calendar'
 import { useEffect, useState } from 'react'
 import { Rings } from '../components/Rings'
 import type { Tab } from '../components/BottomNav'
 import { headline } from '../psych'
 import { t, weekday, weekdayShort } from '../i18n'
-import { type AppState, fmtDayMonth, setState, streak, today, weekDays, workoutFor, ymd } from '../store'
+import { type AppState, currentWeight, cycleInfo, daysBetween, getProjeto, parseYmd, weekStats, fmtDayMonth, setState, streak, today, weekDays, workoutFor, ymd } from '../store'
 
 type Kind = 'wake' | 'meal' | 'train' | 'checkin' | 'event'
 interface Task {
@@ -47,7 +49,10 @@ export function todayProgress(s: AppState) {
   return { train: !wk ? 1 : checks.train ? 1 : 0, diet: p.meals.filter((m) => checks[m.id]).length / meals, cardio: 0, rest: !wk }
 }
 
-export function Today({ s, go, goMenu, openCheckin, owes }: { s: AppState; go: (tab: Tab) => void; goMenu: (sec: string) => void; openCheckin: () => void; owes: boolean }) {
+export function Today({ s, user, go, goMenu, openCheckin, owes }: { s: AppState; user?: User | null; go: (tab: Tab) => void; goMenu: (sec: string) => void; openCheckin: () => void; owes: boolean }) {
+  const [view, setView] = useState<'geral' | 'dia'>('geral')
+  const myPhoto = useLatestPhoto(s, user?.id, user?.hasAvatar)
+  const refPhoto = useRefPhoto(s)
   const p = s.profile
   const now = new Date()
   const key = today()
@@ -67,6 +72,11 @@ export function Today({ s, go, goMenu, openCheckin, owes }: { s: AppState; go: (
   const todayEvents = getEvents().filter((e) => !e.allDay && ymdOf(e.start) === key)
   const st = streak(s)
   const prog = todayProgress(s)
+  const cyc = cycleInfo(p)
+  const ws = weekStats(s)
+  const weight = currentWeight(s)
+  const weightLeft = Math.max(0, +(weight - p.weightGoal).toFixed(1))
+  const goalLeft = Math.max(0, daysBetween(now, parseYmd(getProjeto(s).vision.targetDate)))
 
   const tasks: Task[] = [
     { id: 'wake', time: p.wake, title: t('Acordar e beber água'), kind: 'wake' as Kind, done: !!checks.wake },
@@ -89,23 +99,219 @@ export function Today({ s, go, goMenu, openCheckin, owes }: { s: AppState; go: (
 
   return (
     <div className="screen">
-      <header className="top-row">
-        <div>
-          <span className="date-chip">
-            {weekday(now.getDay())}, {fmtDayMonth(now)}
+      <header className="hero-me">
+        <div className="hero-row">
+          <span className="me-ring" style={{ ['--p' as string]: `${Math.round(cyc.pct * 360)}deg` }}>
+            <span className="me-photo">{myPhoto ? <img src={myPhoto} alt="" /> : (p.name || '?').slice(0, 1).toUpperCase()}</span>
           </span>
-          <h1 className="hi">
-            {greeting()}, {p.name || t('você')}
-            <Info text={t('Sua tela principal. Mostra o que fazer agora, sua lista do dia e sua sequência.')} />
-          </h1>
+          <div className="hero-txt">
+            <span className="date-chip">
+              {weekday(now.getDay())}, {fmtDayMonth(now)}
+            </span>
+            <h1 className="hi">
+              {greeting()}, {(p.name || t('você')).split(' ')[0]}
+              <Info text={t('Sua tela principal. Visão geral mostra seu progresso; Seu dia mostra o que fazer agora e a lista de hoje.')} />
+            </h1>
+          </div>
+          <button type="button" className="bell-btn" title={t('Mensagens do treinador')} onClick={() => go('cobrancas')} aria-label={t('Mensagens do treinador')}>
+            <Icon name="bell" size={22} />
+            {owes && <i className="bnav-dot" />}
+          </button>
         </div>
-        <button type="button" className="bell-btn" title={t('Mensagens do treinador')} onClick={() => go('cobrancas')} aria-label={t('Mensagens do treinador')}>
-          <Icon name="bell" size={22} />
-          {owes && <i className="bnav-dot" />}
-        </button>
-        <Info text={t('O sino abre as mensagens do seu treinador e as cobranças que você mesmo escreveu. Bolinha vermelha: você está devendo a prestação de contas.')} />
+        <div className="hero-chips">
+          <span>
+            <Icon name="calendar" size={14} /> {t('Dia {a} de {b}', { a: cyc.day, b: p.cycleDays })}
+          </span>
+          <span>
+            <Icon name="flame" size={14} /> {st === 1 ? t('1 dia seguido') : t('{n} dias seguidos', { n: st })}
+          </span>
+          <span>
+            <Icon name="target" size={14} /> {t('Faltam {n} dias', { n: goalLeft })}
+          </span>
+        </div>
       </header>
 
+      <div className="seg-tabs" role="tablist">
+        <button type="button" role="tab" aria-selected={view === 'geral'} className={view === 'geral' ? 'on' : ''} onClick={() => setView('geral')}>
+          {t('Visão geral')}
+        </button>
+        <button type="button" role="tab" aria-selected={view === 'dia'} className={view === 'dia' ? 'on' : ''} onClick={() => setView('dia')}>
+          {t('Seu dia')}
+          {pending.length > 0 && <i className="tab-count">{pending.length}</i>}
+        </button>
+      </div>
+
+      {view === 'geral' && (
+        <>
+          {current ? (
+            <button type="button" className={`now-strip ${late ? 'is-late' : ''}`} onClick={() => setView('dia')}>
+              <span className="now-strip-ic">
+                <Icon name={ICON[current.kind]} size={20} />
+              </span>
+              <span className="now-strip-txt">
+                <small>{late ? t('Agora') : `${t('Próximo')} · ${current.time}`}</small>
+                <b>{current.title}</b>
+              </span>
+              <span className="now-strip-go">
+                {t('Abrir')} <Icon name="chevR" size={16} />
+              </span>
+            </button>
+          ) : (
+            <div className="now-strip done">
+              <span className="now-strip-ic">
+                <Icon name="check" size={20} stroke={3} />
+              </span>
+              <span className="now-strip-txt">
+                <b>{t('Dia cumprido.')}</b>
+              </span>
+            </div>
+          )}
+
+          <Setup s={s} go={go} goMenu={goMenu} />
+
+          <section className="card today">
+            <div className="today-rings">
+              <Rings
+                size={140}
+                values={[
+                  { v: prog.train, color: 'var(--ring-1)' },
+                  { v: prog.diet, color: 'var(--ring-2)' },
+                  { v: prog.cardio, color: 'var(--ring-3)' },
+                ]}
+              />
+            </div>
+            <ul className="today-legend">
+              <li>
+                <i style={{ background: 'var(--ring-1)' }}>
+                  <Icon name="dumbbell" size={16} />
+                </i>
+                <span>
+                  <b>{t('Treino')}</b>
+                  <small>{prog.rest ? t('Descanso') : prog.train >= 1 ? t('Feito') : t('Falta')}</small>
+                </span>
+              </li>
+              <li>
+                <i style={{ background: 'var(--ring-2)' }}>
+                  <Icon name="food" size={16} />
+                </i>
+                <span>
+                  <b>{t('Dieta')}</b>
+                  <small>{t('{n}% das refeições', { n: Math.round(prog.diet * 100) })}</small>
+                </span>
+              </li>
+              <li>
+                <i style={{ background: 'var(--ring-3)' }}>
+                  <Icon name="run" size={16} />
+                </i>
+                <span>
+                  <b>{t('Cardio')}</b>
+                  <small>{prog.cardio >= 1 ? t('Feito') : t('Falta')}</small>
+                </span>
+              </li>
+            </ul>
+          </section>
+
+          <section className="card block">
+            <div className="block-h">
+              <h2 className="ttl">
+                {t('Você hoje x Referência')}
+                <Info text={t('À esquerda, sua foto mais recente. À direita, o shape que você quer. Toque para ver sua evolução.')} />
+              </h2>
+            </div>
+            <button type="button" className="vs" onClick={() => go(refPhoto ? 'evolucao' : 'projeto')}>
+              <span className="vs-photo">
+                {myPhoto ? <img src={myPhoto} alt="" /> : <Icon name="camera" size={26} />}
+                <small>{t('Você hoje')}</small>
+              </span>
+              <span className="vs-mid">
+                <b>{weightLeft > 0 ? `${String(weightLeft).replace('.', ',')} kg` : t('Meta')}</b>
+                <small>{weightLeft > 0 ? t('para a meta') : t('batida')}</small>
+                <Icon name="arrow" size={18} />
+              </span>
+              <span className="vs-photo ref">
+                {refPhoto ? <img src={refPhoto} alt="" /> : <Icon name="target" size={26} />}
+                <small>{t('Referência')}</small>
+              </span>
+            </button>
+          </section>
+
+          <div className="grid2">
+            <div className="card tile">
+              <span className="tile-h">
+                {t('Treinos')} <Icon name="dumbbell" size={18} />
+              </span>
+              <b className="tile-n">
+                {ws.trained}
+                <small>/{ws.planned}</small>
+              </b>
+              <span className="tile-s">{t('nesta semana')}</span>
+            </div>
+            <div className="card tile">
+              <span className="tile-h">
+                {t('Cardio')} <Icon name="run" size={18} />
+              </span>
+              <b className="tile-n">
+                {ws.cardio}
+                <small> min</small>
+              </b>
+              <div className="meter">
+                <span style={{ width: `${Math.min(100, (ws.cardio / p.cardioGoalMin) * 100)}%` }} />
+              </div>
+            </div>
+            <div className="card tile">
+              <span className="tile-h">
+                {t('Dieta')} <Icon name="food" size={18} />
+              </span>
+              <b className={`tile-n ${ws.diet >= 8 ? 'ok' : ws.diet >= 6 ? 'warn' : ws.checkins ? 'bad' : ''}`}>
+                {ws.checkins ? ws.diet.toFixed(1) : '—'}
+                <small>/10</small>
+              </b>
+              <span className="tile-s">{t('média da semana')}</span>
+            </div>
+            <div className="card tile">
+              <span className="tile-h">
+                {t('Peso')} <Icon name="scale" size={18} />
+              </span>
+              <b className="tile-n">
+                {weight.toFixed(1)}
+                <small> kg</small>
+              </b>
+              <span className="tile-s">{t('meta {n} kg', { n: p.weightGoal })}</span>
+            </div>
+          </div>
+
+      <section className="streak-card">
+        <div className="streak-main">
+          <span className="streak-flame">
+            <Icon name="flame" size={40} stroke={2.2} />
+          </span>
+          <div>
+            <b className="streak-n">{st}</b>
+            <span className="ttl">
+              {t('dias sem falhar')}
+              <Info light text={t('Quantos dias seguidos você prestou contas. Se pular um dia, volta para zero.')} />
+            </span>
+          </div>
+        </div>
+        <div className="flames">
+          {weekDays().map((d) => {
+            const k = ymd(d)
+            const l = s.daily[k]
+            const cls = k > key ? 'fut' : l ? (l.dietScore >= 8 && l.trained !== 'nao' ? 'lit' : 'half') : k === key ? 'now' : 'off'
+            return (
+              <span key={k} className={`fl fl-${cls}`}>
+                <i>{cls === 'off' ? <Icon name="x" size={14} stroke={3} /> : <Icon name="flame" size={18} />}</i>
+                <small>{weekdayShort(d.getDay())}</small>
+              </span>
+            )
+          })}
+        </div>
+      </section>
+        </>
+      )}
+
+      {view === 'dia' && (
+        <>
       {current ? (
         <section className={`now-card ${late ? 'is-late' : ''}`}>
           <div className="now-top">
@@ -211,35 +417,8 @@ export function Today({ s, go, goMenu, openCheckin, owes }: { s: AppState; go: (
         </ul>
       </section>
 
-      <Setup s={s} go={go} goMenu={goMenu} />
-
-      <section className="streak-card">
-        <div className="streak-main">
-          <span className="streak-flame">
-            <Icon name="flame" size={40} stroke={2.2} />
-          </span>
-          <div>
-            <b className="streak-n">{st}</b>
-            <span className="ttl">
-              {t('dias sem falhar')}
-              <Info light text={t('Quantos dias seguidos você prestou contas. Se pular um dia, volta para zero.')} />
-            </span>
-          </div>
-        </div>
-        <div className="flames">
-          {weekDays().map((d) => {
-            const k = ymd(d)
-            const l = s.daily[k]
-            const cls = k > key ? 'fut' : l ? (l.dietScore >= 8 && l.trained !== 'nao' ? 'lit' : 'half') : k === key ? 'now' : 'off'
-            return (
-              <span key={k} className={`fl fl-${cls}`}>
-                <i>{cls === 'off' ? <Icon name="x" size={14} stroke={3} /> : <Icon name="flame" size={18} />}</i>
-                <small>{weekdayShort(d.getDay())}</small>
-              </span>
-            )
-          })}
-        </div>
-      </section>
+        </>
+      )}
     </div>
   )
 }

@@ -128,8 +128,17 @@ const BANK: Record<Moment, Bank> = {
   },
 }
 
+const NO_STREAK: Record<Tone, string> = {
+  parceiro: 'Hoje pode ser o dia 1 da sua sequência. Ela só começa quando você presta contas.',
+  treinador: 'Sua sequência está em zero. O dia 1 começa com a prestação de contas de hoje.',
+  sargento: 'Zero dias de sequência. Zero. Presta contas hoje e para de começar do nada.',
+}
+
 export function nudge(s: AppState, moment: Moment, extra: Record<string, string> = {}, seed = daySeed()): string {
   const c = ctx(s)
+  // sem sequência, falar em "salvar 0 dias" não faz sentido
+  if ((moment === 'checkin_atrasado' || moment === 'acordar') && c.streak === 0 && /\{streak\}/.test(pick(BANK[moment][s.profile.tone], seed)))
+    return fill(t(NO_STREAK[s.profile.tone]), c, extra)
   return fill(t(pick(BANK[moment][s.profile.tone], seed)), c, extra)
 }
 
