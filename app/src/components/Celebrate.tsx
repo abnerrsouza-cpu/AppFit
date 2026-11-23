@@ -2,7 +2,7 @@ import { t } from '../i18n'
 import { Icon } from './Icon'
 
 /** Comemoração em tela cheia: medalha nova ou subida de nível, com confete. */
-export function Celebrate({ kind, icon, title, desc, onClose }: { kind: 'medal' | 'level'; icon: string; title: string; desc: string; onClose: () => void }) {
+export function Celebrate({ kind, icon, title, desc, onClose, kicker, button }: { kind: 'medal' | 'level'; icon: string; title: string; desc: string; onClose: () => void; kicker?: string; button?: string }) {
   const pieces = Array.from({ length: 36 }, (_, i) => i)
   return (
     <div className="celebrate" role="dialog" aria-modal="true" aria-label={title}>
@@ -21,14 +21,14 @@ export function Celebrate({ kind, icon, title, desc, onClose }: { kind: 'medal' 
         ))}
       </div>
       <div className="celebrate-card">
-        <span className="celebrate-kicker">{kind === 'medal' ? t('Medalha conquistada') : t('Você subiu de nível')}</span>
+        <span className="celebrate-kicker">{kicker ?? (kind === 'medal' ? t('Medalha conquistada') : t('Você subiu de nível'))}</span>
         <span className={`celebrate-medal ${kind === 'level' ? 'level' : ''}`}>
           <Icon name={icon} size={46} stroke={2} />
         </span>
         <h1>{title}</h1>
         <p>{desc}</p>
         <button type="button" className="cta" onClick={onClose}>
-          {t('Continuar')}
+          {button ?? t('Continuar')}
         </button>
       </div>
     </div>

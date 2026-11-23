@@ -6125,7 +6125,7 @@ textarea {
   display: inline-grid;
   place-items: center;
 }
-.pj-num.ok {
+.pj-num.is-done {
   background: var(--good);
 }
 .guide-bar {
@@ -6485,4 +6485,208 @@ textarea {
 }
 .seg-tabs.three {
   grid-template-columns: repeat(3, 1fr);
+}
+
+/* ---------- funil: começar projetinho ---------- */
+.funnel {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  overflow-y: auto;
+  background: var(--bg);
+  -webkit-overflow-scrolling: touch;
+}
+.funnel-body {
+  animation: funnelIn 0.35s ease;
+}
+@keyframes funnelIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+.funnel-coach {
+  margin-bottom: 4px;
+}
+.funnel textarea,
+.funnel input:not([type='file']) {
+  width: 100%;
+  font-size: 1.05rem;
+}
+.oath-card {
+  margin: 4px 0;
+  padding: 20px;
+  border-radius: 22px;
+  border-left: 4px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+  font-size: 1.12rem;
+  line-height: 1.5;
+  font-weight: 600;
+  font-style: italic;
+}
+.hold-btn {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 64px;
+  border-radius: 999px;
+  border: 2px solid var(--accent);
+  background: var(--surface);
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 1.05rem;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  -webkit-touch-callout: none;
+}
+.hold-fill {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
+  transform-origin: left;
+  transform: scaleX(var(--p, 0));
+}
+.hold-txt {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  mix-blend-mode: normal;
+}
+.hold-btn.done .hold-txt {
+  color: #fff;
+}
+.hold-btn.done {
+  border-color: var(--good);
+}
+.hold-btn.done .hold-fill {
+  background: var(--good);
+}
+.funnel-photo {
+  height: 240px;
+  border-radius: 24px;
+  border: 2px dashed color-mix(in srgb, var(--accent) 45%, transparent);
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+}
+.funnel-photo.has {
+  border-style: solid;
+}
+.funnel-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.funnel-days {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.funnel-date {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--fg-2);
+  font-weight: 600;
+}
+.funnel-big {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--accent);
+  text-align: center;
+}
+.funnel-review {
+  min-height: 220px;
+}
+.funnel-sum {
+  list-style: none;
+  margin: 0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.funnel-sum li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.funnel-sum small {
+  color: var(--fg-2);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.72rem;
+}
+.funnel-oath-mini {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--good);
+  font-weight: 700;
+}
+.funnel-go {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  min-height: 60px;
+  animation: goGlow 2s ease-in-out infinite;
+}
+@keyframes goGlow {
+  0%, 100% { box-shadow: 0 14px 30px -14px color-mix(in srgb, var(--accent) 80%, transparent); }
+  50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 22%, transparent), 0 14px 30px -14px color-mix(in srgb, var(--accent) 80%, transparent); }
+}
+.start-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  border-radius: 24px;
+  border: 2px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface));
+}
+.start-card > b {
+  font-size: 1.25rem;
+  line-height: 1.25;
+}
+.start-card > p {
+  margin: 0 0 4px;
+  color: var(--fg-2);
+  line-height: 1.4;
+}
+.start-ic {
+  width: 50px;
+  height: 50px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: #fff;
+}
+.pj-started {
+  align-self: flex-start;
+  margin-top: -4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+.pj-step-n .pj-num,
+.pj-step-n .pj-num svg {
+  color: #fff;
+}
+.pj-photo > span.pj-step-n {
+  display: block;
+}
+
+.funnel .story-bars {
+  grid-template-columns: repeat(11, 1fr);
+  gap: 4px;
 }

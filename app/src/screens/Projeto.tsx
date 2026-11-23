@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Icon } from '../components/Icon'
 import { PhotoButtons } from '../components/PhotoButtons'
+import { Celebrate } from '../components/Celebrate'
+import { ProjetoFunnel } from './ProjetoFunnel'
 import { Info, WithInfo } from '../components/Info'
 import { t } from '../i18n'
 import { type PjStep, projetoTodo } from '../game'
@@ -102,6 +104,9 @@ export function Projeto({ s, initialSec }: { s: AppState; initialSec?: Sec }) {
   const todo = projetoTodo(s)
   const [sec, setSec] = useState<Sec>(() => initialSec ?? SECS.find((x) => todo.count[x.id] > 0)?.id ?? 'expectativa')
   const next = todo.steps[0]
+  const started = !!pj.startedAt
+  const [funnel, setFunnel] = useState(false)
+  const [party, setParty] = useState(false)
   const go = (st: PjStep) => {
     setSec(st.sec)
     focusField(st.target)
@@ -126,13 +131,49 @@ export function Projeto({ s, initialSec }: { s: AppState; initialSec?: Sec }) {
           <Info light text={t('Dias que faltam até a data da sua meta. Você define a data na aba Expectativa.')} />
         </span>
         <p className="pj-result">{pj.vision.result || t('Seu projetinho está vazio. Vamos montar juntos?')}</p>
+        {started && <span className="pj-started">{t('Dia {n} do projetinho', { n: Math.max(1, daysBetween(new Date(pj.startedAt!), new Date()) + 1) })}</span>}
         <div className="pj-stats">
           <span>{kept === 1 ? t('1 promessa cumprida') : t('{n} promessas cumpridas', { n: kept })}</span>
           <span>{t('{a} de {b} metas batidas', { a: goalsDone, b: pj.goals.length })}</span>
         </div>
       </section>
 
-      {next ? (
+      {funnel && (
+        <ProjetoFunnel
+          s={s}
+          name={s.profile.name}
+          onClose={() => setFunnel(false)}
+          onDone={() => {
+            setFunnel(false)
+            setParty(true)
+            window.scrollTo(0, 0)
+          }}
+        />
+      )}
+      {party && (
+        <Celebrate
+          kind="level"
+          icon="flame"
+          kicker={t('Projetinho começou')}
+          title={t('Dia 1. Sem desculpa.')}
+          desc={t('Faltam {n} dias para "{r}". Volte amanhã para dizer se cumpriu sua promessa.', { n: left, r: pj.vision.result })}
+          button={t('Bora')}
+          onClose={() => setParty(false)}
+        />
+      )}
+
+      {!started ? (
+        <section className="card start-card">
+          <span className="start-ic">
+            <Icon name="flame" size={26} />
+          </span>
+          <b>{t('Seu projetinho ainda não começou')}</b>
+          <p>{t('Responda 10 perguntas rápidas, faça o juramento de sinceridade e comece. Leva uns 3 minutos.')}</p>
+          <button type="button" className="cta funnel-go" onClick={() => setFunnel(true)}>
+            {t('Começar projetinho')} <Icon name="arrow" size={18} />
+          </button>
+        </section>
+      ) : next ? (
         <section className="card next-step">
           <span className="next-eyebrow">
             <i>{todo.total}</i> {todo.total === 1 ? t('coisa para fazer aqui') : t('coisas para fazer aqui')}
@@ -176,7 +217,7 @@ export function Projeto({ s, initialSec }: { s: AppState; initialSec?: Sec }) {
 }
 
 function Num({ n, done }: { n: number; done: boolean }) {
-  return <span className={`pj-num ${done ? 'ok' : ''}`}>{done ? <Icon name="check" size={14} stroke={3.2} /> : n}</span>
+  return <span className={`pj-num ${done ? 'is-done' : ''}`}>{done ? <Icon name="check" size={14} stroke={3.2} /> : n}</span>
 }
 
 function Expectativa({ s, visionUrl, nextId }: { s: AppState; visionUrl?: string; nextId?: string }) {

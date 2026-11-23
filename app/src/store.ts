@@ -136,6 +136,10 @@ export interface Projeto {
   goals: Goal[]
   vision: Vision
   photos: GalleryPhoto[]
+  /** quando a pessoa terminou o funil "Começar projetinho" */
+  startedAt?: string
+  /** quando fez o juramento de sinceridade */
+  oathAt?: string
 }
 
 export function blankProjeto(startDate: string, cycleDays: number): Projeto {
