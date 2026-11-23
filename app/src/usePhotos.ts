@@ -16,13 +16,14 @@ export function useLatestPhoto(s: AppState, userId?: number, hasAvatar?: boolean
     const localAvatar = s.profile.avatarId
     if (chosen) getPhoto(chosen).then((u) => alive && setUrl(u ?? null))
     else if (latestId) getPhoto(latestId).then((u) => alive && setUrl(u ?? null))
+    else if (s.startPhotoId) getPhoto(s.startPhotoId).then((u) => alive && setUrl(u ?? null))
     else if (localAvatar) getPhoto(localAvatar).then((u) => alive && setUrl(u ?? (userId && hasAvatar ? avatarUrl(userId) : null)))
     else setUrl(userId && hasAvatar ? avatarUrl(userId) : null)
     return () => {
       alive = false
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chosen, latestId, userId, hasAvatar, s.profile.avatarId])
+  }, [chosen, latestId, userId, hasAvatar, s.profile.avatarId, s.startPhotoId])
   return url
 }
 

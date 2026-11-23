@@ -24,7 +24,8 @@ import { Plano } from './screens/Plano'
 import { Toaster, toast } from './components/Toast'
 import { applyImport, captureImport, isDemoHost } from './migrate'
 import { MoveToApp } from './components/MoveToApp'
-import { resetToBlank, setState, today, useAppState } from './store'
+import { FirstPhotos } from './components/FirstPhotos'
+import { getProjeto, resetToBlank, setState, today, useAppState } from './store'
 import { startSync } from './sync'
 import { refreshEvents } from './calendar'
 
@@ -44,6 +45,11 @@ export default function App() {
   const [pjSec, setPjSec] = useState<PjSec | undefined>(undefined)
   const [howAgain, setHowAgain] = useState(false)
   const [rankNotice, setRankNotice] = useState<string | null>(null)
+  const [fpOpen, setFpOpen] = useState(false)
+  const fpWanted = s.onboarded && !s.demo && !!s.seenHow && !s.photosAsked && !(s.startPhotoId && getProjeto(s).vision.photoId)
+  useEffect(() => {
+    if (fpWanted) setFpOpen(true)
+  }, [fpWanted])
 
   // abertura de novo ao voltar para o app depois de 30 minutos fora
   useEffect(() => {
@@ -223,6 +229,8 @@ export default function App() {
   const hhmm = new Date().toTimeString().slice(0, 5)
   const owes = !s.daily[today()] && hhmm >= s.profile.checkinTime
   const isAdmin = user?.role === 'admin'
+  // depois do "Como funciona", uma vez: shape atual e shape referência (fica aberta até a pessoa tocar em Continuar)
+  const needPhotos = fpOpen && !intro && !howAgain
 
   return (
     <div className="app">
@@ -234,10 +242,19 @@ export default function App() {
           }}
         />
       )}
-      {!intro && s.seenHow && !howAgain && !checkin && fresh && (
+      {needPhotos && (
+        <FirstPhotos
+          s={s}
+          onDone={() => {
+            setFpOpen(false)
+            setState((st) => ({ ...st, photosAsked: true }))
+          }}
+        />
+      )}
+      {!intro && s.seenHow && !howAgain && !checkin && !needPhotos && fresh && (
         <Celebrate kind="medal" icon={fresh.icon} title={fresh.title} desc={fresh.desc} onClose={() => setState((st) => ({ ...st, seenMedals: [...(st.seenMedals || []), fresh.id] }))} />
       )}
-      {!intro && s.seenHow && !howAgain && !checkin && !fresh && levelUp && (
+      {!intro && s.seenHow && !howAgain && !checkin && !needPhotos && !fresh && levelUp && (
         <Celebrate
           kind="level"
           icon="star"

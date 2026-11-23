@@ -1,0 +1,21 @@
+# Traduções (parte 29): suas duas fotos (shape atual e referência).
+D = {
+ 'Abra o ChatGPT, o Gemini ou outro app de imagem, envie a sua foto e cole este pedido:': ('Open ChatGPT, Gemini or another image app, send your photo and paste this request:', 'Abre ChatGPT, Gemini u otra app de imágenes, envía tu foto y pega este pedido:'),
+ 'Continuar sem as fotos': ('Continue without photos', 'Continuar sin las fotos'),
+ 'Copiar pedido': ('Copy request', 'Copiar pedido'),
+ 'Corpo inteiro, de frente, roupa de treino. Vira o seu "antes".': ('Full body, facing front, workout clothes. It becomes your "before".', 'Cuerpo entero, de frente, ropa de entrenamiento. Será tu "antes".'),
+ 'Dica: faça a sua com IA, para se visualizar': ('Tip: make yours with AI to picture yourself', 'Consejo: hazla con IA para visualizarte'),
+ 'Dá para escolher depois em Perfil > Editar fotos da abertura.': ('You can choose later in Profile > Edit opening photos.', 'Puedes elegir después en Perfil > Editar fotos de la apertura.'),
+ 'Elas aparecem toda vez que você abre o app: quem você é hoje e quem você vai ser.': ('They show every time you open the app: who you are today and who you will be.', 'Aparecen cada vez que abres la app: quién eres hoy y quién vas a ser.'),
+ 'Foto do seu shape atual salva': ('Current physique photo saved', 'Foto de tu físico actual guardada'),
+ 'O corpo que você quer ter.': ('The body you want to have.', 'El cuerpo que quieres tener.'),
+ 'Pedido copiado': ('Request copied', 'Pedido copiado'),
+ 'Salve a imagem que a IA criar e escolha ela aqui. Também vale uma foto sua de quando estava em forma.': ('Save the image the AI creates and choose it here. A photo of you when you were in shape also works.', 'Guarda la imagen que cree la IA y elígela aquí. También vale una foto tuya de cuando estabas en forma.'),
+ 'Selecione a foto do seu shape atual': ('Choose a photo of your current physique', 'Elige la foto de tu físico actual'),
+ 'Selecione a foto do seu shape referência': ('Choose a photo of your reference physique', 'Elige la foto de tu físico de referencia'),
+ 'Suas duas fotos': ('Your two photos', 'Tus dos fotos'),
+ 'Use esta foto minha e me mostre {g}, com o abdômen definido e mais músculo, mesma pose, mesma luz e mesmo lugar. Realista, sem filtro.': ('Use this photo of me and show me {g}, with defined abs and more muscle, same pose, same light and same place. Realistic, no filter.', 'Usa esta foto mía y muéstrame {g}, con el abdomen definido y más músculo, misma pose, misma luz y mismo lugar. Realista, sin filtro.'),
+ 'mais forte': ('stronger', 'más fuerte'),
+ '{n} kg mais magro': ('{n} kg leaner', '{n} kg más delgado'),
+ 'Último passo': ('Last step', 'Último paso'),
+}

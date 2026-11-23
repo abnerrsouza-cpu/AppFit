@@ -7917,3 +7917,112 @@ textarea {
   justify-content: center;
   gap: 8px;
 }
+
+/* ---------- suas duas fotos ---------- */
+.fp {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  overflow-y: auto;
+  background: var(--bg);
+}
+.fp-in {
+  max-width: 520px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: max(24px, env(safe-area-inset-top, 0px)) 16px calc(32px + env(safe-area-inset-bottom, 0px));
+}
+.fp-in h1 {
+  margin: 0;
+  font-size: 2rem;
+  letter-spacing: -0.03em;
+}
+.fp-in .lead {
+  margin: 0;
+}
+.fp-step {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 22px;
+}
+.fp-h {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.fp-h > span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.fp-h small {
+  color: var(--fg-2);
+  line-height: 1.35;
+}
+.fp-n {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+.fp-n.is-done {
+  background: var(--good);
+}
+.fp-img {
+  width: min(100%, 240px);
+  aspect-ratio: 3 / 4;
+  align-self: center;
+  border-radius: 20px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  border: 2px dashed color-mix(in srgb, var(--accent) 40%, transparent);
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+}
+.fp-img.ok {
+  border: 2px solid var(--good);
+}
+.fp-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.fp-tip {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  border-radius: 16px;
+  background: color-mix(in srgb, #a78bfa 14%, transparent);
+  border: 1px solid color-mix(in srgb, #a78bfa 40%, transparent);
+}
+.fp-tip b {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #7c3aed;
+}
+.fp-tip small {
+  color: var(--fg-2);
+  line-height: 1.35;
+}
+.fp-tip p {
+  margin: 2px 0;
+  font-style: italic;
+  line-height: 1.4;
+}
+.fp-tip .link {
+  align-self: flex-start;
+  font-weight: 800;
+}
