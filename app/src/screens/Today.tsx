@@ -51,7 +51,17 @@ export function todayProgress(s: AppState) {
 }
 
 export function Today({ s, user, go, goMenu, openCheckin, owes, onMission }: { s: AppState; user?: User | null; go: (tab: Tab) => void; goMenu: (sec: string) => void; openCheckin: () => void; owes: boolean; onMission: (a: Mission['action']) => void }) {
-  const [view, setView] = useState<'geral' | 'dia'>('geral')
+  const [view, setView] = useState<'geral' | 'dia'>(() => {
+    try {
+      if (sessionStorage.getItem('sd:view') === 'dia') {
+        sessionStorage.removeItem('sd:view')
+        return 'dia'
+      }
+    } catch {
+      /* ignora */
+    }
+    return 'geral'
+  })
   const myPhoto = useLatestPhoto(s, user?.id, user?.hasAvatar)
   const refPhoto = useRefPhoto(s)
   const p = s.profile

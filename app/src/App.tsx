@@ -110,6 +110,31 @@ export default function App() {
     void api.ping(getLang()).catch(() => {})
     void subscribePush()
     void refreshEvents(true)
+    // veio de uma notificação: abre direto na tela certa
+    {
+      const u = new URL(location.href)
+      const abrir = u.searchParams.get('abrir')
+      if (abrir) {
+        u.searchParams.delete('abrir')
+        history.replaceState(null, '', u.pathname + u.search)
+        if (abrir === 'checkin') setCheckin(true)
+        else if (abrir === 'plano') setTab('plano')
+        else if (abrir === 'evolucao') setTab('evolucao')
+        else if (abrir === 'semanal') {
+          setOpenWeekly(true)
+          setTab('evolucao')
+        } else if (abrir === 'promessas') {
+          setPjSec('promessas')
+          setTab('projeto')
+        } else if (abrir === 'dia') {
+          try {
+            sessionStorage.setItem('sd:view', 'dia')
+          } catch {
+            /* ignora */
+          }
+        }
+      }
+    }
     if (new URL(location.href).searchParams.get('integracao')) {
       setMenuSec('integracoes')
       setTab('menu')

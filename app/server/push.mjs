@@ -16,7 +16,7 @@ export async function initPush() {
 export const vapidPublicKey = () => publicKey
 
 /** Envia para todos os aparelhos do usuário. Com `dedupe`, nunca envia a mesma coisa duas vezes. */
-export async function sendToUser(userId, { title, body, kind, dedupe = null }) {
+export async function sendToUser(userId, { title, body, kind, dedupe = null, url = '/' }) {
   const ins = await q(
     `insert into notif_log (user_id, kind, dedupe, title, body, ok) values ($1, $2, $3, $4, $5, false)
      on conflict do nothing returning id`,
@@ -27,7 +27,7 @@ export async function sendToUser(userId, { title, body, kind, dedupe = null }) {
   let ok = false
   for (const s of subs.rows) {
     try {
-      await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify({ title, body }), { TTL: 3600 })
+      await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify({ title, body, url }), { TTL: 3600 })
       ok = true
     } catch (e) {
       if (e.statusCode === 404 || e.statusCode === 410) await q('delete from push_subs where id = $1', [s.id]) // aparelho saiu
@@ -78,6 +78,8 @@ async function tick() {
     const reported = !!r.data?.daily?.[now.date]
     for (const n of r.schedule || []) {
       if (n.date !== now.date) continue
+      // a rotina agora é do motor novo (coach.mjs); daqui saem só compromissos da agenda e o modo teste
+      if (!String(n.moment).startsWith('ev:') && !String(n.moment).startsWith('teste')) continue
       const diff = nowMin - minutes(n.time)
       if (diff < 0 || diff > 10) continue // só o que venceu nos últimos 10 minutos
       if (reported && (n.moment === 'checkin' || n.moment === 'checkin_atrasado')) continue

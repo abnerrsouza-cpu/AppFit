@@ -11,6 +11,7 @@ import { authorizeUrl, exchange, fetchPicture, newState, providers } from './oau
 import { eventsFor, normalizeUrl } from './calendar.mjs'
 import { parsePlan, planReady } from './plan.mjs'
 import { canSeeAvatar, migrateSocial, registerSocial, startRankScheduler } from './social.mjs'
+import { startCoach } from './coach.mjs'
 
 const DIST = join(import.meta.dirname, '..', 'dist')
 const PORT = Number(process.env.PORT) || 3000
@@ -424,7 +425,7 @@ route('GET', '/api/admin/stats', async (req, res) => {
        from generate_series(date_trunc('week', current_date) - interval '11 weeks', date_trunc('week', current_date), interval '1 week') w order by w`),
     q(`select m::date::text as month, (select count(distinct user_id) from activity a where a.day >= m::date and a.day < (m + interval '1 month')::date)::int as n
        from generate_series(date_trunc('month', current_date) - interval '5 months', date_trunc('month', current_date), interval '1 month') m order by m`),
-    q(`select count(*) filter (where sent_at > now() - interval '1 day')::int as day, count(*) filter (where sent_at > now() - interval '7 days')::int as week from notif_log where ok`),
+    q(`select count(*) filter (where sent_at > now() - interval '1 day')::int as day, count(*) filter (where sent_at > now() - interval '7 days')::int as week from notif_log where ok and kind not in ('coach', 'coach-key')`),
   ])
   send(res, 200, { totals: tot.rows[0], daily: dau.rows, weekly: wau.rows, monthly: mau.rows, sent: sent.rows[0] })
 })
@@ -434,8 +435,8 @@ route('GET', '/api/admin/notifications', async (req, res) => {
   const [cfg, br, log, by] = await Promise.all([
     getSetting('notifications', { enabled: true }),
     q('select * from broadcasts order by coalesce(sent_at, send_at) desc limit 20'),
-    q(`select l.kind, l.title, l.body, l.ok, l.sent_at, u.name from notif_log l left join users u on u.id = l.user_id order by l.sent_at desc limit 50`),
-    q(`select kind, count(*)::int as n from notif_log where ok and sent_at > now() - interval '7 days' group by kind`),
+    q(`select l.kind, l.title, l.body, l.ok, l.sent_at, u.name from notif_log l left join users u on u.id = l.user_id where l.kind not in ('coach', 'coach-key') order by l.sent_at desc limit 50`),
+    q(`select kind, count(*)::int as n from notif_log where ok and kind not in ('coach', 'coach-key') and sent_at > now() - interval '7 days' group by kind`),
   ])
   send(res, 200, { settings: cfg, broadcasts: br.rows, log: log.rows, byKind: by.rows })
 })
@@ -522,4 +523,5 @@ await ensureAdmin()
 await initPush()
 startScheduler()
 startRankScheduler()
+startCoach()
 server.listen(PORT, () => console.log(`Dont Sorry IA no ar na porta ${PORT}`))
