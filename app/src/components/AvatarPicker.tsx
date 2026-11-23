@@ -6,6 +6,7 @@ import { compress, getPhoto, putPhoto } from '../photos'
 import { newId, setState } from '../store'
 import { Icon } from './Icon'
 import { PhotoButtons } from './PhotoButtons'
+import { toast } from './Toast'
 
 /**
  * Foto de perfil: guarda no celular (profile.avatarId) e, com conta, também no servidor.
@@ -51,6 +52,7 @@ export function AvatarPicker({
       setState((st) => ({ ...st, profile: { ...st.profile, avatarId: id } }))
       if (isServerMode()) await api.setAvatar(data).catch(() => {})
       onSaved?.()
+      toast(t('Foto de perfil salva'))
     } catch {
       setErr(t('Não consegui abrir essa foto. Tente outra.'))
     } finally {

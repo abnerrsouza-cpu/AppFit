@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Icon } from '../components/Icon'
 import { PhotoButtons } from '../components/PhotoButtons'
+import { toast } from '../components/Toast'
 import { t } from '../i18n'
 import { compress, getPhoto, putPhoto } from '../photos'
 import { type AppState, addDays, daysBetween, fmtDayMonth, getProjeto, newId, parseYmd, setProjeto, today, ymd } from '../store'
@@ -126,6 +127,7 @@ export function ProjetoFunnel({ s, name, onClose, onDone }: { s: AppState; name:
     await putPhoto(id, url)
     set({ photoId: id })
     setBusy(false)
+    toast(t('Foto salva'))
   }
 
   const left = Math.max(0, daysBetween(new Date(), parseYmd(d.targetDate)))

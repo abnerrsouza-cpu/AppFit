@@ -1,0 +1,22 @@
+# Traduções (parte 19): confirmações de foto, antes e depois, semana fechada.
+D = {
+ '+{n} pontos': ('+{n} points', '+{n} puntos'),
+ 'Agora falta a foto de depois.': ('Now the after photo is missing.', 'Ahora falta la foto del después.'),
+ 'Agora toque em Fechar a semana para salvar.': ('Now tap Close the week to save.', 'Ahora toca Cerrar la semana para guardar.'),
+ 'Antes: uma foto de corpo inteiro de hoje ou do início. Depois: a foto do check-in semanal. Com as duas, a comparação aparece aqui.': ('Before: a full-body photo from today or the start. After: the weekly check-in photo. With both, the comparison shows here.', 'Antes: una foto de cuerpo entero de hoy o del inicio. Después: la foto del check-in semanal. Con las dos, la comparación aparece aquí.'),
+ 'Check-in atualizado': ('Check-in updated', 'Check-in actualizado'),
+ 'Fazer check-in semanal': ('Do the weekly check-in', 'Hacer el check-in semanal'),
+ 'Foto de perfil salva': ('Profile photo saved', 'Foto de perfil guardada'),
+ 'Foto de referência salva': ('Reference photo saved', 'Foto de referencia guardada'),
+ 'Foto do antes salva': ('Before photo saved', 'Foto del antes guardada'),
+ 'Foto pronta': ('Photo ready', 'Foto lista'),
+ 'Foto salva': ('Photo saved', 'Foto guardada'),
+ 'Foto salva na galeria': ('Photo saved to the gallery', 'Foto guardada en la galería'),
+ 'Monte seu antes e depois': ('Build your before and after', 'Arma tu antes y después'),
+ 'Os botões acima trocam a foto do antes.': ('The buttons above replace the before photo.', 'Los botones de arriba cambian la foto del antes.'),
+ 'Passo 1: tire ou escolha uma foto de corpo inteiro para ser o seu antes.': ('Step 1: take or choose a full-body photo to be your before.', 'Paso 1: toma o elige una foto de cuerpo entero para que sea tu antes.'),
+ 'Passo 2: faça o check-in semanal com uma foto nova. Ela vira o seu depois.': ('Step 2: do the weekly check-in with a new photo. It becomes your after.', 'Paso 2: haz el check-in semanal con una foto nueva. Será tu después.'),
+ 'Salva': ('Saved', 'Guardada'),
+ 'Semana fechada': ('Week closed', 'Semana cerrada'),
+ 'Sua foto só fica salva quando você fechar a semana.': ('Your photo is only saved when you close the week.', 'Tu foto solo se guarda cuando cierres la semana.'),
+}

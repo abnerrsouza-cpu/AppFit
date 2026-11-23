@@ -66,7 +66,7 @@ function Steps({ list }: { list: string[] }) {
   )
 }
 
-export function Ranking({ online, onBack, notice }: { online: boolean; onBack: () => void; notice?: string | null }) {
+export function Ranking({ online, onBack, notice }: { online: boolean; onBack?: () => void; notice?: string | null }) {
   const [scope, setScope] = useState<Scope>('amigos')
   const [info, setInfo] = useState<SocialInfo | null>(null)
   const [rows, setRows] = useState<RankRow[] | null>(null)
@@ -311,12 +311,14 @@ export function Ranking({ online, onBack, notice }: { online: boolean; onBack: (
   )
 }
 
-function Head({ onBack }: { onBack: () => void }) {
+function Head({ onBack }: { onBack?: () => void }) {
   return (
     <div className="sheet-h">
-      <button type="button" className="round-btn" onClick={onBack} aria-label={t('Voltar')}>
-        <Icon name="back" />
-      </button>
+      {onBack && (
+        <button type="button" className="round-btn" onClick={onBack} aria-label={t('Voltar')}>
+          <Icon name="back" />
+        </button>
+      )}
       <span className="eyebrow">{t('Ranking')}</span>
     </div>
   )

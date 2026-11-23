@@ -38,3 +38,17 @@ export function useRefPhoto(s: AppState) {
   }, [id])
   return url
 }
+
+/** URL de uma foto guardada no aparelho. */
+export function usePhotoUrl(id?: string) {
+  const [url, setUrl] = useState<string | null>(null)
+  useEffect(() => {
+    let alive = true
+    if (id) getPhoto(id).then((u) => alive && setUrl(u ?? null))
+    else setUrl(null)
+    return () => {
+      alive = false
+    }
+  }, [id])
+  return url
+}

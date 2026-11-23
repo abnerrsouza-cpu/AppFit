@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Icon } from '../components/Icon'
 import { PhotoButtons } from '../components/PhotoButtons'
 import { Celebrate } from '../components/Celebrate'
+import { toast } from '../components/Toast'
 import { ProjetoFunnel } from './ProjetoFunnel'
 import { Info, WithInfo } from '../components/Info'
 import { t } from '../i18n'
@@ -227,7 +228,10 @@ function Expectativa({ s, visionUrl, nextId }: { s: AppState; visionUrl?: string
   const pickVision = async (f?: File) => {
     setBusy(true)
     const id = await savePhoto(f)
-    if (id) upd({ photoId: id })
+    if (id) {
+      upd({ photoId: id })
+      toast(t('Foto de referência salva'))
+    }
     setBusy(false)
   }
   const done = [!!v.photoId, !!v.result.trim(), !!v.feeling.trim(), !!v.why.trim()].filter(Boolean).length
@@ -531,7 +535,10 @@ function Fotos({ s }: { s: AppState }) {
   const addPhoto = async (f?: File) => {
     setBusy(true)
     const id = await savePhoto(f)
-    if (id) setProjeto((p) => ({ ...p, photos: [{ id: newId(), photoId: id, caption: '', date: today() }, ...p.photos] }))
+    if (id) {
+      setProjeto((p) => ({ ...p, photos: [{ id: newId(), photoId: id, caption: '', date: today() }, ...p.photos] }))
+      toast(t('Foto salva na galeria'))
+    }
     setBusy(false)
   }
   return (

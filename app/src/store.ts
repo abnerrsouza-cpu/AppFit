@@ -86,6 +86,7 @@ export interface AppState {
   lang?: Lang
   seenMedals?: string[] // medalhas já comemoradas
   seenHow?: boolean // já viu o "Como funciona"
+  startPhotoId?: string // foto do antes (início do projeto)
   lastLevel?: number
   testEvery?: number // modo teste: dispara a cada N minutos (0 = desligado)
   projeto?: Projeto

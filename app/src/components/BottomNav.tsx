@@ -7,13 +7,14 @@ const ITEMS: { id: Tab; label: string; icon: string }[] = [
   { id: 'inicio', label: 'Hoje', icon: 'sun' },
   { id: 'evolucao', label: 'Evolução', icon: 'photo' },
   { id: 'projeto', label: 'Projetinho', icon: 'star' },
+  { id: 'ranking', label: 'Ranking', icon: 'trophy' },
   { id: 'menu', label: 'Perfil', icon: 'user' },
 ]
 
 export function BottomNav({ tab, onTab, dots, admin = false }: { tab: Tab; onTab: (t: Tab) => void; dots: Partial<Record<Tab, boolean>>; admin?: boolean }) {
   const items = admin ? [...ITEMS, { id: 'admin' as Tab, label: 'Admin', icon: 'lock' }] : ITEMS
   return (
-    <nav className={`bnav ${admin ? 'n5' : ''}`} aria-label={t('Navegação principal')}>
+    <nav className={`bnav ${admin ? 'n6' : 'n5'}`} aria-label={t('Navegação principal')}>
       {items.map((it) => (
         <button
           key={it.id}

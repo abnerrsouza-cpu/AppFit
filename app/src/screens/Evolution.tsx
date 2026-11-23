@@ -2,6 +2,9 @@ import { useMemo, useState } from 'react'
 import { BeforeAfter } from '../components/BeforeAfter'
 import { Icon } from '../components/Icon'
 import { PhotoButtons } from '../components/PhotoButtons'
+import { toast } from '../components/Toast'
+import { usePhotoUrl } from '../usePhotos'
+import { XP } from '../game'
 import { Info, WithInfo } from '../components/Info'
 import { Locked } from '../components/Locked'
 import { compress, putPhoto } from '../photos'
@@ -13,7 +16,11 @@ const label = (w: WeeklyLog, i: number) => `${t('Sem.')} ${i + 1} · ${fmtDayMon
 
 export function Evolution({ s, openCheckin, openWeekly = false }: { s: AppState; openCheckin: () => void; openWeekly?: boolean }) {
   const weeks = useMemo(() => Object.values(s.weekly).sort((a, b) => a.weekStart.localeCompare(b.weekStart)), [s.weekly])
-  const withPhoto = weeks.map((w, i) => ({ w, i })).filter((x) => x.w.photoId)
+  // foto do antes (início) + fotos dos check-ins semanais
+  const withPhoto = [
+    ...(s.startPhotoId ? [{ id: s.startPhotoId, label: t('Início') }] : []),
+    ...weeks.map((w, i) => ({ w, i })).filter((x) => x.w.photoId).map((x) => ({ id: x.w.photoId!, label: label(x.w, x.i) })),
+  ]
   const [aIdx, setA] = useState(0)
   const [bIdx, setB] = useState(Math.max(0, withPhoto.length - 1))
   const [form, setForm] = useState(openWeekly)
@@ -36,20 +43,14 @@ export function Evolution({ s, openCheckin, openWeekly = false }: { s: AppState;
       </header>
 
       {withPhoto.length < 2 ? (
-        <Locked
-          icon="camera"
-          title={t('Envie 2 fotos semanais para liberar o Antes x Depois')}
-          text={t('Tire uma foto de corpo inteiro no check-in semanal. Na segunda semana, a comparação aparece aqui.')}
-          progress={[withPhoto.length, 2]}
-          onClick={() => setForm(true)}
-        />
+        <StartPair s={s} weekPhotoId={s.weekly[thisWeek]?.photoId} openWeekly={() => setForm(true)} />
       ) : (
       <section className="card block">
         <BeforeAfter
-          beforeId={A?.w.photoId}
-          afterId={B && B !== A ? B.w.photoId : undefined}
-          beforeLabel={A ? label(A.w, A.i) : ''}
-          afterLabel={B ? label(B.w, B.i) : ''}
+          beforeId={A?.id}
+          afterId={B && B !== A ? B.id : undefined}
+          beforeLabel={A?.label ?? ''}
+          afterLabel={B?.label ?? ''}
         />
         {withPhoto.length >= 2 && (
           <div className="row2 pickers">
@@ -58,7 +59,7 @@ export function Evolution({ s, openCheckin, openWeekly = false }: { s: AppState;
               <select id="ev-a" value={aIdx} onChange={(e) => setA(Number(e.target.value))}>
                 {withPhoto.map((x, k) => (
                   <option key={k} value={k}>
-                    {label(x.w, x.i)}
+                    {x.label}
                   </option>
                 ))}
               </select>
@@ -68,7 +69,7 @@ export function Evolution({ s, openCheckin, openWeekly = false }: { s: AppState;
               <select id="ev-b" value={bIdx} onChange={(e) => setB(Number(e.target.value))}>
                 {withPhoto.map((x, k) => (
                   <option key={k} value={k}>
-                    {label(x.w, x.i)}
+                    {x.label}
                   </option>
                 ))}
               </select>
@@ -240,6 +241,7 @@ function WeeklyForm({ s, onClose }: { s: AppState; onClose: () => void }) {
       await putPhoto(id, url)
       setPreview(url)
       set('photoId', id)
+      toast(t('Foto pronta'), t('Agora toque em Fechar a semana para salvar.'))
     } finally {
       setBusy(false)
     }
@@ -270,7 +272,9 @@ function WeeklyForm({ s, onClose }: { s: AppState; onClose: () => void }) {
         className="form"
         onSubmit={(e) => {
           e.preventDefault()
+          const first = !s.weekly[key]
           setState((st) => ({ ...st, weekly: { ...st.weekly, [key]: { ...f, submittedAt: new Date().toISOString() } } }))
+          toast(first ? t('Semana fechada') : t('Check-in atualizado'), first ? t('+{n} pontos', { n: XP.weekly + (f.photoId ? XP.photo : 0) }) : undefined)
           onClose()
         }}
       >
@@ -343,11 +347,14 @@ function WeeklyForm({ s, onClose }: { s: AppState; onClose: () => void }) {
           </label>
         </fieldset>
 
-        <WithInfo text={t('Salva o check-in da semana. A foto entra no antes e depois e o peso entra no gráfico.')}>
-          <button type="submit" className="cta">
-            {t('Fechar a semana')}
-          </button>
-        </WithInfo>
+        <div className="sticky-submit">
+          {f.photoId && !s.weekly[key]?.submittedAt && <small>{t('Sua foto só fica salva quando você fechar a semana.')}</small>}
+          <WithInfo text={t('Salva o check-in da semana. A foto entra no antes e depois e o peso entra no gráfico.')}>
+            <button type="submit" className="cta">
+              {t('Fechar a semana')}
+            </button>
+          </WithInfo>
+        </div>
       </form>
     </div>
   )
@@ -387,6 +394,73 @@ function Journey({ s }: { s: AppState }) {
           <Icon name="quote" size={18} /> {p.letter}
         </p>
       )}
+    </section>
+  )
+}
+
+/** Antes x Depois com 2 vagas: a foto do início (salva na hora) e a da semana. */
+function StartPair({ s, weekPhotoId, openWeekly }: { s: AppState; weekPhotoId?: string; openWeekly: () => void }) {
+  const before = usePhotoUrl(s.startPhotoId)
+  const after = usePhotoUrl(weekPhotoId)
+  const [busy, setBusy] = useState(false)
+  const pick = async (file?: File) => {
+    if (!file) return
+    setBusy(true)
+    try {
+      const url = await compress(file)
+      const id = newId()
+      await putPhoto(id, url)
+      setState((st) => ({ ...st, startPhotoId: id }))
+      toast(t('Foto do antes salva'), t('Agora falta a foto de depois.'))
+    } finally {
+      setBusy(false)
+    }
+  }
+  const done = Number(!!s.startPhotoId) + Number(!!weekPhotoId)
+  return (
+    <section className="card block pair">
+      <div className="block-h">
+        <h2 className="ttl">
+          {t('Monte seu antes e depois')}
+          <Info text={t('Antes: uma foto de corpo inteiro de hoje ou do início. Depois: a foto do check-in semanal. Com as duas, a comparação aparece aqui.')} />
+        </h2>
+        <small className="pair-count">{t('{a} de {b}', { a: done, b: 2 })}</small>
+      </div>
+      <div className="pair-grid">
+        <div className={`pair-slot ${before ? 'ok' : ''}`}>
+          <span className="pair-tag">{t('Antes')}</span>
+          {before ? <img src={before} alt="" /> : <Icon name="camera" size={28} />}
+          {before && (
+            <span className="pair-saved">
+              <Icon name="check" size={12} stroke={3} /> {t('Salva')}
+            </span>
+          )}
+        </div>
+        <div className={`pair-slot ${after ? 'ok' : ''}`}>
+          <span className="pair-tag">{t('Depois')}</span>
+          {after ? <img src={after} alt="" /> : <Icon name="camera" size={28} />}
+          {after && (
+            <span className="pair-saved">
+              <Icon name="check" size={12} stroke={3} /> {t('Salva')}
+            </span>
+          )}
+        </div>
+      </div>
+      {!s.startPhotoId ? (
+        <>
+          <p className="lead">{t('Passo 1: tire ou escolha uma foto de corpo inteiro para ser o seu antes.')}</p>
+          <PhotoButtons onFile={pick} disabled={busy} />
+        </>
+      ) : !weekPhotoId ? (
+        <>
+          <p className="lead">{t('Passo 2: faça o check-in semanal com uma foto nova. Ela vira o seu depois.')}</p>
+          <button type="button" className="cta" onClick={openWeekly}>
+            {t('Fazer check-in semanal')}
+          </button>
+          <PhotoButtons onFile={pick} disabled={busy} />
+          <small className="muted center-txt">{t('Os botões acima trocam a foto do antes.')}</small>
+        </>
+      ) : null}
     </section>
   )
 }
