@@ -34,6 +34,7 @@ export function Auth({ s, onUser }: { s: AppState; onUser: (u: User) => void }) 
   const [avatar, setAvatar] = useState<string>()
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
+  const [forgot, setForgot] = useState(false)
 
   // erro vindo do login com Google/Strava (volta como ?auth_error=...)
   useEffect(() => {
@@ -150,6 +151,28 @@ export function Auth({ s, onUser }: { s: AppState; onUser: (u: User) => void }) 
           <button type="submit" className="cta" disabled={busy}>
             {busy ? t('Enviando...') : mode === 'criar' ? t('Enviar solicitação de acesso') : t('Entrar')}
           </button>
+          {mode === 'entrar' && (
+            <button type="button" className="link" onClick={() => setForgot(!forgot)}>
+              {t('Esqueci minha senha')}
+            </button>
+          )}
+          {mode === 'entrar' && forgot && (
+            <ol className="how-steps forgot">
+              <li>
+                <span>1</span>
+                {t('Fale com o suporte pelo mesmo canal em que você comprou o app.')}
+              </li>
+              <li>
+                <span>2</span>
+                {t('Informe o e-mail da sua conta. O suporte gera uma senha nova e te manda.')}
+              </li>
+              <li>
+                <span>3</span>
+                {t('Entre com a senha nova e troque por uma sua em Perfil.')}
+              </li>
+            </ol>
+          )}
+          {mode === 'entrar' && <p className="muted center-txt">{t('Se você criou a conta com Google ou Strava, use o mesmo botão lá em cima.')}</p>}
         </form>
         <LangPicker s={s} />
       </div>

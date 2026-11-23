@@ -23,6 +23,7 @@ export function Admin({ onPending, onBack }: { onPending: (n: number) => void; o
   const [sec, setSec] = useState<Sec>('solicitacoes')
   const [users, setUsers] = useState<AdminUser[]>([])
   const [err, setErr] = useState('')
+  const [newPwd, setNewPwd] = useState<{ name: string; email: string; password: string } | null>(null)
   const load = useCallback(() => {
     api.admin
       .users()
@@ -99,6 +100,25 @@ export function Admin({ onPending, onBack }: { onPending: (n: number) => void; o
         </section>
       )}
 
+      {newPwd && (
+        <section className="card adm-pwd">
+          <b>Senha nova de {newPwd.name}</b>
+          <p>Mande para a pessoa. Ela entra com o e-mail e essa senha, e depois troca em Perfil.</p>
+          <code>{newPwd.password}</code>
+          <div className="row2">
+            <button
+              type="button"
+              className="ghost-btn"
+              onClick={() => navigator.clipboard?.writeText(`Sua senha nova do app: ${newPwd.password}\nEntre com o e-mail ${newPwd.email} em ${location.origin}`)}
+            >
+              Copiar mensagem
+            </button>
+            <button type="button" className="ghost-btn" onClick={() => setNewPwd(null)}>
+              Fechar
+            </button>
+          </div>
+        </section>
+      )}
       {sec === 'usuarios' && (
         <section className="adm-list">
           <p className="ttl hint">
@@ -139,6 +159,21 @@ export function Admin({ onPending, onBack }: { onPending: (n: number) => void; o
                       Bloquear acesso
                     </button>
                   )}
+                  <button
+                    type="button"
+                    className="chip"
+                    onClick={async () => {
+                      if (!confirm(`Gerar uma senha nova para ${u.name}? A senha atual deixa de funcionar.`)) return
+                      try {
+                        const r = await api.admin.resetPassword(u.id)
+                        setNewPwd({ name: u.name, email: r.email, password: r.password })
+                      } catch (e) {
+                        setErr((e as Error).message)
+                      }
+                    }}
+                  >
+                    Gerar senha nova
+                  </button>
                 </div>
               )}
             </div>

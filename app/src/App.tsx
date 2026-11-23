@@ -21,7 +21,9 @@ import { Projeto, type Sec as PjSec } from './screens/Projeto'
 import { Today } from './screens/Today'
 import { Ranking } from './screens/Ranking'
 import { Plano } from './screens/Plano'
-import { Toaster } from './components/Toast'
+import { Toaster, toast } from './components/Toast'
+import { applyImport, captureImport, isDemoHost } from './migrate'
+import { MoveToApp } from './components/MoveToApp'
 import { resetToBlank, setState, today, useAppState } from './store'
 import { startSync } from './sync'
 import { refreshEvents } from './calendar'
@@ -95,6 +97,9 @@ export default function App() {
     if (!synced.current) {
       synced.current = true
       await startSync(u.name)
+      const imp = applyImport()
+      if (imp === 'imported') setTimeout(() => toast(t('Seus dados foram trazidos para a conta.'), t('As fotos ficaram no aparelho antigo: envie de novo.')), 1500)
+      if (imp === 'kept') setTimeout(() => toast(t('Sua conta já tinha dados.'), t('Mantive os dados da conta.')), 1500)
     }
     void api.ping(getLang()).catch(() => {})
     void subscribePush()
@@ -110,6 +115,7 @@ export default function App() {
 
   useEffect(() => {
     void registerSW()
+    void captureImport()
     {
       const sp = new URL(location.href).searchParams
       const code = sp.get('amigo') || sp.get('grupo')
@@ -207,6 +213,7 @@ export default function App() {
         </span>
       </div>
     )
+  if (phase === 'local' && isDemoHost()) return <MoveToApp s={s} />
   if (phase === 'auth') return <Auth s={s} onUser={enter} />
   if (phase === 'pending' && user) return <Pending user={user} onUser={enter} onLogout={logout} />
 

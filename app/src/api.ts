@@ -12,6 +12,7 @@ export interface User {
   strava?: boolean
   google?: boolean
   provider?: 'senha' | 'google' | 'strava'
+  hasPassword?: boolean
 }
 
 export class ApiError extends Error {
@@ -96,6 +97,7 @@ export const api = {
   login: (email: string, password: string) => call<{ user: User }>('POST', '/api/auth/login', { email, password }),
   logout: () => call('POST', '/api/auth/logout'),
   me: () => call<{ user: User }>('GET', '/api/me'),
+  changePassword: (current: string, next: string) => call('PUT', '/api/me/password', { current, next }),
   setAvatar: (avatar: string | null) => call('PUT', '/api/me/avatar', { avatar }),
   ping: (lang: string) => call('POST', '/api/ping', { lang, tz: tz() }),
   getState: () => call<{ data: unknown | null }>('GET', '/api/state'),
@@ -123,6 +125,7 @@ export const api = {
     notifications: () => call<AdminNotifs>('GET', '/api/admin/notifications'),
     setEnabled: (enabled: boolean) => call('PUT', '/api/admin/notifications', { enabled }),
     broadcast: (title: string, body: string, sendAt?: string) => call('POST', '/api/admin/broadcasts', { title, body, sendAt }),
+    resetPassword: (id: number) => call<{ password: string; email: string }>('POST', `/api/admin/users/${id}/password`),
     cancelBroadcast: (id: number) => call('DELETE', `/api/admin/broadcasts/${id}`),
   },
 }

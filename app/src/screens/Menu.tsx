@@ -1,12 +1,14 @@
 import { type ReactNode, useEffect, useState } from 'react'
 import { Icon } from '../components/Icon'
 import { Info, WithInfo } from '../components/Info'
-import { type User, showEmail } from '../api'
+import { type User, api, showEmail } from '../api'
 import { LANGS, t, weekday } from '../i18n'
 import { Integracoes } from './Integracoes'
 import { AvatarPicker } from '../components/AvatarPicker'
 import { PdfImport } from '../components/PdfImport'
 import { RoutineTasks } from '../components/RoutineTasks'
+import { LoginCta } from '../components/LoginCta'
+import { toast } from '../components/Toast'
 import { type AppState, type Profile, bmi, currentWeight, newId, resetToBlank, resetToDemo, setLang, setState } from '../store'
 
 type Section = null | 'perfil' | 'rotina' | 'treino' | 'dieta' | 'agenda' | 'relogio' | 'carta' | 'integracoes'
@@ -67,9 +69,10 @@ export function Menu({ s, user = null, onUser, onLogout, onHow, onConquistas, on
           <small>
             {t(p.goal)} · {p.height} cm · {currentWeight(s).toFixed(1)} kg
           </small>
-          {user && <small>{showEmail(user.email)}</small>}
         </span>
       </div>
+
+      <Account user={user} onLogout={onLogout} />
 
       <div className="card menu-group">
         <span className="group-label ttl">
@@ -448,5 +451,89 @@ export function LangPicker({ s }: { s: AppState }) {
       ))}
     </div>
     </>
+  )
+}
+
+/** Sua conta: com quem está conectado, trocar senha e sair. Sem conta: convite para criar. */
+function Account({ user, onLogout }: { user: User | null; onLogout?: () => void }) {
+  const [open, setOpen] = useState(false)
+  const [cur, setCur] = useState('')
+  const [next, setNext] = useState('')
+  const [again, setAgain] = useState('')
+  const [err, setErr] = useState('')
+  const [busy, setBusy] = useState(false)
+  if (!user) return <LoginCta title={t('Você está sem conta')} text={t('Crie sua conta para salvar seus dados, entrar no ranking e receber as cobranças com o app fechado.')} />
+  const via = user.provider === 'google' ? t('Entrou com Google') : user.provider === 'strava' ? t('Entrou com Strava') : t('Entrou com e-mail e senha')
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setErr('')
+    if (next.length < 6) return setErr(t('A senha precisa ter pelo menos 6 caracteres'))
+    if (next !== again) return setErr(t('As duas senhas novas não são iguais.'))
+    setBusy(true)
+    try {
+      await api.changePassword(cur, next)
+      toast(user.hasPassword ? t('Senha trocada') : t('Senha criada'), t('Use no próximo login.'))
+      setOpen(false)
+      setCur('')
+      setNext('')
+      setAgain('')
+    } catch (x) {
+      setErr(t((x as Error).message))
+    } finally {
+      setBusy(false)
+    }
+  }
+  return (
+    <section className="card account">
+      <div className="account-h">
+        <span className="account-ok">
+          <Icon name="check" size={16} stroke={3} />
+        </span>
+        <span>
+          <b>{t('Conectado como {n}', { n: user.name.split(' ')[0] })}</b>
+          <small>
+            {showEmail(user.email)} · {via}
+          </small>
+        </span>
+      </div>
+      {!open ? (
+        <div className="account-actions">
+          <button type="button" className="ghost-btn" onClick={() => setOpen(true)}>
+            <Icon name="lock" size={16} /> {user.hasPassword ? t('Trocar senha') : t('Criar uma senha')}
+          </button>
+          {onLogout && (
+            <button type="button" className="ghost-btn" onClick={onLogout}>
+              <Icon name="logout" size={16} /> {t('Sair')}
+            </button>
+          )}
+        </div>
+      ) : (
+        <form className="account-form" onSubmit={save}>
+          {user.hasPassword && (
+            <label>
+              {t('Senha atual')}
+              <input type="password" value={cur} onChange={(e) => setCur(e.target.value)} autoComplete="current-password" required />
+            </label>
+          )}
+          <label>
+            {t('Senha nova')}
+            <input type="password" value={next} onChange={(e) => setNext(e.target.value)} autoComplete="new-password" minLength={6} required placeholder={t('Mínimo de 6 caracteres')} />
+          </label>
+          <label>
+            {t('Repita a senha nova')}
+            <input type="password" value={again} onChange={(e) => setAgain(e.target.value)} autoComplete="new-password" minLength={6} required />
+          </label>
+          {err && <p className="form-err">{err}</p>}
+          <div className="row2">
+            <button type="button" className="ghost-btn" onClick={() => setOpen(false)}>
+              {t('Cancelar')}
+            </button>
+            <button type="submit" className="cta" disabled={busy}>
+              {t('Salvar senha')}
+            </button>
+          </div>
+        </form>
+      )}
+    </section>
   )
 }

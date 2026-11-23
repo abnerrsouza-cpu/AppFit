@@ -63,6 +63,7 @@ const publicUser = (u) => ({
   status: u.status,
   role: u.role,
   hasAvatar: !!u.avatar_type,
+  hasPassword: !!u.password_hash,
   notifPaused: u.notif_paused,
   createdAt: u.created_at,
 })
@@ -268,6 +269,18 @@ route('GET', '/api/calendar', async (req, res) => {
   }
 })
 
+route('PUT', '/api/me/password', async (req, res) => {
+  const u = await requireUser(req, { approved: false })
+  const b = await readJson(req)
+  const next = String(b.next || '')
+  if (next.length < 6) throw new HttpError(400, 'A senha precisa ter pelo menos 6 caracteres')
+  // quem entrou por Google/Strava ainda não tem senha: pode criar uma sem informar a atual
+  const hasPassword = !!u.password_hash
+  if (hasPassword && !(await bcrypt.compare(String(b.current || ''), u.password_hash))) throw new HttpError(400, 'Senha atual incorreta')
+  await q('update users set password_hash = $1 where id = $2', [await bcrypt.hash(next, 10), u.id])
+  send(res, 200, { ok: true })
+})
+
 route('PUT', '/api/me/avatar', async (req, res) => {
   const u = await requireUser(req, { approved: false })
   const a = parseAvatar((await readJson(req)).avatar)
@@ -386,6 +399,18 @@ route('POST', '/api/admin/users/:id/:action', async (req, res, p) => {
   await q(actions[p.action], [id])
   if (p.action === 'approve') sendToUser(id, { title: 'Acesso liberado', body: 'Sua conta foi aprovada. Abra o app e comece o dia 1.', kind: 'admin' }).catch(() => {})
   send(res, 200, { ok: true })
+})
+
+// senha nova gerada pelo admin (a pessoa esqueceu a senha)
+route('POST', '/api/admin/users/:id/password', async (req, res, p) => {
+  await requireAdmin(req)
+  const id = Number(p.id)
+  const abc = 'abcdefghjkmnpqrstuvwxyz23456789'
+  const pwd = Array.from(randomBytes(8), (b) => abc[b % abc.length]).join('')
+  const r = await q(`update users set password_hash = $1 where id = $2 and role <> 'admin' returning email`, [await bcrypt.hash(pwd, 10), id])
+  if (!r.rows.length) throw new HttpError(404, 'Usuário não encontrado')
+  await q('delete from sessions where user_id = $1', [id])
+  send(res, 200, { password: pwd, email: r.rows[0].email })
 })
 
 route('GET', '/api/admin/stats', async (req, res) => {

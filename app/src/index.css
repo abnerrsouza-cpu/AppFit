@@ -7743,3 +7743,118 @@ textarea {
   font-weight: 800;
   color: var(--accent);
 }
+
+/* ---------- conta ---------- */
+.account {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 22px;
+}
+.account-h {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.account-h > span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.account-h small {
+  color: var(--fg-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.account-ok {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--good);
+  color: #fff;
+}
+.account-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.account-actions .ghost-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.account-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.account-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 600;
+  color: var(--fg-2);
+}
+.forgot {
+  padding: 4px 0;
+}
+.adm-pwd {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border: 2px solid var(--good);
+}
+.adm-pwd p {
+  margin: 0;
+  color: var(--fg-2);
+}
+.adm-pwd code {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-align: center;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--surface-2);
+}
+.move {
+  min-height: 100dvh;
+  max-width: 520px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+}
+.move h1 {
+  font-size: 2rem;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+.move .link {
+  align-self: center;
+}
+.move .cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.move-ic {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: #fff;
+}
