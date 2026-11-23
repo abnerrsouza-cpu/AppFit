@@ -1,27 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Icon } from '../components/Icon'
 import { Info, WithInfo } from '../components/Info'
-import { type User, api, avatarUrl, showEmail } from '../api'
+import { type User, showEmail } from '../api'
 import { LANGS, t, weekday } from '../i18n'
-import { compress } from '../photos'
 import { Integracoes } from './Integracoes'
+import { AvatarPicker } from '../components/AvatarPicker'
 import { type AppState, type Profile, bmi, currentWeight, newId, resetToBlank, resetToDemo, setLang, setState } from '../store'
 
 type Section = null | 'perfil' | 'rotina' | 'treino' | 'dieta' | 'agenda' | 'relogio' | 'carta' | 'integracoes'
 
 export function Menu({ s, user = null, onUser, onLogout, initialSec = null, onOpened }: { s: AppState; user?: User | null; onUser?: (u: User) => void; onLogout?: () => void; initialSec?: string | null; onOpened?: () => void }) {
-  const [avatarV, setAvatarV] = useState(0)
-  const [hasAvatar, setHasAvatar] = useState(!!user?.hasAvatar)
-  const changeAvatar = async (f?: File) => {
-    if (!f || !user) return
-    try {
-      await api.setAvatar(await compress(f, 320))
-      setHasAvatar(true)
-      setAvatarV((v) => v + 1)
-    } catch {
-      /* ignora */
-    }
-  }
   const [sec, setSec] = useState<Section>(initialSec as Section)
   useEffect(() => {
     if (initialSec) onOpened?.()
@@ -68,17 +56,7 @@ export function Menu({ s, user = null, onUser, onLogout, initialSec = null, onOp
   return (
     <div className="screen">
       <div className="card profile-card">
-        <label className={`avatar ${user ? 'editable' : ''}`}>
-          {user && hasAvatar ? <img src={avatarUrl(user.id, avatarV)} alt="" /> : (p.name || '?').slice(0, 1).toUpperCase()}
-          {user && (
-            <>
-              <input id="pf-avatar" type="file" accept="image/*" onChange={(e) => changeAvatar(e.target.files?.[0])} />
-              <i className="avatar-edit">
-                <Icon name="camera" size={12} />
-              </i>
-            </>
-          )}
-        </label>
+        <AvatarPicker avatarId={p.avatarId} userId={user?.id} hasServerAvatar={user?.hasAvatar} name={p.name} />
         <span>
           <b className="ttl">
             {p.name || t('Sem nome')}

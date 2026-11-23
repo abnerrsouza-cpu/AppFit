@@ -1,10 +1,9 @@
 import { Fragment, useEffect, useState } from 'react'
-import { avatarUrl } from '../api'
 import { t } from '../i18n'
-import { getPhoto } from '../photos'
 import { type AppState, cycleInfo, daysBetween, getProjeto, parseYmd } from '../store'
 import { Icon } from './Icon'
 import { quoteOfDay } from '../quotes'
+import { useLatestPhoto, useRefPhoto } from '../usePhotos'
 
 const PHOTOS = 10_000 // 10 s obrigatórios com as fotos
 const HALF = PHOTOS / 2
@@ -13,26 +12,12 @@ const TOTAL = PHOTOS + QUOTE
 
 /** Abertura animada de 10 s obrigatórios (não dá para pular): "Esse é você" e depois "Essa é sua referência". */
 export function Intro({ s, userId, hasAvatar, onDone }: { s: AppState; userId?: number; hasAvatar?: boolean; onDone: () => void }) {
-  const [me, setMe] = useState<string | null>(null)
-  const [ref, setRef] = useState<string | null>(null)
+  const me = useLatestPhoto(s, userId, hasAvatar)
+  const ref = useRefPhoto(s)
   const [phase, setPhase] = useState<0 | 1 | 2>(0)
   const [quote] = useState(() => quoteOfDay())
   const [leaving, setLeaving] = useState(false)
 
-  useEffect(() => {
-    let alive = true
-    // foto mais recente: última foto semanal; se não houver, foto de perfil
-    const weeks = Object.values(s.weekly)
-      .filter((w) => w.photoId)
-      .sort((a, b) => b.weekStart.localeCompare(a.weekStart))
-    if (weeks[0]?.photoId) getPhoto(weeks[0].photoId).then((u) => alive && setMe(u ?? null))
-    else if (userId && hasAvatar) setMe(avatarUrl(userId))
-    const vid = getProjeto(s).vision.photoId
-    if (vid) getPhoto(vid).then((u) => alive && setRef(u ?? null))
-    return () => {
-      alive = false
-    }
-  }, [s, userId, hasAvatar])
 
   useEffect(() => {
     const a = setTimeout(() => setPhase(1), HALF)

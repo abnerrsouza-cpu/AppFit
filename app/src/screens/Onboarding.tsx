@@ -6,8 +6,9 @@ import { toneLabel } from '../psych'
 import { t } from '../i18n'
 import { type AppState, type Profile, type Tone, resetToDemo, setState, today } from '../store'
 import { LangPicker } from './Menu'
+import { AvatarPicker } from '../components/AvatarPicker'
 
-export function Onboarding({ p0, s }: { p0: Profile; s: AppState }) {
+export function Onboarding({ p0, s, userId, hasServerAvatar }: { p0: Profile; s: AppState; userId?: number; hasServerAvatar?: boolean }) {
   const [step, setStep] = useState(0)
   const [p, setP] = useState<Profile>(p0)
   const [signed, setSigned] = useState(false)
@@ -15,7 +16,7 @@ export function Onboarding({ p0, s }: { p0: Profile; s: AppState }) {
   const total = 6
 
   const finish = () =>
-    setState((st) => ({ ...st, demo: false, onboarded: true, profile: { ...p, startDate: today() } }))
+    setState((st) => ({ ...st, demo: false, onboarded: true, profile: { ...p, avatarId: st.profile.avatarId, startDate: today() } }))
 
   const canNext = [true, !!p.name.trim() && p.height > 0 && p.weightStart > 0, true, true, signed && p.letter.trim().length > 10, true][step]
 
@@ -68,6 +69,7 @@ export function Onboarding({ p0, s }: { p0: Profile; s: AppState }) {
             <Info text={t('Seus dados básicos. O peso de hoje e a meta definem o seu caminho no app.')} />
           </h1>
           <div className="card field">
+            <AvatarPicker big avatarId={s.profile.avatarId} userId={userId} hasServerAvatar={hasServerAvatar} name={p.name} />
             <label>
               {t('Seu nome')}
               <input id="ob-name" value={p.name} onChange={(e) => upd({ name: e.target.value })} autoFocus />

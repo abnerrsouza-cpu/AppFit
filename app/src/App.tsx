@@ -125,7 +125,7 @@ export default function App() {
   if (phase === 'auth') return <Auth s={s} onUser={enter} />
   if (phase === 'pending' && user) return <Pending user={user} onUser={enter} onLogout={logout} />
 
-  if (!s.onboarded) return <Onboarding p0={s.profile} s={s} />
+  if (!s.onboarded) return <Onboarding p0={s.profile} s={s} userId={user?.id} hasServerAvatar={user?.hasAvatar} />
   if (checkin) return <Checkin s={s} onClose={() => setCheckin(false)} />
 
   const hhmm = new Date().toTimeString().slice(0, 5)

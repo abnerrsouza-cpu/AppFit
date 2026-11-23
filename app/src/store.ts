@@ -37,6 +37,7 @@ export interface Profile {
   cycleDays: number
   icalUrl: string
   integrations?: { wellhub?: boolean; totalpass?: boolean }
+  avatarId?: string // foto de perfil guardada no celular
   cardioGoalMin: number // por semana
   meals: Meal[]
   workouts: WorkoutDay[]

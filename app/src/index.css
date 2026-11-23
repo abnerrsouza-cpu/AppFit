@@ -5271,3 +5271,38 @@ textarea {
   background: var(--pastel-blue);
   color: var(--accent);
 }
+
+/* seletor de foto de perfil */
+.avatar-pick .avatar-big {
+  position: relative;
+  overflow: visible;
+}
+.avatar-pick .avatar-big img {
+  border-radius: 50%;
+}
+.avatar-pick .avatar-big.has {
+  border-style: solid;
+  border-color: var(--glass-line);
+}
+.avatar-pick .avatar-edit {
+  width: 26px;
+  height: 26px;
+  right: 0;
+  bottom: 0;
+}
+.avatar-initial {
+  font-family: var(--font-display);
+}
+.avatar-pick.compact {
+  position: relative;
+  flex: none;
+}
+.avatar-pick.compact .avatar-big {
+  width: 58px;
+  height: 58px;
+  font-size: 1.4rem;
+}
+.avatar-pick.compact .avatar-edit {
+  width: 22px;
+  height: 22px;
+}
