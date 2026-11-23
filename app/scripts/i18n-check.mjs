@@ -49,6 +49,12 @@ const allLits = (txt) => addAll(txt, new RegExp(LIT, 'g'))
 allLits(block('psych.ts', 'const BANK'))
 allLits(block('screens/Integracoes.tsx', 'const STEPS'))
 allLits(block('quotes.ts', 'export const QUOTES'))
+allLits(block('game.ts', 'const LEVEL_NAMES'))
+addAll(block('components/HowItWorks.tsx', 'const SLIDES'), new RegExp(`\\b(?:title|text):\\s*${LIT}`, 'g'))
+for (const m of readFileSync(join(root, 'game.ts'), 'utf8').matchAll(new RegExp(`\\bm\\('[^']*', '[^']*', ${LIT}, ${LIT}`, 'g'))) {
+  keys.add(unesc(m[1]))
+  keys.add(unesc(m[2]))
+}
 allLits(block('psych.ts', 'const TITLES'))
 allLits(block('psych.ts', 'const NO_STREAK'))
 allLits(block('screens/Projeto.tsx', 'const REPLY'))

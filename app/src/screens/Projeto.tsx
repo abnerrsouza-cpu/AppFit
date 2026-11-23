@@ -16,7 +16,7 @@ import {
   today,
 } from '../store'
 
-type Sec = 'expectativa' | 'promessas' | 'metas' | 'desabafo' | 'fotos'
+export type Sec = 'expectativa' | 'promessas' | 'metas' | 'desabafo' | 'fotos'
 const SECS: { id: Sec; label: string; emoji: string }[] = [
   { id: 'expectativa', label: 'Expectativa', emoji: '' },
   { id: 'promessas', label: 'Promessas', emoji: '' },
@@ -48,9 +48,9 @@ async function savePhoto(file?: File) {
   return id
 }
 
-export function Projeto({ s }: { s: AppState }) {
+export function Projeto({ s, initialSec }: { s: AppState; initialSec?: Sec }) {
   const pj = getProjeto(s)
-  const [sec, setSec] = useState<Sec>('expectativa')
+  const [sec, setSec] = useState<Sec>(initialSec ?? 'expectativa')
   const visionUrl = usePhoto(pj.vision.photoId)
   const left = Math.max(0, daysBetween(new Date(), parseYmd(pj.vision.targetDate)))
   const kept = pj.promises.filter((p) => p.status === 'cumprida').length

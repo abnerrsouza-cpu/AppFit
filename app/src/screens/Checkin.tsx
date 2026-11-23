@@ -3,6 +3,8 @@ import { Icon } from '../components/Icon'
 import { Info, WithInfo } from '../components/Info'
 import { feedback, nudge } from '../psych'
 import { t } from '../i18n'
+import { XP, nextStreakMedal } from '../game'
+import { streak } from '../store'
 import { type AppState, type DailyLog, type Trained, setState, today, workoutFor } from '../store'
 
 // Escalas de carinha: viram nota 0-10 por baixo, mas a pessoa só toca.
@@ -40,6 +42,7 @@ export function Checkin({ s, onClose }: { s: AppState; onClose: () => void }) {
   const [step, setStep] = useState(0)
   const [honest, setHonest] = useState(false)
   const [result, setResult] = useState<ReturnType<typeof feedback> | null>(null)
+  const [reward, setReward] = useState<{ xp: number; streak: number; next: { target: number; left: number } | null } | null>(null)
   const set = <K extends keyof DailyLog>(k: K, v: DailyLog[K]) => setF((x) => ({ ...x, [k]: v }))
   const missed = p.meals.filter((m) => !f.mealsOk[m.id])
   const STEPS = 6
@@ -47,7 +50,9 @@ export function Checkin({ s, onClose }: { s: AppState; onClose: () => void }) {
   const submit = () => {
     const log = { ...f, submittedAt: new Date().toISOString() }
     setState((st) => ({ ...st, daily: { ...st.daily, [key]: log } }))
-    setResult(feedback({ ...s, daily: { ...s.daily, [key]: log } }, log))
+    const after = { ...s, daily: { ...s.daily, [key]: log } }
+    setResult(feedback(after, log))
+    if (!prev) setReward({ xp: XP.checkin + (log.trained === 'sim' ? XP.trained : 0), streak: streak(after), next: nextStreakMedal(after) })
   }
 
   if (result) {
@@ -59,6 +64,18 @@ export function Checkin({ s, onClose }: { s: AppState; onClose: () => void }) {
           </span>
           <h1>{result.title}</h1>
           <p>{result.body}</p>
+          {reward && (
+            <div className="reward">
+              <span className="reward-xp">+{reward.xp}</span>
+              <span>
+                <b>{t('pontos ganhos')}</b>
+                <small>
+                  {reward.streak === 1 ? t('Sequência: 1 dia') : t('Sequência: {n} dias', { n: reward.streak })}
+                  {reward.next && ` · ${reward.next.left === 1 ? t('falta 1 dia para a medalha de {n} dias', { n: reward.next.target }) : t('faltam {k} dias para a medalha de {n} dias', { k: reward.next.left, n: reward.next.target })}`}
+                </small>
+              </span>
+            </div>
+          )}
           <button type="button" className="cta" onClick={onClose}>
             {t('Fechar')}
           </button>

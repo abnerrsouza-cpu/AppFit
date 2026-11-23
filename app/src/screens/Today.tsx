@@ -4,6 +4,7 @@ import { Locked } from '../components/Locked'
 import { notifyStatus } from '../notify'
 import type { User } from '../api'
 import { useLatestPhoto, useRefPhoto } from '../usePhotos'
+import { type Mission, levelOf, missions, nextStreakMedal, totalXP } from '../game'
 import { getEvents, hhmmOf, onEvents, refreshEvents, ymdOf } from '../calendar'
 import { useEffect, useState } from 'react'
 import { Rings } from '../components/Rings'
@@ -49,7 +50,7 @@ export function todayProgress(s: AppState) {
   return { train: !wk ? 1 : checks.train ? 1 : 0, diet: p.meals.filter((m) => checks[m.id]).length / meals, cardio: 0, rest: !wk }
 }
 
-export function Today({ s, user, go, goMenu, openCheckin, owes }: { s: AppState; user?: User | null; go: (tab: Tab) => void; goMenu: (sec: string) => void; openCheckin: () => void; owes: boolean }) {
+export function Today({ s, user, go, goMenu, openCheckin, owes, onMission }: { s: AppState; user?: User | null; go: (tab: Tab) => void; goMenu: (sec: string) => void; openCheckin: () => void; owes: boolean; onMission: (a: Mission['action']) => void }) {
   const [view, setView] = useState<'geral' | 'dia'>('geral')
   const myPhoto = useLatestPhoto(s, user?.id, user?.hasAvatar)
   const refPhoto = useRefPhoto(s)
@@ -77,6 +78,11 @@ export function Today({ s, user, go, goMenu, openCheckin, owes }: { s: AppState;
   const weight = currentWeight(s)
   const weightLeft = Math.max(0, +(weight - p.weightGoal).toFixed(1))
   const overall = (Math.min(1, prog.train) + Math.min(1, prog.diet) + Math.min(1, prog.cardio)) / 3
+  const lv = levelOf(totalXP(s))
+  const ms = missions(s)
+  const msDone = ms.filter((m) => m.done).length
+  const nextMedal = nextStreakMedal(s)
+  const atRisk = !log && hhmm >= '19:00'
 
   const tasks: Task[] = [
     { id: 'wake', time: p.wake, title: t('Acordar e beber água'), kind: 'wake' as Kind, done: !!checks.wake },
@@ -133,6 +139,18 @@ export function Today({ s, user, go, goMenu, openCheckin, owes }: { s: AppState;
 
       {view === 'geral' && (
         <>
+          {atRisk && (
+            <button type="button" className="risk" onClick={openCheckin}>
+              <span className="risk-ic">
+                <Icon name="flame" size={20} />
+              </span>
+              <span className="risk-txt">
+                <b>{st > 0 ? t('Sua sequência de {n} dias termina à meia-noite', { n: st }) : t('Hoje ainda não conta. Preste contas até a meia-noite.')}</b>
+                <small>{t('Leva menos de 1 minuto. Toque para prestar contas agora.')}</small>
+              </span>
+              <Icon name="chevR" />
+            </button>
+          )}
           <section className="prog-card">
             <div className="prog-head">
               <span>{t('Progresso de hoje')}</span>
@@ -171,6 +189,40 @@ export function Today({ s, user, go, goMenu, openCheckin, owes }: { s: AppState;
             </div>
           </section>
 
+          <section className="card missions">
+            <div className="block-h">
+              <h2 className="ttl">
+                {t('Missões de hoje')}
+                <Info text={t('Três missões por dia. Cada uma vale pontos para subir de nível. Elas mudam todo dia conforme o que falta no seu projeto.')} />
+              </h2>
+              <span className="soft-chip">{t('{a} de {b}', { a: msDone, b: ms.length })}</span>
+            </div>
+            {msDone === ms.length ? (
+              <div className="missions-done">
+                <Icon name="check" size={20} stroke={3} />
+                <span>
+                  <b>{t('Missões cumpridas.')}</b>
+                  <small>{t('Volte amanhã: novas missões esperam por você.')}</small>
+                </span>
+              </div>
+            ) : (
+              <ul className="mission-list">
+                {ms.map((m) => (
+                  <li key={m.id}>
+                    <button type="button" className={`mission ${m.done ? 'done' : ''}`} onClick={() => !m.done && (m.action === 'dia' ? setView('dia') : onMission(m.action))} disabled={m.done}>
+                      <span className="mission-ic">{m.done ? <Icon name="check" size={16} stroke={3} /> : <Icon name={m.icon} size={16} />}</span>
+                      <span className="mission-txt">
+                        <b>{m.title}</b>
+                        {m.progress && !m.done && <small>{t('{a} de {b}', { a: m.progress[0], b: m.progress[1] })}</small>}
+                      </span>
+                      <span className="mission-xp">+{m.xp}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
           {current ? (
             <button type="button" className={`now-strip ${late ? 'is-late' : ''}`} onClick={() => setView('dia')}>
               <span className="now-strip-ic">
@@ -197,6 +249,24 @@ export function Today({ s, user, go, goMenu, openCheckin, owes }: { s: AppState;
 
           <Setup s={s} go={go} goMenu={goMenu} />
 
+
+          <button type="button" className="level-card" onClick={() => go('conquistas')}>
+            <span className="level-badge">
+              <small>{t('Nível')}</small>
+              <b>{lv.n}</b>
+            </span>
+            <span className="level-txt">
+              <b>{lv.name}</b>
+              <span className="level-bar">
+                <span style={{ width: `${Math.round(lv.pct * 100)}%` }} />
+              </span>
+              <small>
+                {lv.next ? t('{a} de {b} pontos', { a: lv.xp, b: lv.next }) : t('{a} pontos', { a: lv.xp })}
+                {nextMedal && ` · ${t('medalha de {n} dias em {k}', { n: nextMedal.target, k: nextMedal.left })}`}
+              </small>
+            </span>
+            <Icon name="chevR" />
+          </button>
 
           <section className="card block">
             <div className="block-h">

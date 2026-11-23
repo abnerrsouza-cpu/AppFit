@@ -84,6 +84,9 @@ export interface AppState {
   theme: 'dark' | 'light'
   custom?: CustomNudge[] // cobranças escritas pelo próprio usuário
   lang?: Lang
+  seenMedals?: string[] // medalhas já comemoradas
+  seenHow?: boolean // já viu o "Como funciona"
+  lastLevel?: number
   testEvery?: number // modo teste: dispara a cada N minutos (0 = desligado)
   projeto?: Projeto
 }

@@ -4,6 +4,10 @@ import { BottomNav, type Tab } from './components/BottomNav'
 import { Icon } from './components/Icon'
 import { Info } from './components/Info'
 import { Intro } from './components/Intro'
+import { HowItWorks } from './components/HowItWorks'
+import { Celebrate } from './components/Celebrate'
+import { type Mission, levelOf, medals, totalXP } from './game'
+import { Conquistas } from './screens/Conquistas'
 import { getLang, t } from './i18n'
 import { registerSW, setServerMode, startScheduler, subscribePush } from './notify'
 import { Admin } from './screens/Admin'
@@ -13,9 +17,9 @@ import { Checkin } from './screens/Checkin'
 import { Evolution } from './screens/Evolution'
 import { Menu } from './screens/Menu'
 import { Onboarding } from './screens/Onboarding'
-import { Projeto } from './screens/Projeto'
+import { Projeto, type Sec as PjSec } from './screens/Projeto'
 import { Today } from './screens/Today'
-import { resetToBlank, today, useAppState } from './store'
+import { resetToBlank, setState, today, useAppState } from './store'
 import { startSync } from './sync'
 import { refreshEvents } from './calendar'
 
@@ -31,6 +35,9 @@ export default function App() {
   const [pendingCount, setPendingCount] = useState(0)
   const synced = useRef(false)
   const [intro, setIntro] = useState(true)
+  const [openWeekly, setOpenWeekly] = useState(false)
+  const [pjSec, setPjSec] = useState<PjSec | undefined>(undefined)
+  const [howAgain, setHowAgain] = useState(false)
 
   // abertura de novo ao voltar para o app depois de 30 minutos fora
   useEffect(() => {
@@ -114,6 +121,37 @@ export default function App() {
     location.reload()
   }
 
+  const onMission = (a: Mission['action']) => {
+    setOpenWeekly(false)
+    setPjSec(undefined)
+    if (a === 'checkin') return setCheckin(true)
+    if (a === 'semanal') {
+      setOpenWeekly(true)
+      return setTab('evolucao')
+    }
+    if (a === 'referencia') {
+      setPjSec('expectativa')
+      return setTab('projeto')
+    }
+    if (a === 'promessas') {
+      setPjSec('promessas')
+      return setTab('projeto')
+    }
+    if (a === 'dieta' || a === 'carta' || a === 'integracoes') return goMenu(a)
+  }
+
+  // comemorações: medalha nova ou nível novo (só depois do cadastro e fora do exemplo)
+  const unlocked = s.onboarded && !s.demo ? medals(s).filter((m) => m.unlocked) : []
+  const lvNow = levelOf(totalXP(s))
+  const fresh = s.seenMedals ? unlocked.find((m) => !s.seenMedals!.includes(m.id)) : undefined
+  const levelUp = s.lastLevel !== undefined && lvNow.n > s.lastLevel
+  useEffect(() => {
+    // primeira vez: registra o que já existe sem comemorar tudo de uma vez
+    if (s.onboarded && !s.demo && (!s.seenMedals || s.lastLevel === undefined))
+      setState((st) => ({ ...st, seenMedals: st.seenMedals ?? unlocked.map((m) => m.id), lastLevel: st.lastLevel ?? lvNow.n }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [s.onboarded, s.demo])
+
   if (phase === 'loading' || phase === 'syncing')
     return (
       <div className="splash">
@@ -134,6 +172,26 @@ export default function App() {
 
   return (
     <div className="app">
+      {!intro && (howAgain || (!s.seenHow && !s.demo)) && (
+        <HowItWorks
+          onDone={() => {
+            setHowAgain(false)
+            setState((st) => ({ ...st, seenHow: true }))
+          }}
+        />
+      )}
+      {!intro && s.seenHow && !howAgain && !checkin && fresh && (
+        <Celebrate kind="medal" icon={fresh.icon} title={fresh.title} desc={fresh.desc} onClose={() => setState((st) => ({ ...st, seenMedals: [...(st.seenMedals || []), fresh.id] }))} />
+      )}
+      {!intro && s.seenHow && !howAgain && !checkin && !fresh && levelUp && (
+        <Celebrate
+          kind="level"
+          icon="star"
+          title={t('Nível {n}: {x}', { n: lvNow.n, x: lvNow.name })}
+          desc={t('Você está cumprindo o que prometeu. Continue assim e o próximo nível vem rápido.')}
+          onClose={() => setState((st) => ({ ...st, lastLevel: lvNow.n }))}
+        />
+      )}
       {intro && <Intro s={s} userId={user?.id} hasAvatar={user?.hasAvatar} onDone={() => setIntro(false)} />}
       {s.demo && phase === 'local' && (
         <div className="demo-bar">
@@ -146,16 +204,19 @@ export default function App() {
           </button>
         </div>
       )}
-      {tab === 'inicio' && <Today s={s} user={user} go={setTab} goMenu={goMenu} openCheckin={() => setCheckin(true)} owes={owes} />}
-      {tab === 'evolucao' && <Evolution s={s} openCheckin={() => setCheckin(true)} />}
+      {tab === 'inicio' && <Today s={s} user={user} onMission={onMission} go={setTab} goMenu={goMenu} openCheckin={() => setCheckin(true)} owes={owes} />}
+      {tab === 'evolucao' && <Evolution key={openWeekly ? 'w' : 'n'} s={s} openWeekly={openWeekly} openCheckin={() => setCheckin(true)} />}
       {tab === 'cobrancas' && <Alerts s={s} onBack={() => setTab('inicio')} />}
-      {tab === 'projeto' && <Projeto s={s} />}
-      {tab === 'menu' && <Menu s={s} user={user} onUser={setUser} onLogout={user ? logout : undefined} initialSec={menuSec} onOpened={() => setMenuSec(null)} />}
+      {tab === 'projeto' && <Projeto key={pjSec || 'x'} s={s} initialSec={pjSec} />}
+      {tab === 'conquistas' && <Conquistas s={s} onBack={() => setTab('inicio')} />}
+      {tab === 'menu' && <Menu s={s} user={user} onUser={setUser} onHow={() => setHowAgain(true)} onConquistas={() => setTab('conquistas')} onLogout={user ? logout : undefined} initialSec={menuSec} onOpened={() => setMenuSec(null)} />}
       {tab === 'admin' && isAdmin && <Admin onPending={setPendingCount} />}
       <BottomNav
         tab={tab}
         onTab={(x) => {
           setMenuSec(null)
+          setOpenWeekly(false)
+          setPjSec(undefined)
           setTab(x)
         }}
         dots={{ admin: pendingCount > 0 }}

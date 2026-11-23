@@ -10,12 +10,12 @@ import { type AppState, type WeeklyLog, currentWeight, fmtDayMonth, newId, parse
 
 const label = (w: WeeklyLog, i: number) => `${t('Sem.')} ${i + 1} · ${fmtDayMonth(parseYmd(w.weekStart))}`
 
-export function Evolution({ s, openCheckin }: { s: AppState; openCheckin: () => void }) {
+export function Evolution({ s, openCheckin, openWeekly = false }: { s: AppState; openCheckin: () => void; openWeekly?: boolean }) {
   const weeks = useMemo(() => Object.values(s.weekly).sort((a, b) => a.weekStart.localeCompare(b.weekStart)), [s.weekly])
   const withPhoto = weeks.map((w, i) => ({ w, i })).filter((x) => x.w.photoId)
   const [aIdx, setA] = useState(0)
   const [bIdx, setB] = useState(Math.max(0, withPhoto.length - 1))
-  const [form, setForm] = useState(false)
+  const [form, setForm] = useState(openWeekly)
   const A = withPhoto[Math.min(aIdx, withPhoto.length - 1)]
   const B = withPhoto[Math.min(bIdx, withPhoto.length - 1)]
   const thisWeek = ymd(weekStartOf(new Date()))
