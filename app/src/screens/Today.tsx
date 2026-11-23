@@ -1,15 +1,16 @@
-import { useState } from 'react'
 import { Icon } from '../components/Icon'
 import { Info, WithInfo } from '../components/Info'
 import { Locked } from '../components/Locked'
 import { notifyStatus } from '../notify'
+import { getEvents, hhmmOf, onEvents, refreshEvents, ymdOf } from '../calendar'
+import { useEffect, useState } from 'react'
 import { Rings } from '../components/Rings'
 import type { Tab } from '../components/BottomNav'
 import { headline } from '../psych'
 import { t, weekday, weekdayShort } from '../i18n'
 import { type AppState, fmtDayMonth, setState, streak, today, weekDays, workoutFor, ymd } from '../store'
 
-type Kind = 'wake' | 'meal' | 'train' | 'checkin'
+type Kind = 'wake' | 'meal' | 'train' | 'checkin' | 'event'
 interface Task {
   id: string
   time: string
@@ -19,7 +20,7 @@ interface Task {
   done: boolean
 }
 
-const ICON: Record<Kind, string> = { wake: 'sun', meal: 'food', train: 'dumbbell', checkin: 'list' }
+const ICON: Record<Kind, string> = { wake: 'sun', meal: 'food', train: 'dumbbell', checkin: 'list', event: 'calendar' }
 
 function greeting() {
   const h = new Date().getHours()
@@ -55,6 +56,15 @@ export function Today({ s, go, goMenu, openCheckin, owes }: { s: AppState; go: (
   const log = s.daily[key]
   const wk = workoutFor(p, now)
   const [showFicha, setShowFicha] = useState(false)
+  const [, bump] = useState(0)
+  useEffect(() => {
+    void refreshEvents()
+    const off = onEvents(() => bump((n) => n + 1))
+    return () => {
+      off()
+    }
+  }, [])
+  const todayEvents = getEvents().filter((e) => !e.allDay && ymdOf(e.start) === key)
   const st = streak(s)
   const prog = todayProgress(s)
 
@@ -63,6 +73,7 @@ export function Today({ s, go, goMenu, openCheckin, owes }: { s: AppState; go: (
     ...p.meals.map((m) => ({ id: m.id, time: m.time, title: m.name, detail: m.items, kind: 'meal' as Kind, done: !!checks[m.id] })),
     ...(wk ? [{ id: 'train', time: p.trainTime, title: wk.title, detail: wk.items, kind: 'train' as Kind, done: !!checks.train }] : []),
     { id: 'checkin', time: p.checkinTime, title: t('Prestar contas do dia'), kind: 'checkin' as Kind, done: !!log },
+    ...todayEvents.map((e) => ({ id: `ev:${e.uid}`, time: hhmmOf(e.start), title: e.title, kind: 'event' as Kind, done: !!checks[`ev:${e.uid}`] })),
   ].sort((a, b) => a.time.localeCompare(b.time))
 
   // "Agora": a tarefa pendente mais recente que já venceu; se nenhuma venceu, a próxima.
@@ -113,6 +124,7 @@ export function Today({ s, go, goMenu, openCheckin, owes }: { s: AppState; go: (
               {current.kind === 'meal' && current.detail && <p>{current.detail}</p>}
               {current.kind === 'train' && <p>{t('{n} exercícios', { n: (current.detail || '').split('\n').length })}</p>}
               {current.kind === 'checkin' && <p>{t('Leva menos de 1 minuto.')}</p>}
+              {current.kind === 'event' && <p>{t('Compromisso da sua agenda.')}</p>}
             </div>
           </div>
           {current.kind === 'train' && showFicha && <pre className="ficha now-ficha">{current.detail}</pre>}
@@ -126,6 +138,11 @@ export function Today({ s, go, goMenu, openCheckin, owes }: { s: AppState; go: (
                 </>
               )}
             </button>
+            {current.kind === 'train' && (p.integrations?.wellhub || p.integrations?.totalpass) && (
+              <button type="button" className="now-btn ghost" onClick={() => act(current)}>
+                {t('Fiz check-in na academia')}
+              </button>
+            )}
             {current.kind === 'train' && (
               <button type="button" className="now-btn ghost" onClick={() => setShowFicha(!showFicha)}>
                 {showFicha ? t('Fechar ficha') : t('Ver ficha')}

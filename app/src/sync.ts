@@ -3,6 +3,8 @@
 import { api } from './api'
 import { getLang } from './i18n'
 import { testMessages } from './notify'
+import { getEvents, onEvents } from './calendar'
+import { t } from './i18n'
 import { dailySchedule } from './psych'
 import { type AppState, addDays, blankProfile, getState, localizeData, pad, setState, subscribe, ymd } from './store'
 
@@ -13,6 +15,13 @@ function buildSchedule(s: AppState) {
   for (let i = 0; i < 7; i++) {
     const d = addDays(now, i)
     for (const n of dailySchedule(s, d)) out.push({ date: ymd(d), time: n.time, moment: n.moment, title: n.title, body: n.body })
+  }
+  // compromissos da agenda: cobrança 15 minutos antes
+  for (const e of getEvents()) {
+    if (e.allDay) continue
+    const at = new Date(new Date(e.start).getTime() - 15 * 60_000)
+    if (at < now) continue
+    out.push({ date: ymd(at), time: `${pad(at.getHours())}:${pad(at.getMinutes())}`, moment: `ev:${e.uid}`, title: e.title, body: t('Em 15 minutos: {x}. Sem desculpa, sem atraso.', { x: e.title }) })
   }
   // modo teste: uma cobrança a cada N minutos nas próximas 3 horas
   if (s.testEvery) {
@@ -65,6 +74,10 @@ export async function startSync(userName: string) {
   }
   lastJson = ''
   void push()
+  onEvents(() => {
+    lastJson = ''
+    void push()
+  })
   subscribe(() => {
     clearTimeout(timer)
     timer = window.setTimeout(push, 1500)

@@ -36,6 +36,7 @@ export interface Profile {
   price: number
   cycleDays: number
   icalUrl: string
+  integrations?: { wellhub?: boolean; totalpass?: boolean }
   cardioGoalMin: number // por semana
   meals: Meal[]
   workouts: WorkoutDay[]

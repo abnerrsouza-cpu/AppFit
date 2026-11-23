@@ -17,6 +17,7 @@ import { Projeto } from './screens/Projeto'
 import { Today } from './screens/Today'
 import { resetToBlank, today, useAppState } from './store'
 import { startSync } from './sync'
+import { refreshEvents } from './calendar'
 
 type Phase = 'loading' | 'local' | 'auth' | 'pending' | 'syncing' | 'ready'
 
@@ -58,6 +59,11 @@ export default function App() {
     }
     void api.ping(getLang()).catch(() => {})
     void subscribePush()
+    void refreshEvents(true)
+    if (new URL(location.href).searchParams.get('integracao')) {
+      setMenuSec('integracoes')
+      setTab('menu')
+    }
     if (u.role === 'admin') api.admin.users().then((r) => setPendingCount(r.users.filter((x) => x.status === 'pending').length)).catch(() => {})
     setPhase('ready')
   }, [])
@@ -144,7 +150,7 @@ export default function App() {
       {tab === 'evolucao' && <Evolution s={s} openCheckin={() => setCheckin(true)} />}
       {tab === 'cobrancas' && <Alerts s={s} onBack={() => setTab('inicio')} />}
       {tab === 'projeto' && <Projeto s={s} />}
-      {tab === 'menu' && <Menu s={s} user={user} onLogout={user ? logout : undefined} initialSec={menuSec} onOpened={() => setMenuSec(null)} />}
+      {tab === 'menu' && <Menu s={s} user={user} onUser={setUser} onLogout={user ? logout : undefined} initialSec={menuSec} onOpened={() => setMenuSec(null)} />}
       {tab === 'admin' && isAdmin && <Admin onPending={setPendingCount} />}
       <BottomNav
         tab={tab}

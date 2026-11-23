@@ -47,6 +47,7 @@ const block = (file, start) => {
 }
 const allLits = (txt) => addAll(txt, new RegExp(LIT, 'g'))
 allLits(block('psych.ts', 'const BANK'))
+allLits(block('screens/Integracoes.tsx', 'const STEPS'))
 allLits(block('psych.ts', 'const TITLES'))
 allLits(block('screens/Projeto.tsx', 'const REPLY'))
 addAll(block('screens/Projeto.tsx', 'const MOOD_LABEL'), new RegExp(`:\\s*${LIT}`, 'g'))

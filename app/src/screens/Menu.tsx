@@ -4,11 +4,12 @@ import { Info, WithInfo } from '../components/Info'
 import { type User, api, avatarUrl, showEmail } from '../api'
 import { LANGS, t, weekday } from '../i18n'
 import { compress } from '../photos'
+import { Integracoes } from './Integracoes'
 import { type AppState, type Profile, bmi, currentWeight, newId, resetToBlank, resetToDemo, setLang, setState } from '../store'
 
-type Section = null | 'perfil' | 'rotina' | 'treino' | 'dieta' | 'agenda' | 'relogio' | 'carta'
+type Section = null | 'perfil' | 'rotina' | 'treino' | 'dieta' | 'agenda' | 'relogio' | 'carta' | 'integracoes'
 
-export function Menu({ s, user = null, onLogout, initialSec = null, onOpened }: { s: AppState; user?: User | null; onLogout?: () => void; initialSec?: string | null; onOpened?: () => void }) {
+export function Menu({ s, user = null, onUser, onLogout, initialSec = null, onOpened }: { s: AppState; user?: User | null; onUser?: (u: User) => void; onLogout?: () => void; initialSec?: string | null; onOpened?: () => void }) {
   const [avatarV, setAvatarV] = useState(0)
   const [hasAvatar, setHasAvatar] = useState(!!user?.hasAvatar)
   const changeAvatar = async (f?: File) => {
@@ -46,6 +47,7 @@ export function Menu({ s, user = null, onLogout, initialSec = null, onOpened }: 
         {sec === 'agenda' && <Agenda p={p} upd={upd} />}
         {sec === 'relogio' && <Relogio />}
         {sec === 'carta' && <Carta p={p} upd={upd} />}
+        {sec === 'integracoes' && <Integracoes s={s} user={user} onUser={onUser} />}
       </div>
     )
   }
@@ -111,10 +113,9 @@ export function Menu({ s, user = null, onLogout, initialSec = null, onOpened }: 
       <div className="card menu-group">
         <span className="group-label ttl">
           {t('Conexões')}
-          <Info text={t('Ligue sua agenda do Google e, em breve, seu relógio de treino, para o app cobrar com base neles.')} />
+          <Info text={t('Conecte sua agenda, seu Strava e o app da sua academia para o app cobrar com base neles.')} />
         </span>
-        <Row id="agenda" icon="calendar" title={t('Google Agenda')} sub={p.icalUrl ? t('Conectada') : t('Colar link público')} />
-        <Row id="relogio" icon="watch" title={t('Relógio de treino')} sub={t('Strava · em breve')} />
+        <Row id="integracoes" icon="calendar" title={t('Integrações')} sub={t('Agenda, Strava, Gympass e TotalPass')} />
       </div>
 
       <p className="ttl hint">

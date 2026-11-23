@@ -8,6 +8,7 @@ import bcrypt from 'bcryptjs'
 import { getSetting, migrate, q, setSetting } from './db.mjs'
 import { initPush, notifyAdmins, sendToUser, startScheduler, vapidPublicKey } from './push.mjs'
 import { authorizeUrl, exchange, fetchPicture, newState, providers } from './oauth.mjs'
+import { eventsFor, normalizeUrl } from './calendar.mjs'
 
 const DIST = join(import.meta.dirname, '..', 'dist')
 const PORT = Number(process.env.PORT) || 3000
@@ -140,8 +141,9 @@ route('GET', '/api/auth/:provider', async (req, res, p) => {
   if (!PROVIDER_NAME[p.provider]) throw new HttpError(404, 'Rota não encontrada')
   if (!providers()[p.provider]) return authError(res, `O login com ${PROVIDER_NAME[p.provider]} ainda não foi configurado.`)
   const state = newState()
+  const link = new URL(req.url, 'http://x').searchParams.get('link') === '1' ? '.link' : ''
   redirect(res, authorizeUrl(p.provider, req, state), {
-    'Set-Cookie': `oauth_state=${state}; Path=/api/auth; HttpOnly; SameSite=Lax; Max-Age=600${isHttps(req) ? '; Secure' : ''}`,
+    'Set-Cookie': `oauth_state=${state}${link}; Path=/api/auth; HttpOnly; SameSite=Lax; Max-Age=600${isHttps(req) ? '; Secure' : ''}`,
   })
 })
 
@@ -150,7 +152,8 @@ route('GET', '/api/auth/:provider/callback', async (req, res, p) => {
   if (!PROVIDER_NAME[prov]) throw new HttpError(404, 'Rota não encontrada')
   const url = new URL(req.url, 'http://x')
   if (url.searchParams.get('error')) return authError(res, 'Login cancelado.')
-  if (!url.searchParams.get('state') || url.searchParams.get('state') !== cookies(req).oauth_state) return authError(res, 'Não deu para confirmar o login. Tente de novo.')
+  const [savedState, linkFlag] = String(cookies(req).oauth_state || '').split('.')
+  if (!url.searchParams.get('state') || url.searchParams.get('state') !== savedState) return authError(res, 'Não deu para confirmar o login. Tente de novo.')
   let info
   try {
     info = await exchange(prov, req, url.searchParams.get('code') || '')
@@ -158,6 +161,21 @@ route('GET', '/api/auth/:provider/callback', async (req, res, p) => {
     return authError(res, e.message)
   }
   const col = prov === 'google' ? 'google_sub' : 'strava_id'
+  // modo "conectar": quem já está logado liga o Strava/Google à própria conta
+  const me = linkFlag === 'link' ? await currentUser(req) : null
+  if (me) {
+    const other = (await q(`select id from users where ${col} = $1 and id <> $2`, [info.sub, me.id])).rows[0]
+    if (other) return redirect(res, `/?integracao=${prov}_em_uso`)
+    await q(`update users set ${col} = $1 where id = $2`, [info.sub, me.id])
+    if (info.tokens) {
+      await q(
+        `insert into strava_tokens (user_id, athlete_id, access_token, refresh_token, expires_at) values ($1, $2, $3, $4, $5)
+         on conflict (user_id) do update set athlete_id = excluded.athlete_id, access_token = excluded.access_token, refresh_token = excluded.refresh_token, expires_at = excluded.expires_at, updated_at = now()`,
+        [me.id, info.sub, info.tokens.access, info.tokens.refresh, info.tokens.expiresAt],
+      )
+    }
+    return redirect(res, `/?integracao=${prov}_ok`)
+  }
   let u = (await q(`select * from users where ${col} = $1`, [info.sub])).rows[0]
   if (!u && info.email) {
     // conta já existente com o mesmo e-mail: liga o Google a ela
@@ -212,7 +230,40 @@ route('POST', '/api/auth/logout', async (req, res) => {
 
 route('GET', '/api/me', async (req, res) => {
   const u = await requireUser(req, { approved: false })
-  send(res, 200, { user: publicUser(u) })
+  send(res, 200, { user: { ...publicUser(u), strava: !!u.strava_id, google: !!u.google_sub, provider: u.provider } })
+})
+
+route('DELETE', '/api/me/strava', async (req, res) => {
+  const u = await requireUser(req)
+  if (u.provider === 'strava') throw new HttpError(400, 'Sua conta foi criada pelo Strava, então ele não pode ser desconectado.')
+  await q('update users set strava_id = null where id = $1', [u.id])
+  await q('delete from strava_tokens where user_id = $1', [u.id])
+  send(res, 200, { ok: true })
+})
+
+// ---------- agenda ----------
+route('POST', '/api/calendar/test', async (req, res) => {
+  await requireUser(req)
+  const { url } = await readJson(req)
+  try {
+    const clean = normalizeUrl(url)
+    const events = await eventsFor(clean)
+    send(res, 200, { url: clean, events })
+  } catch (e) {
+    throw new HttpError(400, e.message)
+  }
+})
+
+route('GET', '/api/calendar', async (req, res) => {
+  const u = await requireUser(req)
+  const r = await q(`select data->'profile'->>'icalUrl' as url from app_state where user_id = $1`, [u.id])
+  const url = r.rows[0]?.url
+  if (!url) return send(res, 200, { events: [] })
+  try {
+    send(res, 200, { events: await eventsFor(url) })
+  } catch (e) {
+    send(res, 200, { events: [], error: e.message })
+  }
 })
 
 route('PUT', '/api/me/avatar', async (req, res) => {

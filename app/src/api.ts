@@ -9,6 +9,9 @@ export interface User {
   role: 'user' | 'admin'
   hasAvatar: boolean
   notifPaused: boolean
+  strava?: boolean
+  google?: boolean
+  provider?: 'senha' | 'google' | 'strava'
 }
 
 export class ApiError extends Error {
@@ -73,6 +76,9 @@ export const api = {
   ping: (lang: string) => call('POST', '/api/ping', { lang, tz: tz() }),
   getState: () => call<{ data: unknown | null }>('GET', '/api/state'),
   putState: (data: unknown, schedule: unknown[]) => call('PUT', '/api/state', { data, schedule }),
+  calendarTest: (url: string) => call<{ url: string; events: CalEvent[] }>('POST', '/api/calendar/test', { url }),
+  calendar: () => call<{ events: CalEvent[]; error?: string }>('GET', '/api/calendar'),
+  disconnectStrava: () => call('DELETE', '/api/me/strava'),
   pushKey: () => call<{ key: string }>('GET', '/api/push/key'),
   pushSubscribe: (subscription: PushSubscriptionJSON) => call('POST', '/api/push/subscribe', { subscription }),
   pushTest: (title: string, body: string) => call<{ ok: boolean }>('POST', '/api/push/test', { title, body }),
@@ -120,3 +126,11 @@ export interface AdminNotifs {
 
 /** E-mails de contas Strava são internos: mostra 'Conta Strava' no lugar. */
 export const showEmail = (e: string) => (e.endsWith('@strava.invalid') ? 'Conta Strava' : e)
+
+export interface CalEvent {
+  uid: string
+  title: string
+  start: string
+  end: string | null
+  allDay: boolean
+}

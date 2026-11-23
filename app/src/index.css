@@ -4447,3 +4447,127 @@ input[type='time']::-webkit-date-and-time-value {
     animation: none;
   }
 }
+
+/* ================= integrações ================= */
+.integ-h {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.integ-h > span:nth-child(2) {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.integ-h small {
+  color: var(--fg-3);
+}
+.integ-ic {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 14px;
+  background: var(--red-soft);
+  color: var(--red-1);
+}
+.integ-ic.strava {
+  background: rgba(252, 76, 2, 0.12);
+  color: #fc4c02;
+}
+.integ-ic.wellhub {
+  background: rgba(214, 38, 120, 0.12);
+  color: #d62678;
+}
+.integ-ic.totalpass {
+  background: rgba(16, 185, 129, 0.14);
+  color: #0f9d74;
+}
+.integ-status {
+  padding: 4px 10px;
+  border-radius: 99px;
+  background: var(--surface-2);
+  color: var(--fg-3);
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.integ-status.on {
+  background: color-mix(in srgb, var(--good) 14%, transparent);
+  color: var(--good);
+}
+.seg-tabs.three {
+  grid-template-columns: repeat(3, 1fr);
+}
+.seg-tabs.three button {
+  font-size: 0.85rem;
+  padding: 10px 4px;
+}
+.steps-num {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.steps-num li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: var(--fg);
+}
+.steps-num i {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--yel-1), var(--yel-2));
+  color: #fff;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+.cal-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.cal-list li {
+  display: grid;
+  grid-template-columns: 74px 52px 1fr;
+  gap: 8px;
+  align-items: baseline;
+  padding: 9px 0;
+  border-top: 1px solid var(--line);
+  font-size: 0.9rem;
+}
+.cal-list li:first-child {
+  border-top: 0;
+}
+.cal-list small {
+  color: var(--fg-3);
+  text-transform: capitalize;
+}
+.cal-list span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.integr a.ghost-btn {
+  text-decoration: none;
+  color: inherit;
+}
+.now-actions {
+  flex-wrap: wrap;
+}
