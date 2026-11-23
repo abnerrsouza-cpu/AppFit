@@ -6204,3 +6204,45 @@ textarea {
   padding: 4px 10px;
   border-radius: 999px;
 }
+
+/* ---------- foto: tirar ou escolher da galeria ---------- */
+.photo-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.photo-btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.photo-btns.off {
+  opacity: 0.55;
+  pointer-events: none;
+}
+.photo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 10px;
+  border-radius: 16px;
+  background: var(--glass, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-align: center;
+}
+.photo-btn:first-child {
+  background: var(--accent);
+  border-color: transparent;
+  color: #fff;
+}
+.photo-btns .photo-btn,
+.form .photo-btns .photo-btn,
+.field .photo-btns .photo-btn {
+  flex-direction: row;
+  margin: 0;
+}

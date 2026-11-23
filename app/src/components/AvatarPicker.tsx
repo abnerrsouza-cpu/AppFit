@@ -5,6 +5,7 @@ import { isServerMode } from '../notify'
 import { compress, getPhoto, putPhoto } from '../photos'
 import { newId, setState } from '../store'
 import { Icon } from './Icon'
+import { PhotoButtons } from './PhotoButtons'
 
 /**
  * Foto de perfil: guarda no celular (profile.avatarId) e, com conta, também no servidor.
@@ -75,13 +76,16 @@ export function AvatarPicker({
     )
 
   return (
+    <div className="photo-wrap">
     <label className="avatar-pick">
       <input id="ob-avatar" type="file" accept="image/*" onChange={(e) => pick(e.target.files?.[0])} />
       {circle}
       <span>
         <b>{busy ? t('Salvando...') : url ? t('Trocar foto de perfil') : t('Adicione sua foto de perfil')}</b>
-        <small>{err || t('Toque para escolher uma foto do rosto. Ela aparece no início e na abertura do app.')}</small>
+        <small>{err || t('Uma foto do seu rosto. Ela aparece no início e na abertura do app.')}</small>
       </span>
     </label>
+    <PhotoButtons front onFile={pick} disabled={busy} />
+    </div>
   )
 }

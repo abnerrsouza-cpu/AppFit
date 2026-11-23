@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Icon } from '../components/Icon'
+import { PhotoButtons } from '../components/PhotoButtons'
 import { Info, WithInfo } from '../components/Info'
 import { t } from '../i18n'
 import { type PjStep, projetoTodo } from '../game'
@@ -182,6 +183,12 @@ function Expectativa({ s, visionUrl, nextId }: { s: AppState; visionUrl?: string
   const v = getProjeto(s).vision
   const upd = (patch: Partial<typeof v>) => setProjeto((p) => ({ ...p, vision: { ...p.vision, ...patch } }))
   const [busy, setBusy] = useState(false)
+  const pickVision = async (f?: File) => {
+    setBusy(true)
+    const id = await savePhoto(f)
+    if (id) upd({ photoId: id })
+    setBusy(false)
+  }
   const done = [!!v.photoId, !!v.result.trim(), !!v.feeling.trim(), !!v.why.trim()].filter(Boolean).length
   const nx = (id: string) => (nextId === id ? 'pj-next' : '')
   return (
@@ -203,12 +210,7 @@ function Expectativa({ s, visionUrl, nextId }: { s: AppState; visionUrl?: string
           id="pj-vision-photo"
           type="file"
           accept="image/*"
-          onChange={async (e) => {
-            setBusy(true)
-            const id = await savePhoto(e.target.files?.[0])
-            if (id) upd({ photoId: id })
-            setBusy(false)
-          }}
+          onChange={(e) => pickVision(e.target.files?.[0])}
         />
         {visionUrl ? (
           <img src={visionUrl} alt={t('Foto do shape que você quer ter')} />
@@ -221,11 +223,12 @@ function Expectativa({ s, visionUrl, nextId }: { s: AppState; visionUrl?: string
               {busy ? t('Salvando...') : t('Adicione uma foto do shape que você quer ter')}
               <Info text={t('Uma imagem do resultado que você quer. Ela vira o fundo do topo do Projetinho, para você ver todo dia.')} />
             </b>
-            <small>{t('Pode ser uma foto de referência ou uma foto sua de quando estava em forma. Toque aqui para escolher.')}</small>
+            <small>{t('Pode ser uma foto de referência ou uma foto sua de quando estava em forma.')}</small>
           </span>
         )}
         {visionUrl && <span className="pj-photo-tag">{t('Toque para trocar')}</span>}
       </label>
+      <PhotoButtons onFile={pickVision} disabled={busy} />
 
       <div className="card field">
         <label className={`pj-step ${nx('pj-result')}`}>
@@ -484,25 +487,29 @@ function Fotos({ s }: { s: AppState }) {
   const list = getProjeto(s).photos
   const [busy, setBusy] = useState(false)
   const [view, setView] = useState<string | null>(null)
+  const addPhoto = async (f?: File) => {
+    setBusy(true)
+    const id = await savePhoto(f)
+    if (id) setProjeto((p) => ({ ...p, photos: [{ id: newId(), photoId: id, caption: '', date: today() }, ...p.photos] }))
+    setBusy(false)
+  }
   return (
     <div className="pj-sec">
-      {list.length === 0 && <Guide title={t('Guarde os momentos do projeto')} steps={[t('Toque em Adicionar foto.'), t('Escolha uma foto do treino, do prato ou do espelho.'), t('Faça isso toda semana para ver sua evolução.')]} />}
+      {list.length === 0 && <Guide title={t('Guarde os momentos do projeto')} steps={[t('Toque em Tirar foto ou Escolher da galeria.'), t('Pode ser do treino, do prato ou do espelho.'), t('Faça isso toda semana para ver sua evolução.')]} />}
       <label className="card pj-upload">
         <input
           id="pj-gallery"
           type="file"
           accept="image/*"
-          onChange={async (e) => {
-            setBusy(true)
-            const id = await savePhoto(e.target.files?.[0])
-            if (id) setProjeto((p) => ({ ...p, photos: [{ id: newId(), photoId: id, caption: '', date: today() }, ...p.photos] }))
-            setBusy(false)
+          onChange={(e) => {
+            void addPhoto(e.target.files?.[0])
             e.target.value = ''
           }}
         />
         <Icon name="camera" size={22} /> {busy ? t('Salvando...') : t('Adicionar foto')}
         <Info text={t('Guarde qualquer momento do projeto: treino, prato, espelho. Toque numa foto para ver em tela cheia.')} />
       </label>
+      <PhotoButtons onFile={addPhoto} disabled={busy} />
       {list.length === 0 ? (
         <p className="muted center-txt">{t('Nenhuma foto ainda. Adicione fotos dos seus treinos, refeições ou do espelho.')}</p>
       ) : (

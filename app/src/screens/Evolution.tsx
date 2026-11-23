@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { BeforeAfter } from '../components/BeforeAfter'
 import { Icon } from '../components/Icon'
+import { PhotoButtons } from '../components/PhotoButtons'
 import { Info, WithInfo } from '../components/Info'
 import { Locked } from '../components/Locked'
 import { compress, putPhoto } from '../photos'
@@ -280,7 +281,7 @@ function WeeklyForm({ s, onClose }: { s: AppState; onClose: () => void }) {
         <p className="lead">{t('Foto sem filtro e sem ângulo esperto. Mesma luz, mesma pose, mesmo lugar toda semana.')}</p>
 
         <label className="card photo-drop">
-          <input id="wk-photo" type="file" accept="image/*" capture="environment" onChange={(e) => onFile(e.target.files?.[0])} />
+          <input id="wk-photo" type="file" accept="image/*" onChange={(e) => onFile(e.target.files?.[0])} />
           {preview ? (
             <img src={preview} alt={t('Foto da semana')} />
           ) : (
@@ -294,6 +295,7 @@ function WeeklyForm({ s, onClose }: { s: AppState; onClose: () => void }) {
             </span>
           )}
         </label>
+        <PhotoButtons onFile={onFile} disabled={busy} />
 
         <fieldset className="card field">
           <legend>

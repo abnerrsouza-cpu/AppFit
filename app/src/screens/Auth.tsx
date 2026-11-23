@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { type User, api, avatarUrl } from '../api'
 import { Icon } from '../components/Icon'
+import { PhotoButtons } from '../components/PhotoButtons'
 import { Info } from '../components/Info'
 import { getLang, t } from '../i18n'
 import { enableNotifications, notifyStatus } from '../notify'
@@ -109,14 +110,17 @@ export function Auth({ s, onUser }: { s: AppState; onUser: (u: User) => void }) 
         <form className="card field" onSubmit={submit}>
           {mode === 'criar' && (
             <>
+              <div className="photo-wrap">
               <label className="avatar-pick">
                 <input id="au-photo" type="file" accept="image/*" onChange={(e) => pickPhoto(e.target.files?.[0])} />
                 <span className="avatar-big">{avatar ? <img src={avatar} alt="" /> : <Icon name="camera" size={28} />}</span>
                 <span>
                   <b>{avatar ? t('Trocar foto de perfil') : t('Adicione sua foto de perfil')}</b>
-                  <small>{t('Toque para escolher uma foto do rosto.')}</small>
+                  <small>{t('Uma foto do seu rosto.')}</small>
                 </span>
               </label>
+              <PhotoButtons front onFile={pickPhoto} />
+              </div>
               <label>
                 {t('Seu nome')}
                 <input id="au-name" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" required />
