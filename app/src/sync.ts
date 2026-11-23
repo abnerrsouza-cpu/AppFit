@@ -4,7 +4,7 @@ import { api } from './api'
 import { getLang } from './i18n'
 import { testMessages } from './notify'
 import { dailySchedule } from './psych'
-import { type AppState, addDays, blankProfile, getState, pad, setState, subscribe, ymd } from './store'
+import { type AppState, addDays, blankProfile, getState, localizeData, pad, setState, subscribe, ymd } from './store'
 
 function buildSchedule(s: AppState) {
   if (!s.onboarded) return []
@@ -46,7 +46,7 @@ export async function startSync(userName: string) {
   try {
     const { data } = await api.getState()
     if (data && typeof data === 'object') {
-      setState(() => ({ ...(data as AppState), lang: local.lang ?? (data as AppState).lang, demo: false }))
+      setState(() => ({ ...localizeData(data as AppState, getLang()), lang: local.lang ?? (data as AppState).lang, demo: false }))
     } else {
       // conta nova: começa do zero com o nome da conta
       setState(() => ({

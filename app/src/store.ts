@@ -1,4 +1,5 @@
 import { type Lang, detectLang, getLang, setLangRuntime, t, tr } from './i18n'
+import { DICT } from './i18n-dict'
 // Estado do app. No MVP fica no localStorage do aparelho.
 // Na versão com servidor, troca-se este arquivo por chamadas ao Supabase.
 import { useEffect, useState } from 'react'
@@ -320,8 +321,9 @@ function load(): AppState {
     const raw = localStorage.getItem(KEY)
     if (raw) {
       const st = JSON.parse(raw) as AppState
-      setLangRuntime(st.lang ?? detectLang())
-      return st
+      const lang = st.lang ?? detectLang()
+      setLangRuntime(lang)
+      return localizeData(st, lang)
     }
   } catch {
     /* sem storage: segue com exemplo */
@@ -331,10 +333,43 @@ function load(): AppState {
   return demoState(lang)
 }
 
+// Textos-padrão criados pelo app (nomes das refeições, treinos, frase de cobrança...) ficam
+// guardados no idioma do cadastro. Esta tabela reconhece esses textos em qualquer idioma
+// para convertê-los quando o idioma muda. Textos escritos pela pessoa não são alterados.
+let REV: Map<string, string> | null = null
+function canonical(txt: string) {
+  if (!REV) {
+    REV = new Map()
+    for (const [pt, [en, es]] of Object.entries(DICT)) {
+      REV.set(pt, pt)
+      if (!REV.has(en)) REV.set(en, pt)
+      if (!REV.has(es)) REV.set(es, pt)
+    }
+  }
+  return REV.get(txt)
+}
+const conv = (txt: string, lang: Lang) => {
+  const pt = txt ? canonical(txt) : undefined
+  return pt ? tr(lang, pt) : txt
+}
+
+/** Converte para o idioma `lang` os textos-padrão guardados nos dados. */
+export function localizeData(s: AppState, lang: Lang): AppState {
+  return {
+    ...s,
+    profile: {
+      ...s.profile,
+      meals: s.profile.meals.map((m) => ({ ...m, name: conv(m.name, lang), items: conv(m.items, lang) })),
+      workouts: s.profile.workouts.map((w) => ({ ...w, title: conv(w.title, lang), items: conv(w.items, lang) })),
+    },
+    custom: s.custom?.map((c) => ({ ...c, text: conv(c.text, lang) })),
+  }
+}
+
 /** Troca o idioma. Se estiver vendo o exemplo, refaz o exemplo no idioma novo. */
 export function setLang(lang: Lang) {
   setLangRuntime(lang)
-  setState((s) => (s.demo ? { ...demoState(lang), theme: s.theme, lang } : { ...s, lang }))
+  setState((s) => (s.demo ? { ...demoState(lang), theme: s.theme, lang } : { ...localizeData(s, lang), lang }))
 }
 
 let state: AppState = load()
