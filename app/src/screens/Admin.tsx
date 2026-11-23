@@ -19,7 +19,7 @@ function ago(s: string | null) {
   return d === 1 ? 'ontem' : `há ${d} dias`
 }
 
-export function Admin({ onPending }: { onPending: (n: number) => void }) {
+export function Admin({ onPending, onBack }: { onPending: (n: number) => void; onBack?: () => void }) {
   const [sec, setSec] = useState<Sec>('solicitacoes')
   const [users, setUsers] = useState<AdminUser[]>([])
   const [err, setErr] = useState('')
@@ -46,6 +46,14 @@ export function Admin({ onPending }: { onPending: (n: number) => void }) {
 
   return (
     <div className="screen">
+      {onBack && (
+        <div className="sheet-h">
+          <button type="button" className="round-btn" onClick={onBack} aria-label="Voltar">
+            <Icon name="back" />
+          </button>
+          <span className="eyebrow">Perfil</span>
+        </div>
+      )}
       <header className="page-h">
         <h1 className="ttl">
           Admin

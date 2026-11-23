@@ -18,7 +18,9 @@ import {
   getProjeto,
   newId,
   parseYmd,
+  blankProjeto,
   setProjeto,
+  setState,
   today,
 } from '../store'
 
@@ -237,6 +239,7 @@ export function Projeto({ s, initialSec }: { s: AppState; initialSec?: Sec }) {
               </button>
             ))}
           </div>
+          <NewProject s={s} onStart={() => setFunnel(true)} />
         </>
       )}
 
@@ -750,5 +753,72 @@ function Thumb({ photoId, date, onOpen }: { photoId: string; date: string; onOpe
       {url && <img src={url} alt="" />}
       <small>{dm(date)}</small>
     </button>
+  )
+}
+
+/** Encerrar o projetinho atual (vai para o histórico) e começar outro. */
+function NewProject({ s, onStart }: { s: AppState; onStart: () => void }) {
+  const [ask, setAsk] = useState(false)
+  const hist = s.projetoHistory ?? []
+  const restart = () => {
+    const pj = getProjeto(s)
+    const st = projetoStats(s)
+    setState((x) => ({
+      ...x,
+      projetoHistory: [
+        {
+          result: pj.vision.result,
+          startedAt: pj.startedAt ?? new Date().toISOString(),
+          endedAt: new Date().toISOString(),
+          efficacy: st.efficacy,
+          kept: st.kept,
+          goalsDone: pj.goals.filter((g) => g.done).length,
+          goals: pj.goals.length,
+        },
+        ...(x.projetoHistory ?? []),
+      ],
+      // zera objetivo, promessas e metas; desabafos e fotos continuam
+      projeto: { ...blankProjeto(today(), x.profile.cycleDays), vents: pj.vents, photos: pj.photos },
+    }))
+    setAsk(false)
+    onStart()
+  }
+  return (
+    <>
+      {!ask ? (
+        <button type="button" className="ghost-btn pj-new" onClick={() => setAsk(true)}>
+          <Icon name="plus" size={18} /> {t('Novo projetinho')}
+        </button>
+      ) : (
+        <section className="card pj-new-ask">
+          <b>{t('Começar um novo projetinho?')}</b>
+          <p>{t('O atual vai para o histórico com o resultado e a eficácia. Objetivo, promessas e metas começam do zero. Seus desabafos e fotos continuam guardados.')}</p>
+          <button type="button" className="cta" onClick={restart}>
+            {t('Sim, começar outro')}
+          </button>
+          <button type="button" className="link" onClick={() => setAsk(false)}>
+            {t('Cancelar')}
+          </button>
+        </section>
+      )}
+      {hist.length > 0 && (
+        <section className="card pj-hist">
+          <b className="ttl">{t('Projetinhos anteriores')}</b>
+          <ul>
+            {hist.map((h, i) => (
+              <li key={i}>
+                <span>
+                  <b>{h.result || t('Sem título')}</b>
+                  <small>
+                    {fmtDayMonth(new Date(h.startedAt))} → {fmtDayMonth(new Date(h.endedAt))} · {t('{a} promessas cumpridas', { a: h.kept })} · {t('{a} de {b} metas', { a: h.goalsDone, b: h.goals })}
+                  </small>
+                </span>
+                <span className="pj-hist-eff">{h.efficacy === null ? '—' : `${Math.round(h.efficacy * 100)}%`}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </>
   )
 }

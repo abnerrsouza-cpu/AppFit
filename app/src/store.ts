@@ -97,6 +97,7 @@ export interface AppState {
   lastLevel?: number
   testEvery?: number // modo teste: dispara a cada N minutos (0 = desligado)
   projeto?: Projeto
+  projetoHistory?: ProjetoArchive[] // projetinhos anteriores
 }
 
 export interface CustomNudge {
@@ -148,6 +149,16 @@ export interface Projeto {
   startedAt?: string
   /** quando fez o juramento de sinceridade */
   oathAt?: string
+}
+
+export interface ProjetoArchive {
+  result: string
+  startedAt: string
+  endedAt: string
+  efficacy: number | null
+  kept: number
+  goalsDone: number
+  goals: number
 }
 
 export function blankProjeto(startDate: string, cycleDays: number): Projeto {

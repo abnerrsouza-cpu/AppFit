@@ -11,7 +11,7 @@ import { type AppState, type Profile, bmi, currentWeight, newId, resetToBlank, r
 
 type Section = null | 'perfil' | 'rotina' | 'treino' | 'dieta' | 'agenda' | 'relogio' | 'carta' | 'integracoes'
 
-export function Menu({ s, user = null, onUser, onLogout, onHow, onConquistas, onRanking, onPlano, initialSec = null, onOpened }: { s: AppState; user?: User | null; onUser?: (u: User) => void; onLogout?: () => void; onHow?: () => void; onConquistas?: () => void; onRanking?: () => void; onPlano?: () => void; initialSec?: string | null; onOpened?: () => void }) {
+export function Menu({ s, user = null, onUser, onLogout, onHow, onConquistas, onRanking, onPlano, onAdmin, adminPending = 0, initialSec = null, onOpened }: { s: AppState; user?: User | null; onUser?: (u: User) => void; onLogout?: () => void; onHow?: () => void; onConquistas?: () => void; onRanking?: () => void; onPlano?: () => void; onAdmin?: () => void; adminPending?: number; initialSec?: string | null; onOpened?: () => void }) {
   const [sec, setSec] = useState<Section>(initialSec as Section)
   useEffect(() => {
     if (initialSec) onOpened?.()
@@ -110,6 +110,19 @@ export function Menu({ s, user = null, onUser, onLogout, onHow, onConquistas, on
 
       <div className="card menu-group">
         <span className="group-label">{t('Ajuda')}</span>
+        {onAdmin && (
+          <button type="button" className="menu-row" onClick={onAdmin}>
+            <span className="menu-ic">
+              <Icon name="lock" size={20} />
+            </span>
+            <span>
+              <b>{t('Painel admin')}</b>
+              <small>{adminPending > 0 ? t('{n} solicitações esperando aprovação', { n: adminPending }) : t('Usuários, frequência e notificações')}</small>
+            </span>
+            {adminPending > 0 && <i className="cat-badge">{adminPending}</i>}
+            <Icon name="chevR" size={18} />
+          </button>
+        )}
         <button type="button" className="menu-row" onClick={onRanking}>
           <span className="menu-ic">
             <Icon name="flame" size={20} />

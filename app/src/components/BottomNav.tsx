@@ -5,6 +5,7 @@ export type Tab = 'inicio' | 'evolucao' | 'projeto' | 'cobrancas' | 'menu' | 'ad
 
 const ITEMS: { id: Tab; label: string; icon: string }[] = [
   { id: 'inicio', label: 'Hoje', icon: 'sun' },
+  { id: 'plano', label: 'Treino e dieta', icon: 'dumbbell' },
   { id: 'evolucao', label: 'Evolução', icon: 'photo' },
   { id: 'projeto', label: 'Projetinho', icon: 'star' },
   { id: 'ranking', label: 'Ranking', icon: 'trophy' },
@@ -12,9 +13,11 @@ const ITEMS: { id: Tab; label: string; icon: string }[] = [
 ]
 
 export function BottomNav({ tab, onTab, dots, admin = false }: { tab: Tab; onTab: (t: Tab) => void; dots: Partial<Record<Tab, boolean>>; admin?: boolean }) {
-  const items = admin ? [...ITEMS, { id: 'admin' as Tab, label: 'Admin', icon: 'lock' }] : ITEMS
+  // o Admin fica no Perfil, para o rodapé não passar de 6 abas
+  void admin
+  const items = ITEMS
   return (
-    <nav className={`bnav ${admin ? 'n6' : 'n5'}`} aria-label={t('Navegação principal')}>
+    <nav className="bnav n6" aria-label={t('Navegação principal')}>
       {items.map((it) => (
         <button
           key={it.id}
