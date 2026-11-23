@@ -1,18 +1,22 @@
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { avatarUrl } from '../api'
 import { t } from '../i18n'
 import { getPhoto } from '../photos'
 import { type AppState, cycleInfo, daysBetween, getProjeto, parseYmd } from '../store'
 import { Icon } from './Icon'
+import { quoteOfDay } from '../quotes'
 
-const TOTAL = 10_000 // 10 segundos no total
-const HALF = TOTAL / 2
+const PHOTOS = 10_000 // 10 s obrigatórios com as fotos
+const HALF = PHOTOS / 2
+const QUOTE = 3_000 // depois, 3 s com a frase do dia
+const TOTAL = PHOTOS + QUOTE
 
 /** Abertura animada de 10 s obrigatórios (não dá para pular): "Esse é você" e depois "Essa é sua referência". */
 export function Intro({ s, userId, hasAvatar, onDone }: { s: AppState; userId?: number; hasAvatar?: boolean; onDone: () => void }) {
   const [me, setMe] = useState<string | null>(null)
   const [ref, setRef] = useState<string | null>(null)
-  const [phase, setPhase] = useState<0 | 1>(0)
+  const [phase, setPhase] = useState<0 | 1 | 2>(0)
+  const [quote] = useState(() => quoteOfDay())
   const [leaving, setLeaving] = useState(false)
 
   useEffect(() => {
@@ -32,9 +36,11 @@ export function Intro({ s, userId, hasAvatar, onDone }: { s: AppState; userId?: 
 
   useEffect(() => {
     const a = setTimeout(() => setPhase(1), HALF)
+    const q = setTimeout(() => setPhase(2), PHOTOS)
     const b = setTimeout(() => finish(), TOTAL)
     return () => {
       clearTimeout(a)
+      clearTimeout(q)
       clearTimeout(b)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -76,7 +82,18 @@ export function Intro({ s, userId, hasAvatar, onDone }: { s: AppState; userId?: 
         {v.result ? <p className="intro-goal">{v.result}</p> : !ref && <p className="intro-hint">{t('Escolha sua foto de referência no Projetinho.')}</p>}
       </div>
 
-      <div className="intro-foot">
+      <div className={`intro-quote ${phase === 2 ? 'on' : ''}`}>
+        <span className="intro-kicker">{t('Frase do dia')}</span>
+        <p>
+          {quote.split(' ').map((w, i) => (
+            <Fragment key={i}>
+              <span style={{ animationDelay: `${i * 70}ms` }}>{w}</span>{' '}
+            </Fragment>
+          ))}
+        </p>
+      </div>
+
+      <div className={`intro-foot ${phase === 2 ? 'quote' : ''}`}>
         <small>{t('Lembre por que você começou.')}</small>
         <div className="intro-bar">
           <span />

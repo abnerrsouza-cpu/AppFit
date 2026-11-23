@@ -4435,7 +4435,7 @@ input[type='time']::-webkit-date-and-time-value {
   border-radius: 5px;
   background: linear-gradient(90deg, #3d8bff, #8cbcff);
   transform-origin: left;
-  animation: introBar 10s linear both;
+  animation: introBar 13s linear both;
 }
 @keyframes introBar {
   from {
@@ -4571,4 +4571,65 @@ input[type='time']::-webkit-date-and-time-value {
 }
 .now-actions {
   flex-wrap: wrap;
+}
+
+/* frase do dia (3 s depois das fotos) */
+.intro-quote {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding: 0 max(28px, env(safe-area-inset-left, 0px));
+  text-align: center;
+  background: radial-gradient(90% 60% at 50% 50%, #1557d6 0%, #05070d 75%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.intro-quote.on {
+  opacity: 1;
+}
+.intro-quote p {
+  max-width: 420px;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 7.5vw, 2.4rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+.intro-quote p span {
+  display: inline-block;
+  opacity: 0;
+}
+.intro-quote.on p span {
+  animation: wordIn 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2) forwards;
+}
+@keyframes wordIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.96);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+.intro-foot {
+  position: relative;
+  z-index: 2;
+}
+.intro-foot.quote small {
+  visibility: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  .intro-quote.on p span {
+    animation: none;
+    opacity: 1;
+  }
 }
