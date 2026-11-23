@@ -461,6 +461,9 @@ async function serveStatic(req, res, pathname) {
 async function ensureAdmin() {
   const hash = process.env.ADMIN_PASSWORD_HASH
   if (!ADMIN_EMAIL) return
+  // só o e-mail de ADMIN_EMAIL é admin: contas que viraram admin antes (ex.: a primeira criada) voltam a ser usuário
+  const demoted = await q(`update users set role = 'user' where role = 'admin' and email <> $1 returning email`, [ADMIN_EMAIL])
+  if (demoted.rows.length) console.log(`admin: ${demoted.rows.length} conta(s) deixaram de ser admin`)
   const r = await q('select id from users where email = $1', [ADMIN_EMAIL])
   if (r.rows.length) {
     await q(`update users set role = 'admin', status = 'approved', approved_at = coalesce(approved_at, now()) where id = $1`, [r.rows[0].id])
