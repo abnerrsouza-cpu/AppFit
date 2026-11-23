@@ -8,7 +8,7 @@ import { quoteOfDay } from '../quotes'
 
 const PHOTOS = 10_000 // 10 s obrigatórios com as fotos
 const HALF = PHOTOS / 2
-const QUOTE = 3_000 // depois, 3 s com a frase do dia
+const QUOTE = 5_000 // depois, 5 s com a frase do dia
 const TOTAL = PHOTOS + QUOTE
 
 /** Abertura animada de 10 s obrigatórios (não dá para pular): "Esse é você" e depois "Essa é sua referência". */
@@ -83,7 +83,6 @@ export function Intro({ s, userId, hasAvatar, onDone }: { s: AppState; userId?: 
       </div>
 
       <div className={`intro-quote ${phase === 2 ? 'on' : ''}`}>
-        <span className="intro-kicker">{t('Frase do dia')}</span>
         <p>
           {quote.split(' ').map((w, i) => (
             <Fragment key={i}>

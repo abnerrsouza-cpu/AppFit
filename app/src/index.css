@@ -4435,7 +4435,7 @@ input[type='time']::-webkit-date-and-time-value {
   border-radius: 5px;
   background: linear-gradient(90deg, #3d8bff, #8cbcff);
   transform-origin: left;
-  animation: introBar 13s linear both;
+  animation: introBar 15s linear both;
 }
 @keyframes introBar {
   from {
