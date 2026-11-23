@@ -339,34 +339,8 @@ function Notificacoes() {
       setMsg((ex as Error).message)
     }
   }
-  const fmt = async (title: string, label: string) => {
-    try {
-      const r = await api.pushTest(title, 'Preste contas: leva 1 minuto. Sequência de 3 dias em jogo.')
-      setMsg(r.ok ? `Teste ${label} enviado para o seu celular. Bloqueie a tela e veja como chegou.` : 'Não chegou: ative as notificações neste aparelho (sininho da tela Hoje).')
-    } catch (ex) {
-      setMsg((ex as Error).message)
-    }
-  }
   return (
     <section className="adm-list">
-      <div className="card adm-fmt">
-        <b className="ttl">
-          Teste de formato (só no seu celular)
-          <Info text="Compara como o iPhone mostra a notificação. O 'from Sem Desculpa' é colocado pelo iOS em apps web; aqui testamos se algum formato evita." />
-        </b>
-        <div className="adm-fmt-btns">
-          <button type="button" className="ghost-btn" onClick={() => fmt('', 'A')}>
-            A · Sem título
-          </button>
-          <button type="button" className="ghost-btn" onClick={() => fmt('Sem Desculpa', 'B')}>
-            B · Título = nome do app
-          </button>
-          <button type="button" className="ghost-btn" onClick={() => fmt('Preste contas', 'C')}>
-            C · Como é hoje
-          </button>
-        </div>
-        {msg && <small className="muted">{msg}</small>}
-      </div>
       <div className={`card test-mode ${d.settings.enabled ? '' : 'off-all'}`}>
         <div>
           <b className="ttl">
