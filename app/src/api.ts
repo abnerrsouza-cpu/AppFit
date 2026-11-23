@@ -106,7 +106,7 @@ export const api = {
   calendar: () => call<{ events: CalEvent[]; error?: string }>('GET', '/api/calendar'),
   disconnectStrava: () => call('DELETE', '/api/me/strava'),
   social: () => call<SocialInfo>('GET', '/api/social'),
-  ranking: (scope: string) => call<{ rows: RankRow[]; total: number }>('GET', `/api/ranking?scope=${encodeURIComponent(scope)}`),
+  ranking: (scope: string, period: 'week' | 'month' | 'year' = 'week') => call<{ rows: RankRow[]; total: number }>('GET', `/api/ranking?scope=${encodeURIComponent(scope)}&period=${period}`),
   joinFriend: (code: string) => call<{ ok: boolean; name: string }>('POST', '/api/friends/join', { code }),
   removeFriend: (id: number) => call('DELETE', `/api/friends/${id}`),
   createGroup: (name: string) => call<{ group: { id: number; name: string; code: string } }>('POST', '/api/groups', { name }),

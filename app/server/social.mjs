@@ -56,10 +56,11 @@ const XP = { task: 10, checkin: 50, trained: 20, weekly: 100, photo: 30, promise
 const LEVELS = [0, 100, 300, 600, 1000, 1500, 2200, 3000, 4000, 5500]
 
 /** Pontos da semana (segunda a domingo), total, nível e sequência. `weekOffset` = -1 para a semana passada. */
-export function score(data, tz, weekOffset = 0) {
+export function score(data, tz, weekOffset = 0, period = 'week') {
   const today = localParts(tz).date
-  const ws = addDays(mondayOf(today), 7 * weekOffset)
-  const we = weekOffset === 0 ? today : addDays(ws, 6)
+  // período do ranking: semana (seg-dom), mês (dia 1 até hoje) ou ano (1º de jan até hoje)
+  const ws = period === 'month' ? today.slice(0, 8) + '01' : period === 'year' ? today.slice(0, 5) + '01-01' : addDays(mondayOf(today), 7 * weekOffset)
+  const we = weekOffset === 0 || period !== 'week' ? today : addDays(ws, 6)
   const inWeek = (k) => k >= ws && k <= we
   let week = 0
   let total = 0
@@ -73,7 +74,7 @@ export function score(data, tz, weekOffset = 0) {
   for (const [k, w] of Object.entries(d.weekly || {})) {
     const v = XP.weekly + (w?.photoId ? XP.photo : 0)
     total += v
-    if (k === ws) week += v
+    if (period === 'week' ? k === ws : k >= ws && k <= we) week += v
   }
   const pj = d.projeto || {}
   for (const p of pj.promises || []) if (p.status === 'cumprida') add(XP.promise, p.date || '')
@@ -97,7 +98,7 @@ const shortName = (n) => {
 }
 
 /** Monta o ranking de uma lista de pessoas. */
-async function board(ids, meId, { short = false, weekOffset = 0 } = {}) {
+async function board(ids, meId, { short = false, weekOffset = 0, period = 'week' } = {}) {
   if (!ids.length) return []
   const r = await q(
     `select u.id, u.name, u.tz, u.avatar_type is not null as has_avatar, s.data
@@ -106,7 +107,7 @@ async function board(ids, meId, { short = false, weekOffset = 0 } = {}) {
     [ids],
   )
   const rows = r.rows.map((u) => {
-    const sc = score(u.data, u.tz, weekOffset)
+    const sc = score(u.data, u.tz, weekOffset, period)
     return { id: u.id, name: short && u.id !== meId ? shortName(u.name) : u.name, hasAvatar: u.has_avatar, points: sc.week, level: sc.level, streak: sc.streak, me: u.id === meId }
   })
   rows.sort((a, b) => b.points - a.points || b.streak - a.streak || a.id - b.id)
@@ -159,12 +160,14 @@ export function registerSocial({ route, send, readJson, requireUser, HttpError }
 
   route('GET', '/api/ranking', async (req, res) => {
     const u = await requireUser(req)
-    const scope = new URL(req.url, 'http://x').searchParams.get('scope') || 'friends'
+    const sp = new URL(req.url, 'http://x').searchParams
+    const scope = sp.get('scope') || 'friends'
+    const period = ['week', 'month', 'year'].includes(sp.get('period')) ? sp.get('period') : 'week'
     let rows
-    if (scope === 'friends') rows = await board([u.id, ...(await friendIds(u.id))], u.id)
+    if (scope === 'friends') rows = await board([u.id, ...(await friendIds(u.id))], u.id, { period })
     else if (scope === 'global') {
       const r = await q(`select id from users where status = 'approved' and (ranking_public or id = $1)`, [u.id])
-      rows = await board(r.rows.map((x) => x.id), u.id, { short: true })
+      rows = await board(r.rows.map((x) => x.id), u.id, { short: true, period })
       const me = rows.find((x) => x.me)
       const top = rows.slice(0, 50)
       return send(res, 200, { rows: me && me.pos > 50 ? [...top, me] : top, total: rows.length })
@@ -173,7 +176,7 @@ export function registerSocial({ route, send, readJson, requireUser, HttpError }
       const ok = await q('select 1 from group_members where group_id = $1 and user_id = $2', [gid, u.id])
       if (!ok.rows.length) throw new HttpError(403, 'Você não está nesse grupo')
       const m = await q('select user_id from group_members where group_id = $1', [gid])
-      rows = await board(m.rows.map((x) => x.user_id), u.id)
+      rows = await board(m.rows.map((x) => x.user_id), u.id, { period })
     } else throw new HttpError(400, 'Ranking inválido')
     send(res, 200, { rows, total: rows.length })
   })

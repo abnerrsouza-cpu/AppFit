@@ -68,7 +68,8 @@ function Steps({ list }: { list: string[] }) {
 }
 
 export function Ranking({ online, onBack, notice }: { online: boolean; onBack?: () => void; notice?: string | null }) {
-  const [scope, setScope] = useState<Scope>('amigos')
+  const [scope, setScope] = useState<Scope>('geral')
+  const [period, setPeriod] = useState<'week' | 'month' | 'year'>('week')
   const [info, setInfo] = useState<SocialInfo | null>(null)
   const [rows, setRows] = useState<RankRow[] | null>(null)
   const [total, setTotal] = useState<number>()
@@ -90,7 +91,7 @@ export function Ranking({ online, onBack, notice }: { online: boolean; onBack?: 
     setRows(null)
     if (!sc) return
     let alive = true
-    api.ranking(sc).then(
+    api.ranking(sc, period).then(
       (r) => {
         if (!alive) return
         setRows(r.rows)
@@ -101,15 +102,22 @@ export function Ranking({ online, onBack, notice }: { online: boolean; onBack?: 
     return () => {
       alive = false
     }
-  }, [online, scope, gid, info])
+  }, [online, scope, gid, info, period])
 
   useEffect(() => {
     if (scope === 'grupos' && !gid && info?.groups.length) setGid(info.groups[0].id)
   }, [scope, gid, info])
 
-  const day = new Date().getDay()
-  const left = (7 - day) % 7
+  const now = new Date()
+  const left =
+    period === 'week'
+      ? (7 - now.getDay()) % 7
+      : period === 'month'
+        ? new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() - now.getDate()
+        : Math.round((new Date(now.getFullYear(), 11, 31).getTime() - new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()) / 86400000)
   const ends = left === 0 ? t('Termina hoje à meia-noite.') : left === 1 ? t('Termina amanhã à meia-noite.') : t('Termina em {n} dias.', { n: left })
+  const reset = period === 'week' ? t('Zera toda segunda.') : period === 'month' ? t('Zera todo dia 1.') : t('Zera em 1º de janeiro.')
+  const title = period === 'week' ? t('Ranking da semana') : period === 'month' ? t('Ranking do mês') : t('Ranking do ano')
 
   if (!online)
     return (
@@ -137,12 +145,19 @@ export function Ranking({ online, onBack, notice }: { online: boolean; onBack?: 
     <div className="screen">
       <Head onBack={onBack} />
       <h1 className="ttl rk-title">
-        {t('Ranking da semana')}
+        {title}
         <Info text={t('Quem cumprir mais na semana fica em 1º. Os pontos vêm das tarefas marcadas, da prestação de contas, do treino, da foto semanal e das promessas cumpridas. Zera toda segunda.')} />
       </h1>
       <p className="lead">
-        {t('Zera toda segunda.')} {ends}
+        {reset} {ends}
       </p>
+      <div className="rk-period" role="tablist">
+        {(['week', 'month', 'year'] as const).map((x) => (
+          <button key={x} type="button" role="tab" aria-selected={period === x} className={`chip ${period === x ? 'on' : ''}`} onClick={() => setPeriod(x)}>
+            {t({ week: 'Semana', month: 'Mês', year: 'Ano' }[x])}
+          </button>
+        ))}
+      </div>
 
       {msg && (
         <div className="rk-msg">
@@ -155,7 +170,7 @@ export function Ranking({ online, onBack, notice }: { online: boolean; onBack?: 
       {err && <p className="rk-err">{err}</p>}
 
       <div className="seg-tabs three" role="tablist">
-        {(['amigos', 'grupos', 'geral'] as Scope[]).map((x) => (
+        {(['geral', 'grupos', 'amigos'] as Scope[]).map((x) => (
           <button key={x} type="button" role="tab" aria-selected={scope === x} className={scope === x ? 'on' : ''} onClick={() => setScope(x)}>
             {t({ amigos: 'Amigos', grupos: 'Grupos', geral: 'Geral' }[x])}
           </button>

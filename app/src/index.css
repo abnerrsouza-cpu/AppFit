@@ -8348,3 +8348,20 @@ body::before {
   -webkit-backdrop-filter: blur(14px) saturate(1.4);
   backdrop-filter: blur(14px) saturate(1.4);
 }
+.rk-period {
+  display: flex;
+  gap: 8px;
+}
+.rk-period .chip {
+  flex: 1;
+  justify-content: center;
+}
+
+/* rodapé assentado e sem o "pulo" elástico do iPhone ao rolar até o fim */
+html,
+body {
+  overscroll-behavior: none;
+}
+.bnav {
+  bottom: calc(6px + env(safe-area-inset-bottom, 0px) * 0.55);
+}
