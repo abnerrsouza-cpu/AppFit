@@ -83,6 +83,19 @@ export async function migrate() {
     create unique index if not exists notif_log_dedupe on notif_log (user_id, dedupe) where dedupe is not null;
     create index if not exists notif_log_sent on notif_log (sent_at desc);
   `)
+  await q(`
+    alter table users add column if not exists provider text not null default 'senha';
+    alter table users add column if not exists google_sub text unique;
+    alter table users add column if not exists strava_id text unique;
+    create table if not exists strava_tokens (
+      user_id int primary key references users(id) on delete cascade,
+      athlete_id text not null,
+      access_token text not null,
+      refresh_token text not null,
+      expires_at bigint not null,
+      updated_at timestamptz not null default now()
+    );
+  `)
   await q(`insert into settings (key, value) values ('notifications', '{"enabled": true}') on conflict do nothing`)
 }
 

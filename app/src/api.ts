@@ -93,6 +93,7 @@ export interface AdminUser {
   id: number
   name: string
   email: string
+  provider: 'senha' | 'google' | 'strava'
   status: User['status']
   role: User['role']
   notif_paused: boolean
@@ -116,3 +117,6 @@ export interface AdminNotifs {
   log: { kind: string; title: string; body: string; ok: boolean; sent_at: string; name: string | null }[]
   byKind: { kind: string; n: number }[]
 }
+
+/** E-mails de contas Strava são internos: mostra 'Conta Strava' no lugar. */
+export const showEmail = (e: string) => (e.endsWith('@strava.invalid') ? 'Conta Strava' : e)

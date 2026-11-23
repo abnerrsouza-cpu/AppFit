@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { type AdminNotifs, type AdminStats, type AdminUser, api, avatarUrl } from '../api'
+import { type AdminNotifs, type AdminStats, type AdminUser, api, avatarUrl, showEmail } from '../api'
 import { Icon } from '../components/Icon'
 import { Info, WithInfo } from '../components/Info'
 
@@ -153,7 +153,10 @@ function UserHead({ u, sub }: { u: AdminUser; sub: string }) {
         <b>
           {u.name} {u.role === 'admin' && <em className="adm-chip">admin</em>}
         </b>
-        <small>{u.email}</small>
+        <small>
+          {showEmail(u.email)}
+          {u.provider !== 'senha' && ` · via ${u.provider === 'google' ? 'Google' : 'Strava'}`}
+        </small>
         <small>{sub}</small>
       </span>
       <span className={`adm-status ${chip[1]}`}>{u.notif_paused && u.status === 'approved' ? 'Pausado' : chip[0]}</span>

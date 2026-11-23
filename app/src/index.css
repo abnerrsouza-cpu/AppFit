@@ -4247,3 +4247,39 @@ input[type='time']::-webkit-date-and-time-value {
   border-color: color-mix(in srgb, var(--bad) 40%, transparent);
   background: var(--bad-soft);
 }
+
+/* entrar com Google / Strava */
+.social {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 15px 18px;
+  border-radius: var(--r-pill);
+  font-weight: 600;
+  font-size: 0.98rem;
+  text-decoration: none;
+  transition: transform 0.12s;
+}
+.social-btn:active {
+  transform: scale(0.98);
+}
+.social-btn.google {
+  background: #fff;
+  color: #1f1f1f;
+  border: 1px solid #dadce0;
+}
+.social-btn.strava {
+  background: #fc4c02;
+  color: #fff;
+}
+.social .hint {
+  justify-content: center;
+  width: 100%;
+  margin-top: 2px;
+}

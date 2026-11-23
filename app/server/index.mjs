@@ -7,6 +7,7 @@ import { extname, join, normalize } from 'node:path'
 import bcrypt from 'bcryptjs'
 import { getSetting, migrate, q, setSetting } from './db.mjs'
 import { initPush, notifyAdmins, sendToUser, startScheduler, vapidPublicKey } from './push.mjs'
+import { authorizeUrl, exchange, fetchPicture, newState, providers } from './oauth.mjs'
 
 const DIST = join(import.meta.dirname, '..', 'dist')
 const PORT = Number(process.env.PORT) || 3000
@@ -125,12 +126,78 @@ route('POST', '/api/auth/signup', async (req, res) => {
   send(res, 201, { user: publicUser(u) }, { 'Set-Cookie': sessionCookie(req, token, SESSION_DAYS * 86400) })
 })
 
+// ---------- entrar com Google / Strava ----------
+const redirect = (res, to, headers = {}) => {
+  res.writeHead(302, { Location: to, 'Cache-Control': 'no-store', ...headers })
+  res.end()
+}
+const authError = (res, msg) => redirect(res, `/?auth_error=${encodeURIComponent(msg)}`)
+const PROVIDER_NAME = { google: 'Google', strava: 'Strava' }
+
+route('GET', '/api/auth/providers', async (req, res) => send(res, 200, providers()))
+
+route('GET', '/api/auth/:provider', async (req, res, p) => {
+  if (!PROVIDER_NAME[p.provider]) throw new HttpError(404, 'Rota não encontrada')
+  if (!providers()[p.provider]) return authError(res, `O login com ${PROVIDER_NAME[p.provider]} ainda não foi configurado.`)
+  const state = newState()
+  redirect(res, authorizeUrl(p.provider, req, state), {
+    'Set-Cookie': `oauth_state=${state}; Path=/api/auth; HttpOnly; SameSite=Lax; Max-Age=600${isHttps(req) ? '; Secure' : ''}`,
+  })
+})
+
+route('GET', '/api/auth/:provider/callback', async (req, res, p) => {
+  const prov = p.provider
+  if (!PROVIDER_NAME[prov]) throw new HttpError(404, 'Rota não encontrada')
+  const url = new URL(req.url, 'http://x')
+  if (url.searchParams.get('error')) return authError(res, 'Login cancelado.')
+  if (!url.searchParams.get('state') || url.searchParams.get('state') !== cookies(req).oauth_state) return authError(res, 'Não deu para confirmar o login. Tente de novo.')
+  let info
+  try {
+    info = await exchange(prov, req, url.searchParams.get('code') || '')
+  } catch (e) {
+    return authError(res, e.message)
+  }
+  const col = prov === 'google' ? 'google_sub' : 'strava_id'
+  let u = (await q(`select * from users where ${col} = $1`, [info.sub])).rows[0]
+  if (!u && info.email) {
+    // conta já existente com o mesmo e-mail: liga o Google a ela
+    u = (await q('select * from users where email = $1', [info.email])).rows[0]
+    if (u) await q(`update users set ${col} = $1 where id = $2`, [info.sub, u.id])
+  }
+  let created = false
+  if (!u) {
+    const email = info.email || `strava-${info.sub}@strava.invalid`
+    const noUsers = (await q('select count(*)::int as n from users')).rows[0].n === 0
+    const isAdmin = ADMIN_EMAIL ? email === ADMIN_EMAIL : noUsers
+    const pic = await fetchPicture(info.picture)
+    u = (
+      await q(
+        `insert into users (email, name, password_hash, avatar, avatar_type, status, role, approved_at, provider, ${col})
+         values ($1, $2, '', $3, $4, $5, $6, $7, $8, $9) returning *`,
+        [email, info.name.slice(0, 60), pic?.buf || null, pic?.type || null, isAdmin ? 'approved' : 'pending', isAdmin ? 'admin' : 'user', isAdmin ? new Date() : null, prov, info.sub],
+      )
+    ).rows[0]
+    created = !isAdmin
+  }
+  if (info.tokens) {
+    await q(
+      `insert into strava_tokens (user_id, athlete_id, access_token, refresh_token, expires_at) values ($1, $2, $3, $4, $5)
+       on conflict (user_id) do update set access_token = excluded.access_token, refresh_token = excluded.refresh_token, expires_at = excluded.expires_at, updated_at = now()`,
+      [u.id, info.sub, info.tokens.access, info.tokens.refresh, info.tokens.expiresAt],
+    )
+  }
+  if (created) notifyAdmins('Nova solicitação de acesso', `${u.name} (via ${PROVIDER_NAME[prov]}) quer entrar no app.`).catch(() => {})
+  const token = await newSession(u.id)
+  redirect(res, '/', { 'Set-Cookie': sessionCookie(req, token, SESSION_DAYS * 86400) })
+})
+
 route('POST', '/api/auth/login', async (req, res) => {
   const b = await readJson(req)
   const email = String(b.email || '').trim().toLowerCase()
   checkAttempts(email)
   const r = await q('select * from users where email = $1', [email])
   const u = r.rows[0]
+  if (u && !u.password_hash) throw new HttpError(401, `Essa conta foi criada com ${u.provider === 'google' ? 'Google' : 'Strava'}. Use o botão de entrar com ${u.provider === 'google' ? 'Google' : 'Strava'}.`)
   if (!u || !(await bcrypt.compare(String(b.password || ''), u.password_hash))) throw new HttpError(401, 'E-mail ou senha incorretos')
   attempts.delete(email)
   const token = await newSession(u.id)
@@ -219,7 +286,7 @@ route('POST', '/api/push/test', async (req, res) => {
 route('GET', '/api/admin/users', async (req, res) => {
   await requireAdmin(req)
   const r = await q(`
-    select u.id, u.name, u.email, u.status, u.role, u.notif_paused, u.created_at, u.approved_at, u.last_seen_at, (u.avatar_type is not null) as has_avatar,
+    select u.id, u.name, u.email, u.provider, u.status, u.role, u.notif_paused, u.created_at, u.approved_at, u.last_seen_at, (u.avatar_type is not null) as has_avatar,
       (select count(*) from activity a where a.user_id = u.id and a.day > current_date - 30)::int as days30,
       (select count(*) from push_subs p where p.user_id = u.id)::int as devices
     from users u order by (u.status = 'pending') desc, u.created_at desc`)

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Icon } from '../components/Icon'
 import { Info, WithInfo } from '../components/Info'
-import { type User, api, avatarUrl } from '../api'
+import { type User, api, avatarUrl, showEmail } from '../api'
 import { LANGS, t, weekday } from '../i18n'
 import { compress } from '../photos'
 import { type AppState, type Profile, bmi, currentWeight, newId, resetToBlank, resetToDemo, setLang, setState } from '../store'
@@ -85,7 +85,7 @@ export function Menu({ s, user = null, onLogout, initialSec = null, onOpened }: 
           <small>
             {t(p.goal)} · {p.height} cm · {currentWeight(s).toFixed(1)} kg
           </small>
-          {user && <small>{user.email}</small>}
+          {user && <small>{showEmail(user.email)}</small>}
         </span>
       </div>
 
