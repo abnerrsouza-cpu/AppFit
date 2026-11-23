@@ -4,6 +4,7 @@ import { Icon } from '../components/Icon'
 import { Info, WithInfo } from '../components/Info'
 import { isStandalone, notifyStatus } from '../notify'
 import { InstallStep, NotifyStep } from '../components/InstallGuide'
+import { FirstPhotos } from '../components/FirstPhotos'
 import { toneLabel } from '../psych'
 import { t } from '../i18n'
 import { type AppState, type Profile, type Tone, resetToDemo, setState, today } from '../store'
@@ -15,12 +16,12 @@ export function Onboarding({ p0, s, userId, hasServerAvatar }: { p0: Profile; s:
   const [p, setP] = useState<Profile>(p0)
   const [signed, setSigned] = useState(false)
   const upd = (patch: Partial<Profile>) => setP((x) => ({ ...x, ...patch }))
-  const total = 6
+  const total = 7
 
   const finish = () =>
-    setState((st) => ({ ...st, demo: false, onboarded: true, profile: { ...p, avatarId: st.profile.avatarId, startDate: today() } }))
+    setState((st) => ({ ...st, demo: false, onboarded: true, profile: { ...p, avatarId: st.profile.avatarId, startDate: today() }, photosAsked: true }))
 
-  const canNext = [true, !!p.name.trim() && p.height > 0 && p.weightStart > 0, true, true, signed && p.letter.trim().length > 10, true][step]
+  const canNext = [true, !!p.name.trim() && p.height > 0 && p.weightStart > 0, true, true, signed && p.letter.trim().length > 10, true, true][step]
 
   return (
     <div className="onb">
@@ -191,10 +192,11 @@ export function Onboarding({ p0, s, userId, hasServerAvatar }: { p0: Profile; s:
       )}
 
       {step === 5 && <NotifStep />}
+      {step === 6 && <FirstPhotos s={s} embedded profile={p} />}
 
       <div className="onb-foot">
         {step < total - 1 ? (
-          <WithInfo text={step === 0 ? t('Começa o cadastro. São 6 passos rápidos.') : t('Vai para o próximo passo do cadastro.')}>
+          <WithInfo text={step === 0 ? t('Começa o cadastro. São 7 passos rápidos.') : t('Vai para o próximo passo do cadastro.')}>
             <button type="button" className="cta" disabled={!canNext} onClick={() => setStep(step + 1)}>
               {step === 0 ? t('Aceito ser cobrado') : t('Continuar')}
             </button>
@@ -242,7 +244,7 @@ function NotifStep() {
           </div>
         </li>
       </ol>
-      {!installed && <p className="muted">{t('Pode tocar em "Começar o dia 1" agora e fazer isso depois: o app lembra você na tela Hoje.')}</p>}
+      {!installed && <p className="muted">{t('Pode continuar agora e fazer isso depois: o app lembra você na tela Hoje.')}</p>}
     </div>
   )
 }

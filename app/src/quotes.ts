@@ -50,3 +50,21 @@ export function quoteOfDay(d = new Date()) {
   const day = Math.floor(new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() / 86400000)
   return t(QUOTES[day % QUOTES.length])
 }
+
+/** Uma frase diferente a cada abertura do app (nunca repete a da vez anterior). */
+export function nextQuote() {
+  let last = -1
+  try {
+    last = Number(localStorage.getItem('sd:quote') ?? -1)
+  } catch {
+    /* sem storage */
+  }
+  let i = Math.floor(Math.random() * QUOTES.length)
+  if (i === last) i = (i + 1 + Math.floor(Math.random() * (QUOTES.length - 1))) % QUOTES.length
+  try {
+    localStorage.setItem('sd:quote', String(i))
+  } catch {
+    /* sem storage */
+  }
+  return t(QUOTES[i])
+}

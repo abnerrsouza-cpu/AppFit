@@ -2,7 +2,7 @@ import { Fragment, useEffect, useState } from 'react'
 import { t } from '../i18n'
 import { type AppState, cycleInfo, daysBetween, getProjeto, parseYmd } from '../store'
 import { Icon } from './Icon'
-import { quoteOfDay } from '../quotes'
+import { nextQuote } from '../quotes'
 import { useLatestPhoto, useRefPhoto } from '../usePhotos'
 
 const PHOTOS = 10_000 // 10 s obrigatórios com as fotos
@@ -15,7 +15,7 @@ export function Intro({ s, userId, hasAvatar, onDone }: { s: AppState; userId?: 
   const me = useLatestPhoto(s, userId, hasAvatar)
   const ref = useRefPhoto(s)
   const [phase, setPhase] = useState<0 | 1 | 2>(0)
-  const [quote] = useState(() => quoteOfDay())
+  const [quote] = useState(() => nextQuote())
   const [leaving, setLeaving] = useState(false)
 
 

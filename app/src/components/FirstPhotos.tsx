@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { t } from '../i18n'
 import { compress, putPhoto } from '../photos'
-import { type AppState, getProjeto, newId, setProjeto, setState } from '../store'
+import { type AppState, type Profile, getProjeto, newId, setProjeto, setState } from '../store'
 import { usePhotoUrl } from '../usePhotos'
 import { Icon } from './Icon'
 import { PhotoButtons } from './PhotoButtons'
@@ -17,13 +17,14 @@ async function save(raw?: File) {
   return id
 }
 
-export function FirstPhotos({ s, onDone }: { s: AppState; onDone: () => void }) {
+export function FirstPhotos({ s, onDone, embedded = false, profile }: { s: AppState; onDone?: () => void; embedded?: boolean; profile?: Profile }) {
+  const pf = profile ?? s.profile
   const refId = getProjeto(s).vision.photoId
   const me = usePhotoUrl(s.startPhotoId)
   const ref = usePhotoUrl(refId)
   const [busy, setBusy] = useState(false)
   const [copied, setCopied] = useState(false)
-  const goal = s.profile.weightStart > s.profile.weightGoal ? t('{n} kg mais magro', { n: Math.round(s.profile.weightStart - s.profile.weightGoal) }) : t('mais forte')
+  const goal = pf.weightStart > pf.weightGoal ? t('{n} kg mais magro', { n: Math.round(pf.weightStart - pf.weightGoal) }) : t('mais forte')
   const prompt = t('Use esta foto minha e me mostre {g}, com o abdômen definido e mais músculo, mesma pose, mesma luz e mesmo lugar. Realista, sem filtro.', { g: goal })
 
   const pickMe = async (f?: File) => {
@@ -47,9 +48,9 @@ export function FirstPhotos({ s, onDone }: { s: AppState; onDone: () => void }) 
   const both = !!s.startPhotoId && !!refId
 
   return (
-    <div className="fp" role="dialog" aria-modal="true">
+    <div className={embedded ? 'fp-embed' : 'fp'} role={embedded ? undefined : 'dialog'} aria-modal={embedded ? undefined : true}>
       <div className="fp-in">
-        <span className="eyebrow">{t('Último passo')}</span>
+        {!embedded && <span className="eyebrow">{t('Último passo')}</span>}
         <h1>{t('Suas duas fotos')}</h1>
         <p className="lead">{t('Elas aparecem toda vez que você abre o app: quem você é hoje e quem você vai ser.')}</p>
 
@@ -100,9 +101,11 @@ export function FirstPhotos({ s, onDone }: { s: AppState; onDone: () => void }) 
           <PhotoButtons onFile={pickRef} disabled={busy} />
         </section>
 
-        <button type="button" className="cta" onClick={onDone}>
-          {both ? t('Continuar') : t('Continuar sem as fotos')}
-        </button>
+        {!embedded && (
+          <button type="button" className="cta" onClick={onDone}>
+            {both ? t('Continuar') : t('Continuar sem as fotos')}
+          </button>
+        )}
         {!both && <small className="muted center-txt">{t('Dá para escolher depois em Perfil > Editar fotos da abertura.')}</small>}
       </div>
     </div>

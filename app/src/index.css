@@ -8163,3 +8163,6 @@ textarea {
   gap: 8px;
   margin-top: 2px;
 }
+.fp-embed .fp-in {
+  padding: 0;
+}
