@@ -4297,8 +4297,8 @@ input[type='time']::-webkit-date-and-time-value {
   padding-bottom: max(18px, env(safe-area-inset-bottom, 0px));
   padding-left: max(20px, env(safe-area-inset-left, 0px));
   padding-right: max(20px, env(safe-area-inset-right, 0px));
-  cursor: pointer;
   transition: opacity 0.35s ease, transform 0.35s ease;
+  touch-action: none;
   animation: introIn 0.35s ease;
 }
 .intro.out {
@@ -4416,8 +4416,9 @@ input[type='time']::-webkit-date-and-time-value {
   gap: 10px;
 }
 .intro-foot small {
-  color: rgba(255, 255, 255, 0.55);
-  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 .intro-bar {
   width: 100%;

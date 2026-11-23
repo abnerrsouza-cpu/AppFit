@@ -8,7 +8,7 @@ import { Icon } from './Icon'
 const TOTAL = 10_000 // 10 segundos no total
 const HALF = TOTAL / 2
 
-/** Abertura animada: "Esse é você" (foto mais recente) e depois "Essa é sua referência". */
+/** Abertura animada de 10 s obrigatórios (não dá para pular): "Esse é você" e depois "Essa é sua referência". */
 export function Intro({ s, userId, hasAvatar, onDone }: { s: AppState; userId?: number; hasAvatar?: boolean; onDone: () => void }) {
   const [me, setMe] = useState<string | null>(null)
   const [ref, setRef] = useState<string | null>(null)
@@ -51,7 +51,7 @@ export function Intro({ s, userId, hasAvatar, onDone }: { s: AppState; userId?: 
   const initial = (s.profile.name || '?').slice(0, 1).toUpperCase()
 
   return (
-    <div className={`intro ${leaving ? 'out' : ''}`} onClick={finish} role="dialog" aria-label={t('Abertura')}>
+    <div className={`intro ${leaving ? 'out' : ''}`} role="dialog" aria-modal="true" aria-label={t('Abertura')}>
       <div className={`intro-slide ${phase === 0 ? 'on' : ''}`}>
         <span className="intro-kicker">{t('Dia {a} de {b}', { a: c.day, b: s.profile.cycleDays })}</span>
         <h1 className="intro-title">{t('Esse é você')}</h1>
@@ -77,7 +77,7 @@ export function Intro({ s, userId, hasAvatar, onDone }: { s: AppState; userId?: 
       </div>
 
       <div className="intro-foot">
-        <small>{t('Toque para pular')}</small>
+        <small>{t('Lembre por que você começou.')}</small>
         <div className="intro-bar">
           <span />
         </div>
