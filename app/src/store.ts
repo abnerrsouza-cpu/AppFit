@@ -352,6 +352,12 @@ export function getState() {
   return state
 }
 
+/** Avisa a cada mudança de estado (usado pela sincronização). */
+export function subscribe(fn: () => void) {
+  listeners.add(fn)
+  return () => listeners.delete(fn)
+}
+
 export function setState(fn: (s: AppState) => AppState) {
   state = fn(state)
   save()

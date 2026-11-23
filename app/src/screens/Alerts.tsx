@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Icon } from '../components/Icon'
 import { Info, WithInfo } from '../components/Info'
 import { t } from '../i18n'
-import { enableNotifications, fireTestNow, notifyStatus, show } from '../notify'
+import { enableNotifications, fireTestNow, notifyStatus, sendTest } from '../notify'
 import { dailySchedule, toneLabel } from '../psych'
 import { type AppState, type CustomNudge, type Tone, defaultCustom, newId, setState } from '../store'
 
@@ -139,7 +139,7 @@ function MyNudges({ s, canSend }: { s: AppState; canSend: boolean }) {
   const save = (l: CustomNudge[]) => setState((st) => ({ ...st, custom: l }))
 
   const send = async (n: CustomNudge) => {
-    const ok = await show(t('Recado seu'), n.text)
+    const ok = await sendTest(t('Recado seu'), n.text)
     setSent(ok ? n.id : 'erro')
     setTimeout(() => setSent(null), 2500)
   }

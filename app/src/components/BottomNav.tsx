@@ -1,7 +1,7 @@
 import { t } from '../i18n'
 import { Icon } from './Icon'
 
-export type Tab = 'inicio' | 'evolucao' | 'projeto' | 'cobrancas' | 'menu'
+export type Tab = 'inicio' | 'evolucao' | 'projeto' | 'cobrancas' | 'menu' | 'admin'
 
 const ITEMS: { id: Tab; label: string; icon: string }[] = [
   { id: 'inicio', label: 'Hoje', icon: 'sun' },
@@ -10,10 +10,11 @@ const ITEMS: { id: Tab; label: string; icon: string }[] = [
   { id: 'menu', label: 'Perfil', icon: 'user' },
 ]
 
-export function BottomNav({ tab, onTab, dots }: { tab: Tab; onTab: (t: Tab) => void; dots: Partial<Record<Tab, boolean>> }) {
+export function BottomNav({ tab, onTab, dots, admin = false }: { tab: Tab; onTab: (t: Tab) => void; dots: Partial<Record<Tab, boolean>>; admin?: boolean }) {
+  const items = admin ? [...ITEMS, { id: 'admin' as Tab, label: 'Admin', icon: 'lock' }] : ITEMS
   return (
-    <nav className="bnav" aria-label={t('Navegação principal')}>
-      {ITEMS.map((it) => (
+    <nav className={`bnav ${admin ? 'n5' : ''}`} aria-label={t('Navegação principal')}>
+      {items.map((it) => (
         <button
           key={it.id}
           type="button"

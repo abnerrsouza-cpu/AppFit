@@ -3,6 +3,7 @@
 // o app estiver aberto ou em segundo plano recente.
 // Produção: o servidor envia Web Push (VAPID) pelo mesmo cronograma, com o app fechado.
 import { dailySchedule, nudge } from './psych'
+import { api } from './api'
 import { t } from './i18n'
 import { defaultCustom, getState, today } from './store'
 
@@ -19,6 +20,48 @@ export function notifyStatus(): NotifyStatus {
 }
 
 let reg: ServiceWorkerRegistration | null = null
+let serverMode = false
+export const setServerMode = (v: boolean) => {
+  serverMode = v
+}
+export const isServerMode = () => serverMode
+
+const b64ToBytes = (b64: string) => {
+  const pad = '='.repeat((4 - (b64.length % 4)) % 4)
+  const raw = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'))
+  return Uint8Array.from(raw, (c) => c.charCodeAt(0))
+}
+
+/** Inscreve este aparelho para receber notificações do servidor (chegam com o app fechado). */
+export async function subscribePush(): Promise<boolean> {
+  if (!serverMode || !('serviceWorker' in navigator) || !('PushManager' in window)) return false
+  if (!('Notification' in window) || Notification.permission !== 'granted') return false
+  try {
+    const r = reg || (await navigator.serviceWorker.ready)
+    let sub = await r.pushManager.getSubscription()
+    if (!sub) {
+      const { key } = await api.pushKey()
+      sub = await r.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToBytes(key) })
+    }
+    await api.pushSubscribe(sub.toJSON())
+    return true
+  } catch {
+    return false
+  }
+}
+
+/** Notificação de teste: pelo servidor quando houver, senão local. */
+export async function sendTest(title: string, body: string) {
+  if (serverMode) {
+    try {
+      const r = await api.pushTest(title, body)
+      if (r.ok) return true
+    } catch {
+      /* cai para o envio local */
+    }
+  }
+  return show(title, body)
+}
 
 export async function registerSW() {
   if (!('serviceWorker' in navigator)) return
@@ -33,7 +76,11 @@ export async function enableNotifications(): Promise<NotifyStatus> {
   if (!('Notification' in window)) return notifyStatus()
   try {
     const r = await Notification.requestPermission()
-    if (r === 'granted') await show(t('Cobrança ativada'), t('A partir de agora eu vou te cobrar o dia inteiro. Você pediu por isso.'))
+    if (r === 'granted') {
+      const pushed = await subscribePush()
+      if (pushed) await sendTest(t('Cobrança ativada'), t('A partir de agora eu vou te cobrar o dia inteiro. Você pediu por isso.'))
+      else await show(t('Cobrança ativada'), t('A partir de agora eu vou te cobrar o dia inteiro. Você pediu por isso.'))
+    }
     return r as NotifyStatus
   } catch {
     return 'denied'
@@ -58,7 +105,7 @@ const FIRED = 'semdesculpa:fired'
 export function startScheduler() {
   const tick = () => {
     const s = getState()
-    if (!s.onboarded) return
+    if (!s.onboarded || serverMode) return // com servidor, quem envia é o servidor
     testTick()
     const now = new Date()
     const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
@@ -115,6 +162,7 @@ export function testMessages() {
 export function fireTestNow() {
   const list = testMessages()
   const m = list[testIdx++ % list.length]
+  if (serverMode) return sendTest(m.title, m.body)
   try {
     localStorage.setItem(LAST_TEST, String(Date.now()))
   } catch {
@@ -124,6 +172,7 @@ export function fireTestNow() {
 }
 
 function testTick() {
+  if (serverMode) return
   const every = getState().testEvery || 0
   if (!every) return
   let last = 0

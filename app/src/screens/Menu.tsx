@@ -1,12 +1,26 @@
 import { useEffect, useState } from 'react'
 import { Icon } from '../components/Icon'
 import { Info, WithInfo } from '../components/Info'
+import { type User, api, avatarUrl } from '../api'
 import { LANGS, t, weekday } from '../i18n'
+import { compress } from '../photos'
 import { type AppState, type Profile, bmi, currentWeight, newId, resetToBlank, resetToDemo, setLang, setState } from '../store'
 
 type Section = null | 'perfil' | 'rotina' | 'treino' | 'dieta' | 'agenda' | 'relogio' | 'carta'
 
-export function Menu({ s, initialSec = null, onOpened }: { s: AppState; initialSec?: string | null; onOpened?: () => void }) {
+export function Menu({ s, user = null, onLogout, initialSec = null, onOpened }: { s: AppState; user?: User | null; onLogout?: () => void; initialSec?: string | null; onOpened?: () => void }) {
+  const [avatarV, setAvatarV] = useState(0)
+  const [hasAvatar, setHasAvatar] = useState(!!user?.hasAvatar)
+  const changeAvatar = async (f?: File) => {
+    if (!f || !user) return
+    try {
+      await api.setAvatar(await compress(f, 320))
+      setHasAvatar(true)
+      setAvatarV((v) => v + 1)
+    } catch {
+      /* ignora */
+    }
+  }
   const [sec, setSec] = useState<Section>(initialSec as Section)
   useEffect(() => {
     if (initialSec) onOpened?.()
@@ -52,7 +66,17 @@ export function Menu({ s, initialSec = null, onOpened }: { s: AppState; initialS
   return (
     <div className="screen">
       <div className="card profile-card">
-        <span className="avatar">{(p.name || '?').slice(0, 1).toUpperCase()}</span>
+        <label className={`avatar ${user ? 'editable' : ''}`}>
+          {user && hasAvatar ? <img src={avatarUrl(user.id, avatarV)} alt="" /> : (p.name || '?').slice(0, 1).toUpperCase()}
+          {user && (
+            <>
+              <input id="pf-avatar" type="file" accept="image/*" onChange={(e) => changeAvatar(e.target.files?.[0])} />
+              <i className="avatar-edit">
+                <Icon name="camera" size={12} />
+              </i>
+            </>
+          )}
+        </label>
         <span>
           <b className="ttl">
             {p.name || t('Sem nome')}
@@ -61,6 +85,7 @@ export function Menu({ s, initialSec = null, onOpened }: { s: AppState; initialS
           <small>
             {t(p.goal)} · {p.height} cm · {currentWeight(s).toFixed(1)} kg
           </small>
+          {user && <small>{user.email}</small>}
         </span>
       </div>
 
@@ -131,7 +156,14 @@ export function Menu({ s, initialSec = null, onOpened }: { s: AppState; initialS
           </button>
         </WithInfo>
       )}
-      {!s.demo && (
+      {onLogout && (
+        <WithInfo text={t('Sai da sua conta neste celular. Seus dados continuam salvos no servidor.')}>
+          <button type="button" className="ghost-btn" onClick={onLogout}>
+            <Icon name="logout" size={18} /> {t('Sair da conta')}
+          </button>
+        </WithInfo>
+      )}
+      {!s.demo && !user && (
         <button type="button" className="link center" onClick={resetToDemo}>
           {t('Ver dados de exemplo')}
         </button>
