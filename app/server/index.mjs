@@ -379,6 +379,20 @@ async function serveStatic(req, res, pathname) {
   res.end(await readFile(file))
 }
 
+/** Conta de admin fixa: ADMIN_EMAIL + ADMIN_PASSWORD_HASH (hash bcrypt) nas variáveis do Railway. */
+async function ensureAdmin() {
+  const hash = process.env.ADMIN_PASSWORD_HASH
+  if (!ADMIN_EMAIL) return
+  const r = await q('select id from users where email = $1', [ADMIN_EMAIL])
+  if (r.rows.length) {
+    await q(`update users set role = 'admin', status = 'approved', approved_at = coalesce(approved_at, now()) where id = $1`, [r.rows[0].id])
+    console.log('admin: conta já existe, garantido como admin')
+  } else if (hash) {
+    await q(`insert into users (email, name, password_hash, status, role, approved_at) values ($1, 'Admin', $2, 'approved', 'admin', now())`, [ADMIN_EMAIL, hash])
+    console.log('admin: conta criada')
+  }
+}
+
 const server = createServer(async (req, res) => {
   const url = new URL(req.url || '/', 'http://x')
   try {
@@ -397,6 +411,7 @@ const server = createServer(async (req, res) => {
 })
 
 await migrate()
+await ensureAdmin()
 await initPush()
 startScheduler()
 server.listen(PORT, () => console.log(`Dont Sorry IA no ar na porta ${PORT}`))
