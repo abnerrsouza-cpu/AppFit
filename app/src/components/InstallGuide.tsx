@@ -61,12 +61,20 @@ export function InstallStep() {
 }
 
 /** Ativar os avisos: só funciona depois de instalar no iPhone. */
-export function NotifyStep({ okText }: { okText?: string }) {
+export function NotifyStep({ okText, onGranted }: { okText?: string; onGranted?: () => void }) {
   const [st, setSt] = useState(notifyStatus())
   if (st === 'granted') return <p className="ig-ok">{okText ?? t('Avisos ativados.')}</p>
   if (st === 'default')
     return (
-      <button type="button" className="cta ig-btn" onClick={async () => setSt(await enableNotifications())}>
+      <button
+        type="button"
+        className="cta ig-btn"
+        onClick={async () => {
+          const r = await enableNotifications()
+          setSt(r)
+          if (r === 'granted') onGranted?.()
+        }}
+      >
         <Icon name="bell" size={18} /> {t('Ativar avisos')}
       </button>
     )

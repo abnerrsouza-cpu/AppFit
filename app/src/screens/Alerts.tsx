@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import { Icon } from '../components/Icon'
 import { Info, WithInfo } from '../components/Info'
+import { NotifyActivate } from '../components/NotifyActivate'
 import { t } from '../i18n'
-import { enableNotifications, fireTestNow, notifyStatus, sendTest } from '../notify'
+import { fireTestNow, notifyStatus, sendTest } from '../notify'
 import { dailySchedule, toneLabel } from '../psych'
 import { type AppState, type CustomNudge, type Tone, defaultCustom, newId, setState } from '../store'
 
 
 export function Alerts({ s, onBack }: { s: AppState; onBack: () => void }) {
-  const [help, setHelp] = useState(false)
   const [status, setStatus] = useState(notifyStatus())
   const now = new Date()
   const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
@@ -36,6 +36,8 @@ export function Alerts({ s, onBack }: { s: AppState; onBack: () => void }) {
         </div>
       </header>
 
+      {status !== 'granted' && <NotifyActivate s={s} onGranted={() => setStatus('granted')} />}
+
       <p className="ttl hint">
         {t('Nível de dureza')}
         <Info text={t('Escolha o jeito que o treinador fala com você. Parceiro é gentil, Treinador é direto e Sargento é brutal.')} />
@@ -53,49 +55,6 @@ export function Alerts({ s, onBack }: { s: AppState; onBack: () => void }) {
           </button>
         ))}
       </div>
-
-      {status !== 'granted' && (
-        <section className="card notif">
-          <span className="notif-ic">
-            <Icon name="bell" />
-          </span>
-          <div>
-            <b className="ttl">
-              {t('Deixe eu te cobrar fora do app')}
-              <Info text={t('Sem notificação ativada, as cobranças só aparecem quando você abre o app. Ative para receber no celular.')} />
-            </b>
-            <small>
-              {status === 'default' && t('Ative as notificações.')}
-              {status === 'denied' && t('Você bloqueou. Libere nas configurações do navegador.')}
-              {status === 'needs-install' && t('No iPhone: Compartilhar e depois "Adicionar à Tela de Início".')}
-              {status === 'unsupported' && t('Instale o app no celular para ativar.')}
-            </small>
-          </div>
-          {(status === 'denied' || status === 'needs-install' || status === 'unsupported') && (
-            <button type="button" className="pill-btn sm" onClick={() => setHelp(!help)}>
-              {t('Como fazer')}
-            </button>
-          )}
-          {status === 'default' && (
-            <button type="button" className="pill-btn sm" title={t('Ativar')} onClick={async () => setStatus(await enableNotifications())}>
-              {t('Ativar')}
-            </button>
-          )}
-        </section>
-      )}
-      {help && status !== 'granted' && (
-        <ol className="card how-steps">
-          {(status === 'denied'
-            ? [t('iPhone: abra Ajustes, toque em Notificações e depois em Sem Desculpa.'), t('Ligue Permitir Notificações.'), t('Android: toque no cadeado ao lado do endereço, depois em Permissões, e libere Notificações.'), t('Volte aqui e recarregue o app.')]
-            : [t('No Safari, toque em Compartilhar (o quadrado com a seta para cima).'), t('Toque em Adicionar à Tela de Início.'), t('Abra o app pelo ícone novo na tela do celular.'), t('Volte aqui e toque em Ativar.')]
-          ).map((x, i) => (
-            <li key={i}>
-              <span>{i + 1}</span>
-              {x}
-            </li>
-          ))}
-        </ol>
-      )}
 
       <div className="chat">
         <span className="chat-day ttl">

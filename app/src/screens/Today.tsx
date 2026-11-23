@@ -63,6 +63,7 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission }: { s
     return 'geral'
   })
   const myPhoto = useLatestPhoto(s, user?.id, user?.hasAvatar)
+  const needNotif = notifyStatus() !== 'granted'
   const refPhoto = useRefPhoto(s)
   const p = s.profile
   const now = new Date()
@@ -124,9 +125,14 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission }: { s
           <small>{greeting()},</small>
           <b>{(p.name || t('você')).split(' ')[0]}</b>
         </span>
-        <button type="button" className="bell-btn" title={t('Mensagens do treinador')} onClick={() => go('cobrancas')} aria-label={t('Mensagens do treinador')}>
+        {needNotif && (
+          <button type="button" className="bell-pill" onClick={() => go('cobrancas')}>
+            {t('Ativar avisos')} <Icon name="arrow" size={14} />
+          </button>
+        )}
+        <button type="button" className={`bell-btn ${needNotif ? 'bell-alert' : ''}`} title={t('Mensagens do treinador')} onClick={() => go('cobrancas')} aria-label={needNotif ? t('Ativar avisos') : t('Mensagens do treinador')}>
           <Icon name="bell" size={22} />
-          {owes && <i className="bnav-dot" />}
+          {needNotif ? <i className="bell-bang">!</i> : owes && <i className="bnav-dot" />}
         </button>
       </header>
 
