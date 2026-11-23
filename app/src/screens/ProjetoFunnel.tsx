@@ -1,4 +1,5 @@
 // Começar projetinho: um funil de perguntas, uma por tela, com juramento de sinceridade
+import { editPhoto } from '../components/PhotoEditor'
 // no início e "Começar projetinho" com confete no final.
 import { useEffect, useRef, useState } from 'react'
 import { Icon } from '../components/Icon'
@@ -119,7 +120,8 @@ export function ProjetoFunnel({ s, name, onClose, onDone }: { s: AppState; name:
     el?.focus({ preventScroll: true })
   }, [i])
 
-  const pick = async (f?: File) => {
+  const pick = async (raw?: File) => {
+    const f = raw && (await editPhoto(raw, 3 / 4))
     if (!f) return
     setBusy(true)
     const url = await compress(f, 1100)

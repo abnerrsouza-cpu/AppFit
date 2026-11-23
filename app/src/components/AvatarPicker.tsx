@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { editPhoto } from './PhotoEditor'
 import { api, avatarUrl } from '../api'
 import { t } from '../i18n'
 import { isServerMode } from '../notify'
@@ -40,7 +41,8 @@ export function AvatarPicker({
     }
   }, [avatarId, userId, hasServerAvatar])
 
-  const pick = async (f?: File) => {
+  const pick = async (raw?: File) => {
+    const f = raw && (await editPhoto(raw, 1, true))
     if (!f) return
     setBusy(true)
     setErr('')

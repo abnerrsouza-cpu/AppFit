@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { editPhoto } from '../components/PhotoEditor'
 import { Icon } from '../components/Icon'
 import { PhotoButtons } from '../components/PhotoButtons'
 import { Celebrate } from '../components/Celebrate'
@@ -92,7 +93,8 @@ function usePhoto(id?: string) {
   return url
 }
 
-async function savePhoto(file?: File) {
+async function savePhoto(raw?: File, aspect = 3 / 4) {
+  const file = raw && (await editPhoto(raw, aspect))
   if (!file) return undefined
   const url = await compress(file, 1100)
   const id = newId()
@@ -534,7 +536,7 @@ function Fotos({ s }: { s: AppState }) {
   const [view, setView] = useState<string | null>(null)
   const addPhoto = async (f?: File) => {
     setBusy(true)
-    const id = await savePhoto(f)
+    const id = await savePhoto(f, 4 / 5)
     if (id) {
       setProjeto((p) => ({ ...p, photos: [{ id: newId(), photoId: id, caption: '', date: today() }, ...p.photos] }))
       toast(t('Foto salva na galeria'))

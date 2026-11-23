@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { editPhoto } from '../components/PhotoEditor'
 import { BeforeAfter } from '../components/BeforeAfter'
 import { Icon } from '../components/Icon'
 import { PhotoButtons } from '../components/PhotoButtons'
@@ -232,7 +233,8 @@ function WeeklyForm({ s, onClose }: { s: AppState; onClose: () => void }) {
   const [busy, setBusy] = useState(false)
   const set = <K extends keyof WeeklyLog>(k: K, v: WeeklyLog[K]) => setF((x) => ({ ...x, [k]: v }))
 
-  const onFile = async (file?: File) => {
+  const onFile = async (raw?: File) => {
+    const file = raw && (await editPhoto(raw, 3 / 4))
     if (!file) return
     setBusy(true)
     try {
@@ -403,7 +405,8 @@ function StartPair({ s, weekPhotoId, openWeekly }: { s: AppState; weekPhotoId?: 
   const before = usePhotoUrl(s.startPhotoId)
   const after = usePhotoUrl(weekPhotoId)
   const [busy, setBusy] = useState(false)
-  const pick = async (file?: File) => {
+  const pick = async (raw?: File) => {
+    const file = raw && (await editPhoto(raw, 3 / 4))
     if (!file) return
     setBusy(true)
     try {

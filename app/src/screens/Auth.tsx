@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { editPhoto } from '../components/PhotoEditor'
 import { type User, api, avatarUrl } from '../api'
 import { Icon } from '../components/Icon'
 import { PhotoButtons } from '../components/PhotoButtons'
@@ -45,7 +46,8 @@ export function Auth({ s, onUser }: { s: AppState; onUser: (u: User) => void }) 
     }
   }, [])
 
-  const pickPhoto = async (f?: File) => {
+  const pickPhoto = async (raw?: File) => {
+    const f = raw && (await editPhoto(raw, 1, true))
     if (!f) return
     try {
       setAvatar(await compress(f, 320))
