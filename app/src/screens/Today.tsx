@@ -13,7 +13,7 @@ import { headline } from '../psych'
 import { t, weekdayShort } from '../i18n'
 import { type AppState, currentWeight, cycleInfo, weekStats, setState, streak, today, weekDays, workoutFor, ymd } from '../store'
 
-type Kind = 'wake' | 'meal' | 'train' | 'checkin' | 'event'
+type Kind = 'wake' | 'meal' | 'train' | 'checkin' | 'event' | 'task'
 interface Task {
   id: string
   time: string
@@ -23,7 +23,7 @@ interface Task {
   done: boolean
 }
 
-const ICON: Record<Kind, string> = { wake: 'sun', meal: 'food', train: 'dumbbell', checkin: 'list', event: 'calendar' }
+const ICON: Record<Kind, string> = { wake: 'sun', meal: 'food', train: 'dumbbell', checkin: 'list', event: 'calendar', task: 'check' }
 
 function greeting() {
   const h = new Date().getHours()
@@ -87,6 +87,7 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission }: { s
   const tasks: Task[] = [
     { id: 'wake', time: p.wake, title: t('Acordar e beber água'), kind: 'wake' as Kind, done: !!checks.wake },
     ...p.meals.map((m) => ({ id: m.id, time: m.time, title: m.name, detail: m.items, kind: 'meal' as Kind, done: !!checks[m.id] })),
+    ...(p.tasks ?? []).filter((x) => x.title.trim()).map((x) => ({ id: x.id, time: x.time, title: x.title, kind: 'task' as Kind, done: !!checks[x.id] })),
     ...(wk ? [{ id: 'train', time: p.trainTime, title: wk.title, detail: wk.items, kind: 'train' as Kind, done: !!checks.train }] : []),
     { id: 'checkin', time: p.checkinTime, title: t('Prestar contas do dia'), kind: 'checkin' as Kind, done: !!log },
     ...todayEvents.map((e) => ({ id: `ev:${e.uid}`, time: hhmmOf(e.start), title: e.title, kind: 'event' as Kind, done: !!checks[`ev:${e.uid}`] })),

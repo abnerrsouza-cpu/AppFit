@@ -6,8 +6,9 @@ import { type Profile, newId } from '../store'
 import { Icon } from './Icon'
 import { LoginCta } from './LoginCta'
 
-type Kind = 'diet' | 'workout'
+type Kind = 'diet' | 'workout' | 'routine'
 type DietResult = { readable: boolean; meals: { name: string; time: string; items: string }[]; notes: string }
+type RoutineResult = { readable: boolean; wake: string; sleep: string; tasks: { time: string; title: string }[]; notes: string }
 type WorkoutResult = { readable: boolean; days: { weekday: number; title: string; items: string }[]; notes: string }
 
 const MAX_MB = 10
@@ -29,6 +30,7 @@ export function PdfImport({ kind, online, lang, upd }: { kind: Kind; online: boo
   const [err, setErr] = useState('')
   const [diet, setDiet] = useState<DietResult | null>(null)
   const [work, setWork] = useState<WorkoutResult | null>(null)
+  const [rout, setRout] = useState<RoutineResult | null>(null)
   const [done, setDone] = useState(false)
   const input = useRef<HTMLInputElement>(null)
 
@@ -46,7 +48,11 @@ export function PdfImport({ kind, online, lang, upd }: { kind: Kind; online: boo
     setBusy(true)
     try {
       const pdf = await readBase64(file)
-      if (kind === 'diet') {
+      if (kind === 'routine') {
+        const r = await api.planParse<RoutineResult>('routine', pdf, lang)
+        if (!r.readable || !r.tasks?.length) setErr(t('Não encontrei horários nesse PDF. Confira se é a sua rotina.'))
+        else setRout(r)
+      } else if (kind === 'diet') {
         const r = await api.planParse<DietResult>('diet', pdf, lang)
         if (!r.readable || !r.meals?.length) setErr(t('Não encontrei refeições nesse PDF. Confira se é o plano alimentar.'))
         else setDiet(r)
@@ -68,6 +74,14 @@ export function PdfImport({ kind, online, lang, upd }: { kind: Kind; online: boo
       upd({ meals: diet.meals.map((m) => ({ id: newId(), name: m.name.trim(), time: hhmm(m.time), items: m.items.trim() })).sort((a, b) => a.time.localeCompare(b.time)) })
       setDiet(null)
     }
+    if (rout) {
+      upd({
+        tasks: rout.tasks.map((x) => ({ id: newId(), time: hhmm(x.time), title: x.title.trim() })).sort((a, b) => a.time.localeCompare(b.time)),
+        ...(/^\d{1,2}:\d{2}$/.test(rout.wake) ? { wake: hhmm(rout.wake) } : {}),
+        ...(/^\d{1,2}:\d{2}$/.test(rout.sleep) ? { sleep: hhmm(rout.sleep) } : {}),
+      })
+      setRout(null)
+    }
     if (work) {
       const seen = new Set<number>()
       const days = work.days.filter((d) => d.weekday >= 0 && d.weekday <= 6 && !seen.has(d.weekday) && seen.add(d.weekday))
@@ -79,14 +93,20 @@ export function PdfImport({ kind, online, lang, upd }: { kind: Kind; online: boo
   const cancel = () => {
     setDiet(null)
     setWork(null)
+    setRout(null)
   }
 
-  const title = kind === 'diet' ? t('Tem o plano em PDF?') : t('Tem a ficha em PDF?')
-  const sub = kind === 'diet' ? t('Envie o PDF do nutricionista. O app lê e preenche suas refeições e horários.') : t('Envie o PDF do personal. O app lê e distribui os treinos pelos dias da semana.')
+  const title = kind === 'diet' ? t('Tem o plano em PDF?') : kind === 'routine' ? t('Tem sua rotina em PDF?') : t('Tem a ficha em PDF?')
+  const sub =
+    kind === 'diet'
+      ? t('Envie o PDF do nutricionista. O app lê e preenche suas refeições e horários.')
+      : kind === 'routine'
+        ? t('Envie um PDF com seus horários. O app lê e cria seus afazeres do dia.')
+        : t('Envie o PDF do personal. O app lê e distribui os treinos pelos dias da semana.')
 
   // prévia: a pessoa confere antes de trocar o plano
-  if (diet || work) {
-    const count = diet ? t('{n} refeições encontradas', { n: diet.meals.length }) : t('{n} dias de treino encontrados', { n: work!.days.length })
+  if (diet || work || rout) {
+    const count = diet ? t('{n} refeições encontradas', { n: diet.meals.length }) : rout ? t('{n} afazeres encontrados', { n: rout.tasks.length }) : t('{n} dias de treino encontrados', { n: work!.days.length })
     return (
       <div className="card pdf-card preview">
         <b className="pdf-h">
@@ -103,6 +123,14 @@ export function PdfImport({ kind, online, lang, upd }: { kind: Kind; online: boo
               </div>
             </li>
           ))}
+          {rout?.tasks.map((x, i) => (
+            <li key={i}>
+              <span className="pdf-tag">{hhmm(x.time)}</span>
+              <div>
+                <b>{x.title}</b>
+              </div>
+            </li>
+          ))}
           {work?.days
             .slice()
             .sort((a, b) => ((a.weekday + 6) % 7) - ((b.weekday + 6) % 7))
@@ -116,7 +144,7 @@ export function PdfImport({ kind, online, lang, upd }: { kind: Kind; online: boo
               </li>
             ))}
         </ul>
-        {(diet?.notes || work?.notes) && <p className="pdf-notes">{diet?.notes || work?.notes}</p>}
+        {(diet?.notes || work?.notes || rout?.notes) && <p className="pdf-notes">{diet?.notes || work?.notes || rout?.notes}</p>}
         <button type="button" className="cta" onClick={apply}>
           {t('Usar este plano')}
         </button>
@@ -127,7 +155,7 @@ export function PdfImport({ kind, online, lang, upd }: { kind: Kind; online: boo
     )
   }
 
-  const blocked = !online ? 'login' : ready === false ? t('A leitura de PDF ainda não foi ativada. Por enquanto, preencha abaixo.') : ''
+  const blocked = !online ? 'login' : ready === false ? (kind === 'routine' ? t('A leitura de PDF ainda não foi ativada. Por enquanto, adicione os afazeres acima.') : t('A leitura de PDF ainda não foi ativada. Por enquanto, preencha abaixo.')) : ''
   return (
     <div className={`card pdf-card ${blocked ? 'off' : ''}`}>
       <div className="pdf-row">

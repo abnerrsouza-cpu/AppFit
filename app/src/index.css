@@ -7036,3 +7036,49 @@ textarea {
   justify-content: center;
   gap: 8px;
 }
+
+/* ---------- afazeres da rotina ---------- */
+.rtasks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.rtasks-h {
+  font-size: 1.05rem;
+}
+.rtasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.rtask {
+  display: grid;
+  grid-template-columns: 128px 1fr 36px;
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  border-radius: 18px;
+}
+.rtask input {
+  min-width: 0;
+}
+.rtask-x {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--fg-2);
+  background: var(--surface-2);
+}
+.rtasks-add {
+  border: 1.5px dashed color-mix(in srgb, var(--accent) 55%, transparent);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.rtask input[type='time'] {
+  padding-left: 10px;
+  padding-right: 6px;
+  font-size: 0.95rem;
+}

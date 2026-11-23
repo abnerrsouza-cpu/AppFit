@@ -41,6 +41,13 @@ export interface Profile {
   cardioGoalMin: number // por semana
   meals: Meal[]
   workouts: WorkoutDay[]
+  tasks?: RoutineTask[] // afazeres extras da rotina (água, creatina, caminhada...)
+}
+
+export interface RoutineTask {
+  id: string
+  time: string
+  title: string
 }
 
 export type Trained = 'sim' | 'parcial' | 'nao' | 'descanso'

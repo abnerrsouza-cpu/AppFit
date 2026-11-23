@@ -55,7 +55,38 @@ const WORKOUT_SCHEMA = {
   additionalProperties: false,
 }
 
+const ROUTINE_SCHEMA = {
+  type: 'object',
+  properties: {
+    readable: { type: 'boolean', description: 'false se o PDF não tiver horários de rotina ou não der para ler' },
+    wake: { type: 'string', description: 'horário de acordar HH:MM, ou vazio se não houver' },
+    sleep: { type: 'string', description: 'horário de dormir HH:MM, ou vazio se não houver' },
+    tasks: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          time: { type: 'string', description: 'HH:MM, 24h' },
+          title: { type: 'string', description: 'o afazer, curto e no imperativo. Ex.: Tomar creatina' },
+        },
+        required: ['time', 'title'],
+        additionalProperties: false,
+      },
+    },
+    notes: { type: 'string', description: 'observações gerais curtas. Vazio se não houver.' },
+  },
+  required: ['readable', 'wake', 'sleep', 'tasks', 'notes'],
+  additionalProperties: false,
+}
+
 const PROMPTS = {
+  routine: `Este PDF tem a rotina diária de uma pessoa (horários do dia: suplementos, água, estudo, trabalho, caminhada, alongamento, etc.).
+Liste os afazeres com horário, na ordem do dia.
+- Não inclua refeições nem o treino de musculação: o app já cuida deles em outras telas.
+- wake e sleep: horários de acordar e dormir se o PDF disser; senão, vazio.
+- title: curto e no imperativo (ex.: "Tomar creatina", "Caminhar 20 minutos").
+- Se um afazer não tiver horário, use um horário típico para ele.
+Não invente afazeres que não estejam no PDF.`,
   diet: `Este PDF é o plano alimentar de uma pessoa (feito por nutricionista ou por ela mesma).
 Organize em refeições do dia, na ordem em que acontecem.
 - name: nome da refeição (Café da manhã, Lanche da manhã, Almoço, Lanche da tarde, Jantar, Ceia, Pré-treino, Pós-treino...).
@@ -72,7 +103,7 @@ Não invente exercícios que não estejam no PDF.`,
 }
 
 export async function parsePlan(kind, base64, lang = 'pt') {
-  const schema = kind === 'diet' ? DIET_SCHEMA : WORKOUT_SCHEMA
+  const schema = kind === 'diet' ? DIET_SCHEMA : kind === 'routine' ? ROUTINE_SCHEMA : WORKOUT_SCHEMA
   const response = await getClient().beta.messages.create({
     model: MODEL,
     // se o modelo principal recusar, o próprio servidor da Anthropic tenta de novo com outro modelo

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { RoutineTasks } from '../components/RoutineTasks'
 import { Icon } from '../components/Icon'
 import { Info, WithInfo } from '../components/Info'
 import { enableNotifications, notifyStatus } from '../notify'
@@ -135,6 +136,7 @@ export function Onboarding({ p0, s, userId, hasServerAvatar }: { p0: Profile; s:
               </label>
             </div>
           </div>
+          <RoutineTasks tasks={p.tasks} upd={upd} online={!!userId} lang={s.lang || 'pt'} />
           <p className="muted">{t('Ficha de treino, plano alimentar e Google Agenda você cadastra depois, no Perfil.')}</p>
         </div>
       )}

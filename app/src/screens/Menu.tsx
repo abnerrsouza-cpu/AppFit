@@ -6,6 +6,7 @@ import { LANGS, t, weekday } from '../i18n'
 import { Integracoes } from './Integracoes'
 import { AvatarPicker } from '../components/AvatarPicker'
 import { PdfImport } from '../components/PdfImport'
+import { RoutineTasks } from '../components/RoutineTasks'
 import { type AppState, type Profile, bmi, currentWeight, newId, resetToBlank, resetToDemo, setLang, setState } from '../store'
 
 type Section = null | 'perfil' | 'rotina' | 'treino' | 'dieta' | 'agenda' | 'relogio' | 'carta' | 'integracoes'
@@ -30,7 +31,7 @@ export function Menu({ s, user = null, onUser, onLogout, onHow, onConquistas, on
           <span className="eyebrow">{t('Perfil')}</span>
         </div>
         {sec === 'perfil' && <Perfil p={p} upd={upd} weight={currentWeight(s)} />}
-        {sec === 'rotina' && <Rotina p={p} upd={upd} />}
+        {sec === 'rotina' && <Rotina p={p} upd={upd} extra={<RoutineTasks tasks={p.tasks} upd={upd} online={!!user} lang={s.lang || 'pt'} />} />}
         {sec === 'treino' && <Treino p={p} upd={upd} pdf={<PdfImport kind="workout" online={!!user} lang={s.lang || 'pt'} upd={upd} />} />}
         {sec === 'dieta' && <Dieta p={p} upd={upd} pdf={<PdfImport kind="diet" online={!!user} lang={s.lang || 'pt'} upd={upd} />} />}
         {sec === 'agenda' && <Agenda p={p} upd={upd} />}
@@ -250,7 +251,7 @@ function Perfil({ p, upd, weight }: { p: Profile; upd: Upd; weight: number }) {
   )
 }
 
-function Rotina({ p, upd }: { p: Profile; upd: Upd }) {
+function Rotina({ p, upd, extra }: { p: Profile; upd: Upd; extra: ReactNode }) {
   const T = ({ k, l }: { k: 'wake' | 'trainTime' | 'checkinTime' | 'sleep'; l: string }) => (
     <label>
       {t(l)}
@@ -274,6 +275,7 @@ function Rotina({ p, upd }: { p: Profile; upd: Upd }) {
           <T k="checkinTime" l="Prestação de contas" />
         </div>
       </div>
+      {extra}
     </form>
   )
 }

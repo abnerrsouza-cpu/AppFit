@@ -321,7 +321,7 @@ route('POST', '/api/plan/parse', async (req, res) => {
   const u = await requireUser(req)
   if (!planReady()) throw new HttpError(503, 'Leitura de PDF ainda não configurada')
   const b = await readJson(req, 14_000_000)
-  if (b.kind !== 'diet' && b.kind !== 'workout') throw new HttpError(400, 'Tipo inválido')
+  if (!['diet', 'workout', 'routine'].includes(b.kind)) throw new HttpError(400, 'Tipo inválido')
   const pdf = typeof b.pdf === 'string' ? b.pdf.replace(/^data:application\/pdf;base64,/, '') : ''
   if (!pdf || !Buffer.from(pdf.slice(0, 8), 'base64').toString('latin1').startsWith('%PDF')) throw new HttpError(400, 'Arquivo não é PDF')
   const day = new Date().toISOString().slice(0, 10)
