@@ -6,7 +6,7 @@ import { Info } from './components/Info'
 import { Intro } from './components/Intro'
 import { HowItWorks } from './components/HowItWorks'
 import { Celebrate } from './components/Celebrate'
-import { type Mission, levelOf, medals, totalXP } from './game'
+import { type Mission, levelOf, medals, projetoTodo, totalXP } from './game'
 import { Conquistas } from './screens/Conquistas'
 import { getLang, t } from './i18n'
 import { registerSW, setServerMode, startScheduler, subscribePush } from './notify'
@@ -219,7 +219,7 @@ export default function App() {
           setPjSec(undefined)
           setTab(x)
         }}
-        dots={{ admin: pendingCount > 0 }}
+        dots={{ admin: pendingCount > 0, projeto: tab !== 'projeto' && projetoTodo(s).total > 0 }}
         admin={isAdmin}
       />
     </div>

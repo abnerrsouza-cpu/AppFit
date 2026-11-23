@@ -5986,3 +5986,221 @@ textarea {
 .pdf-card .link {
   align-self: center;
 }
+
+/* ---------- Projetinho: guiar a pessoa ---------- */
+.cat {
+  position: relative;
+}
+.cat-badge {
+  font-style: normal;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--bad);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  display: inline-grid;
+  place-items: center;
+  box-shadow: 0 0 0 2px var(--surface);
+  animation: badgePop 2.4s ease-in-out infinite;
+}
+.cat-ok {
+  font-style: normal;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--good);
+  color: #fff;
+  display: inline-grid;
+  place-items: center;
+}
+@keyframes badgePop {
+  0%, 80%, 100% { transform: scale(1); }
+  88% { transform: scale(1.22); }
+}
+.next-step {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px;
+  border-radius: 24px;
+  border: 2px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+}
+.next-step > b {
+  font-size: 1.2rem;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+.next-step > p {
+  margin: 0 0 6px;
+  color: var(--fg-2);
+  line-height: 1.4;
+}
+.next-step .cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.next-step.done {
+  border-color: var(--good);
+  background: color-mix(in srgb, var(--good) 8%, var(--surface));
+}
+.next-step.done > b {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--good);
+  font-size: 1.05rem;
+}
+.next-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--bad);
+}
+.next-eyebrow i {
+  font-style: normal;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--bad);
+  color: #fff;
+  display: inline-grid;
+  place-items: center;
+  font-size: 0.78rem;
+}
+.next-lbl {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  font-size: 0.72rem;
+  color: var(--accent);
+  margin-top: 4px;
+}
+.guide {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+}
+.guide > b {
+  font-size: 1rem;
+}
+.guide > small {
+  color: var(--fg-2);
+  font-weight: 600;
+}
+.guide ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.guide li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  line-height: 1.35;
+}
+.guide li > span,
+.pj-num {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.85rem;
+  display: inline-grid;
+  place-items: center;
+}
+.pj-num.ok {
+  background: var(--good);
+}
+.guide-bar {
+  height: 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  overflow: hidden;
+}
+.guide-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width 0.4s;
+}
+.pj-step .ttl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pj-photo {
+  position: relative;
+}
+.pj-step-n {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 2;
+}
+.pj-next {
+  position: relative;
+  border-radius: 18px;
+  outline: 2.5px solid var(--accent);
+  outline-offset: 6px;
+}
+.pj-flash {
+  animation: pjFlash 1.6s ease;
+}
+@keyframes pjFlash {
+  0%, 60% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 60%, transparent); }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+.examples {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+.examples small {
+  color: var(--fg-2);
+  font-weight: 600;
+}
+.examples > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ex-chip {
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px dashed color-mix(in srgb, var(--accent) 55%, transparent);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+.promise.is-late {
+  border: 2px solid var(--bad);
+}
+.late-tag {
+  align-self: flex-start;
+  background: var(--bad);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+}

@@ -136,3 +136,50 @@ export function missions(s: AppState): Mission[] {
   }
   return list
 }
+
+// ---------- pendências do Projetinho (bolinhas vermelhas e "próximo passo") ----------
+export type PjSec = 'expectativa' | 'promessas' | 'metas' | 'desabafo' | 'fotos'
+export interface PjStep {
+  sec: PjSec
+  target: string // id do campo para rolar e focar
+  title: string
+  why: string
+}
+
+export function projetoTodo(s: AppState) {
+  const pj = getProjeto(s)
+  const v = pj.vision
+  const key = today()
+  const weekAgo = ymd(addDays(new Date(), -6))
+  const vision = [
+    !v.photoId && { target: 'pj-vision-photo', title: t('Escolha uma foto do corpo que você quer ter'), why: t('Ela fica no topo do app para você lembrar todo dia aonde quer chegar.') },
+    !v.result.trim() && { target: 'pj-result', title: t('Escreva o resultado que você quer'), why: t('Uma frase só. Ex.: perder 8 kg até dezembro.') },
+    !v.feeling.trim() && { target: 'pj-feeling', title: t('Escreva como vai se sentir quando chegar lá'), why: t('Pensar nesse dia ajuda a não desistir.') },
+    !v.why.trim() && { target: 'pj-why', title: t('Escreva por que isso é importante para você'), why: t('É o seu motivo. Ele segura você nos dias sem vontade.') },
+  ].filter(Boolean) as Omit<PjStep, 'sec'>[]
+  const late = pj.promises.filter((p) => p.status === 'aberta' && p.date < key)
+  const promisedToday = pj.promises.some((p) => p.date === key)
+  const overdue = pj.goals.filter((g) => !g.done && g.due && g.due < key).length
+  const ventToday = pj.vents.some((x) => x.date === key)
+  const photoWeek = pj.photos.some((x) => x.date >= weekAgo)
+
+  const count: Record<PjSec, number> = {
+    expectativa: vision.length,
+    promessas: late.length + (promisedToday ? 0 : 1),
+    metas: pj.goals.length === 0 ? 1 : overdue,
+    desabafo: ventToday ? 0 : 1,
+    fotos: photoWeek ? 0 : 1,
+  }
+
+  // ordem do que fazer primeiro
+  const steps: PjStep[] = [
+    ...vision.map((x) => ({ ...x, sec: 'expectativa' as PjSec })),
+    ...(late.length ? [{ sec: 'promessas' as PjSec, target: `pj-promise-${late[0].id}`, title: t('Você fez uma promessa. Cumpriu?'), why: t('Toque em Cumpri ou Não cumpri. Seja sincero.') }] : []),
+    ...(pj.goals.length === 0 ? [{ sec: 'metas' as PjSec, target: 'pj-goal-title', title: t('Crie sua primeira meta'), why: t('Um objetivo com data. Ex.: correr 5 km até o fim do mês.') }] : []),
+    ...(!promisedToday ? [{ sec: 'promessas' as PjSec, target: 'pj-new-promise', title: t('Faça uma promessa para amanhã'), why: t('Uma coisa pequena que você vai cumprir. Amanhã você volta e marca se cumpriu.') }] : []),
+    ...(!ventToday ? [{ sec: 'desabafo' as PjSec, target: 'pj-vent', title: t('Conte como foi seu dia'), why: t('Escolha como você está e escreva um pouco. Só você lê.') }] : []),
+    ...(!photoWeek ? [{ sec: 'fotos' as PjSec, target: 'pj-gallery', title: t('Guarde uma foto da semana'), why: t('Pode ser do treino, do prato ou do espelho.') }] : []),
+  ]
+  const total = Object.values(count).reduce((a, b) => a + b, 0)
+  return { count, steps, total, visionDone: 4 - vision.length }
+}

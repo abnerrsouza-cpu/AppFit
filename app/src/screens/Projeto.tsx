@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Icon } from '../components/Icon'
 import { Info, WithInfo } from '../components/Info'
 import { t } from '../i18n'
+import { type PjStep, projetoTodo } from '../game'
 import { compress, getPhoto, putPhoto } from '../photos'
 import {
   type AppState,
@@ -17,6 +18,53 @@ import {
 } from '../store'
 
 export type Sec = 'expectativa' | 'promessas' | 'metas' | 'desabafo' | 'fotos'
+
+/** Rola até o campo, destaca e (se for texto) já deixa o cursor nele. */
+function focusField(id: string) {
+  setTimeout(() => {
+    const el = document.getElementById(id)
+    if (!el) return
+    const box = (el.closest('.pj-step, .card') as HTMLElement | null) ?? el
+    box.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    box.classList.remove('pj-flash')
+    void box.offsetWidth
+    box.classList.add('pj-flash')
+    if (el instanceof HTMLTextAreaElement || (el instanceof HTMLInputElement && el.type !== 'file')) el.focus({ preventScroll: true })
+  }, 120)
+}
+
+/** Passo a passo numerado, em linguagem simples. */
+function Guide({ title, steps }: { title: string; steps: string[] }) {
+  return (
+    <div className="guide">
+      <b>{title}</b>
+      <ol>
+        {steps.map((x, i) => (
+          <li key={i}>
+            <span>{i + 1}</span>
+            {x}
+          </li>
+        ))}
+      </ol>
+    </div>
+  )
+}
+
+/** Exemplos prontos: tocar preenche o campo. */
+function Examples({ list, onPick }: { list: string[]; onPick: (x: string) => void }) {
+  return (
+    <div className="examples">
+      <small>{t('Sem ideia? Toque num exemplo:')}</small>
+      <div>
+        {list.map((x) => (
+          <button key={x} type="button" className="ex-chip" onClick={() => onPick(t(x))}>
+            {t(x)}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
 const SECS: { id: Sec; label: string; emoji: string }[] = [
   { id: 'expectativa', label: 'Expectativa', emoji: '' },
   { id: 'promessas', label: 'Promessas', emoji: '' },
@@ -50,7 +98,13 @@ async function savePhoto(file?: File) {
 
 export function Projeto({ s, initialSec }: { s: AppState; initialSec?: Sec }) {
   const pj = getProjeto(s)
-  const [sec, setSec] = useState<Sec>(initialSec ?? 'expectativa')
+  const todo = projetoTodo(s)
+  const [sec, setSec] = useState<Sec>(() => initialSec ?? SECS.find((x) => todo.count[x.id] > 0)?.id ?? 'expectativa')
+  const next = todo.steps[0]
+  const go = (st: PjStep) => {
+    setSec(st.sec)
+    focusField(st.target)
+  }
   const visionUrl = usePhoto(pj.vision.photoId)
   const left = Math.max(0, daysBetween(new Date(), parseYmd(pj.vision.targetDate)))
   const kept = pj.promises.filter((p) => p.status === 'cumprida').length
@@ -70,12 +124,33 @@ export function Projeto({ s, initialSec }: { s: AppState; initialSec?: Sec }) {
           <b>{left}</b> {t('dias')}
           <Info light text={t('Dias que faltam até a data da sua meta. Você define a data na aba Expectativa.')} />
         </span>
-        <p className="pj-result">{pj.vision.result || t('Escreva na aba Expectativa o resultado que você quer.')}</p>
+        <p className="pj-result">{pj.vision.result || t('Seu projetinho está vazio. Vamos montar juntos?')}</p>
         <div className="pj-stats">
           <span>{kept === 1 ? t('1 promessa cumprida') : t('{n} promessas cumpridas', { n: kept })}</span>
           <span>{t('{a} de {b} metas batidas', { a: goalsDone, b: pj.goals.length })}</span>
         </div>
       </section>
+
+      {next ? (
+        <section className="card next-step">
+          <span className="next-eyebrow">
+            <i>{todo.total}</i> {todo.total === 1 ? t('coisa para fazer aqui') : t('coisas para fazer aqui')}
+          </span>
+          <small className="next-lbl">{t('Próximo passo')}</small>
+          <b>{next.title}</b>
+          <p>{next.why}</p>
+          <button type="button" className="cta" onClick={() => go(next)}>
+            {t('Fazer agora')} <Icon name="arrow" size={18} />
+          </button>
+        </section>
+      ) : (
+        <section className="card next-step done">
+          <b>
+            <Icon name="check" size={20} stroke={3} /> {t('Tudo em dia no seu projetinho.')}
+          </b>
+          <p>{t('Volte amanhã para fazer uma nova promessa e contar como foi o dia.')}</p>
+        </section>
+      )}
 
       <p className="ttl hint">
         {t('Seções')}
@@ -85,11 +160,12 @@ export function Projeto({ s, initialSec }: { s: AppState; initialSec?: Sec }) {
         {SECS.map((x) => (
           <button key={x.id} type="button" className={`cat ${sec === x.id ? 'on' : ''}`} onClick={() => setSec(x.id)}>
             {t(x.label)}
+            {todo.count[x.id] > 0 ? <i className="cat-badge">{todo.count[x.id]}</i> : <i className="cat-ok"><Icon name="check" size={11} stroke={3.4} /></i>}
           </button>
         ))}
       </div>
 
-      {sec === 'expectativa' && <Expectativa s={s} visionUrl={visionUrl} />}
+      {sec === 'expectativa' && <Expectativa s={s} visionUrl={visionUrl} nextId={next?.sec === 'expectativa' ? next.target : undefined} />}
       {sec === 'promessas' && <Promessas s={s} />}
       {sec === 'metas' && <Metas s={s} />}
       {sec === 'desabafo' && <Desabafo s={s} />}
@@ -98,13 +174,31 @@ export function Projeto({ s, initialSec }: { s: AppState; initialSec?: Sec }) {
   )
 }
 
-function Expectativa({ s, visionUrl }: { s: AppState; visionUrl?: string }) {
+function Num({ n, done }: { n: number; done: boolean }) {
+  return <span className={`pj-num ${done ? 'ok' : ''}`}>{done ? <Icon name="check" size={14} stroke={3.2} /> : n}</span>
+}
+
+function Expectativa({ s, visionUrl, nextId }: { s: AppState; visionUrl?: string; nextId?: string }) {
   const v = getProjeto(s).vision
   const upd = (patch: Partial<typeof v>) => setProjeto((p) => ({ ...p, vision: { ...p.vision, ...patch } }))
   const [busy, setBusy] = useState(false)
+  const done = [!!v.photoId, !!v.result.trim(), !!v.feeling.trim(), !!v.why.trim()].filter(Boolean).length
+  const nx = (id: string) => (nextId === id ? 'pj-next' : '')
   return (
     <div className="pj-sec">
-      <label className="card pj-photo">
+      {done < 4 && (
+        <div className="guide">
+          <b>{t('Monte o seu objetivo em 4 passos')}</b>
+          <div className="guide-bar">
+            <span style={{ width: `${(done / 4) * 100}%` }} />
+          </div>
+          <small>{t('{a} de {b} prontos', { a: done, b: 4 })}</small>
+        </div>
+      )}
+      <label className={`card pj-photo pj-step ${nx('pj-vision-photo')}`}>
+        <span className="pj-step-n">
+          <Num n={1} done={!!v.photoId} />
+        </span>
         <input
           id="pj-vision-photo"
           type="file"
@@ -134,26 +228,32 @@ function Expectativa({ s, visionUrl }: { s: AppState; visionUrl?: string }) {
       </label>
 
       <div className="card field">
-        <label>
+        <label className={`pj-step ${nx('pj-result')}`}>
           <span className="ttl">
+            <Num n={2} done={!!v.result.trim()} />
             {t('Qual resultado você quer alcançar?')}
             <Info text={t('Escreva em uma frase o resultado que você quer. Aparece em destaque no topo da tela.')} />
           </span>
           <textarea id="pj-result" rows={2} value={v.result} onChange={(e) => upd({ result: e.target.value })} placeholder={t('Ex.: chegar a 80 kg com o abdômen aparecendo')} />
+          {!v.result.trim() && <Examples list={['Perder 8 kg', 'Ver o abdômen aparecer', 'Ganhar massa muscular', 'Voltar a caber nas minhas roupas']} onPick={(x) => upd({ result: x })} />}
         </label>
-        <label>
+        <label className={`pj-step ${nx('pj-feeling')}`}>
           <span className="ttl">
+            <Num n={3} done={!!v.feeling.trim()} />
             {t('Como você vai se sentir quando chegar lá?')}
             <Info text={t('Imaginar o sentimento ajuda a não desistir. Escreva como você vai se sentir no dia que chegar.')} />
           </span>
           <textarea id="pj-feeling" rows={2} value={v.feeling} onChange={(e) => upd({ feeling: e.target.value })} placeholder={t('Ex.: confiante para tirar a camisa na praia')} />
+          {!v.feeling.trim() && <Examples list={['Orgulhoso de mim', 'Confiante para tirar a camisa', 'Com mais energia no dia a dia']} onPick={(x) => upd({ feeling: x })} />}
         </label>
-        <label>
+        <label className={`pj-step ${nx('pj-why')}`}>
           <span className="ttl">
+            <Num n={4} done={!!v.why.trim()} />
             {t('Por que isso é importante para você?')}
             <Info text={t('O motivo verdadeiro. É ele que segura você nos dias sem vontade.')} />
           </span>
           <textarea id="pj-why" rows={2} value={v.why} onChange={(e) => upd({ why: e.target.value })} placeholder={t('Ex.: quero ser exemplo para os meus filhos')} />
+          {!v.why.trim() && <Examples list={['Quero cuidar da minha saúde', 'Quero me sentir bem no espelho', 'Quero provar que consigo']} onPick={(x) => upd({ why: x })} />}
         </label>
         <label>
           <span className="ttl">
@@ -170,10 +270,19 @@ function Expectativa({ s, visionUrl }: { s: AppState; visionUrl?: string }) {
 function Promessas({ s }: { s: AppState }) {
   const list = getProjeto(s).promises
   const [text, setText] = useState('')
+  const key = today()
+  const promisedToday = list.some((p) => p.date === key)
+  const sorted = list.slice().sort((a, b) => Number(b.status === 'aberta' && b.date < key) - Number(a.status === 'aberta' && a.date < key))
   const set = (id: string, status: Promise_['status']) =>
     setProjeto((p) => ({ ...p, promises: p.promises.map((x) => (x.id === id ? { ...x, status } : x)) }))
   return (
     <div className="pj-sec">
+      {!promisedToday && (
+        <Guide
+          title={t('Como funciona uma promessa')}
+          steps={[t('Escreva uma coisa pequena que você vai fazer amanhã.'), t('Toque em Salvar promessa.'), t('Amanhã, volte aqui e toque em Cumpri ou Não cumpri.')]}
+        />
+      )}
       <form
         className="card pj-add"
         onSubmit={(e) => {
@@ -188,14 +297,16 @@ function Promessas({ s }: { s: AppState }) {
           <Info text={t('Escreva um compromisso com você mesmo. Depois marque Cumpri ou Não cumpri. Promessas cumpridas aparecem no topo.')} />
         </span>
         <textarea id="pj-new-promise" rows={2} value={text} onChange={(e) => setText(e.target.value)} placeholder={t('Ex.: vou treinar amanhã mesmo cansado')} />
+        {!text.trim() && <Examples list={['Vou treinar amanhã mesmo cansado', 'Vou beber 2 litros de água amanhã', 'Não vou comer doce amanhã', 'Vou dormir antes da meia-noite']} onPick={setText} />}
         <WithInfo text={t('Salva a promessa na lista abaixo com a data de hoje.')}>
           <button type="submit" className="cta sm-cta">
             {t('Salvar promessa')}
           </button>
         </WithInfo>
       </form>
-      {list.map((p) => (
-        <div key={p.id} className={`card promise is-${p.status}`}>
+      {sorted.map((p) => (
+        <div key={p.id} id={`pj-promise-${p.id}`} className={`card promise is-${p.status} ${p.status === 'aberta' && p.date < key ? 'is-late' : ''}`}>
+          {p.status === 'aberta' && p.date < key && <span className="late-tag">{t('Responda: você cumpriu?')}</span>}
           <p>"{p.text}"</p>
           <small>{t('Prometido em {d}', { d: dm(p.date) })}</small>
           {p.status === 'aberta' ? (
@@ -224,9 +335,16 @@ function Metas({ s }: { s: AppState }) {
   const [title, setTitle] = useState('')
   const [due, setDue] = useState('')
   const done = list.filter((g) => g.done).length
+  const empty = list.length === 0
   const toggle = (g: Goal) => setProjeto((p) => ({ ...p, goals: p.goals.map((x) => (x.id === g.id ? { ...x, done: !x.done } : x)) }))
   return (
     <div className="pj-sec">
+      {empty && (
+        <Guide
+          title={t('Como criar uma meta')}
+          steps={[t('Escreva o que você quer conseguir.'), t('Escolha até que dia.'), t('Toque em Salvar meta. Quando conseguir, toque no círculo.')]}
+        />
+      )}
       {list.length > 0 && (
         <div className="card pj-progress">
           <b>
@@ -272,6 +390,7 @@ function Metas({ s }: { s: AppState }) {
           <Info text={t('Crie um objetivo com prazo, como correr 5 km. Escreva a meta, escolha a data limite e salve. Marque o círculo quando bater.')} />
         </span>
         <input id="pj-goal-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t('Ex.: fazer 10 barras seguidas')} />
+        {!title.trim() && <Examples list={['Perder 3 kg', 'Correr 5 km sem parar', 'Treinar 20 dias no mês', 'Fazer 10 flexões seguidas']} onPick={setTitle} />}
         <label>
           {t('Data limite')}
           <input id="pj-goal-due" type="date" value={due} onChange={(e) => setDue(e.target.value)} />
@@ -305,8 +424,12 @@ function Desabafo({ s }: { s: AppState }) {
   const [mood, setMood] = useState('normal')
   const [text, setText] = useState('')
   const [reply, setReply] = useState<string | null>(null)
+  const ventToday = list.some((x) => x.date === today())
   return (
     <div className="pj-sec">
+      {!ventToday && !reply && (
+        <Guide title={t('Conte como foi seu dia')} steps={[t('Toque em como você está.'), t('Escreva o que aconteceu hoje. Pode ser pouco.'), t('Toque em Salvar desabafo. Só você lê.')]} />
+      )}
       <form
         className="card pj-add"
         onSubmit={(e) => {
@@ -363,6 +486,7 @@ function Fotos({ s }: { s: AppState }) {
   const [view, setView] = useState<string | null>(null)
   return (
     <div className="pj-sec">
+      {list.length === 0 && <Guide title={t('Guarde os momentos do projeto')} steps={[t('Toque em Adicionar foto.'), t('Escolha uma foto do treino, do prato ou do espelho.'), t('Faça isso toda semana para ver sua evolução.')]} />}
       <label className="card pj-upload">
         <input
           id="pj-gallery"
