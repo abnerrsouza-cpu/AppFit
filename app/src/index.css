@@ -8166,3 +8166,13 @@ textarea {
 .fp-embed .fp-in {
   padding: 0;
 }
+.adm-fmt {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+}
+.adm-fmt-btns {
+  display: grid;
+  gap: 8px;
+}

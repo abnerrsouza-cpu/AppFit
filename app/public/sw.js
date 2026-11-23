@@ -1,5 +1,5 @@
 // Service worker: guarda o app para abrir offline e recebe as notificações push.
-const CACHE = 'semdesculpa-v2'
+const CACHE = 'semdesculpa-v3'
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['./', './index.html'])).catch(() => {}))
   self.skipWaiting()
@@ -20,7 +20,7 @@ self.addEventListener('fetch', (e) => {
 // Push vindo do servidor (fase 2)
 self.addEventListener('push', (e) => {
   const d = e.data ? e.data.json() : { title: 'Sem Desculpa', body: 'Hora de prestar contas.' }
-  e.waitUntil(self.registration.showNotification(d.title, { body: d.body, icon: 'icon-192.png', badge: 'icon-192.png', data: { url: d.url || './' } }))
+  e.waitUntil(self.registration.showNotification(d.title ?? '', { body: d.body, icon: 'icon-192.png', badge: 'icon-192.png', data: { url: d.url || './' } }))
 })
 self.addEventListener('notificationclick', (e) => {
   e.notification.close()

@@ -370,7 +370,9 @@ route('POST', '/api/push/subscribe', async (req, res) => {
 route('POST', '/api/push/test', async (req, res) => {
   const u = await requireUser(req, { approved: false })
   const b = await readJson(req)
-  const ok = await sendToUser(u.id, { title: String(b.title || 'Dont Sorry IA').slice(0, 80), body: String(b.body || 'Notificação de teste.').slice(0, 300), kind: 'teste' })
+  // b.title === '' (vazio de propósito) testa notificação sem título
+  const title = b.title === '' ? '' : String(b.title || 'Sem Desculpa').slice(0, 80)
+  const ok = await sendToUser(u.id, { title, body: String(b.body || 'Notificação de teste.').slice(0, 300), kind: 'teste', dedupe: null })
   send(res, 200, { ok })
 })
 
