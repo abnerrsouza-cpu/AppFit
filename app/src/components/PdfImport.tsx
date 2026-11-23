@@ -4,6 +4,7 @@ import { api } from '../api'
 import { t, weekday } from '../i18n'
 import { type Profile, newId } from '../store'
 import { Icon } from './Icon'
+import { LoginCta } from './LoginCta'
 
 type Kind = 'diet' | 'workout'
 type DietResult = { readable: boolean; meals: { name: string; time: string; items: string }[]; notes: string }
@@ -126,7 +127,7 @@ export function PdfImport({ kind, online, lang, upd }: { kind: Kind; online: boo
     )
   }
 
-  const blocked = !online ? t('Disponível no app com login.') : ready === false ? t('A leitura de PDF ainda não foi ativada.') : ''
+  const blocked = !online ? 'login' : ready === false ? t('A leitura de PDF ainda não foi ativada. Por enquanto, preencha abaixo.') : ''
   return (
     <div className={`card pdf-card ${blocked ? 'off' : ''}`}>
       <div className="pdf-row">
@@ -148,7 +149,7 @@ export function PdfImport({ kind, online, lang, upd }: { kind: Kind; online: boo
         </button>
       )}
       <input ref={input} type="file" accept="application/pdf,.pdf" hidden onChange={(e) => pick(e.target.files?.[0])} />
-      {blocked && <small className="pdf-msg">{blocked}</small>}
+      {blocked === 'login' ? <LoginCta compact text={t('Enviar PDF funciona na versão com conta.')} /> : blocked && <small className="pdf-msg">{blocked}</small>}
       {err && <small className="pdf-msg bad-msg">{err}</small>}
       {done && <small className="pdf-msg ok-msg">{t('Pronto. Plano atualizado. Confira e ajuste abaixo se precisar.')}</small>}
     </div>

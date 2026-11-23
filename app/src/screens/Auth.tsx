@@ -26,7 +26,7 @@ const StravaLogo = () => (
 )
 
 export function Auth({ s, onUser }: { s: AppState; onUser: (u: User) => void }) {
-  const [mode, setMode] = useState<'entrar' | 'criar'>('criar')
+  const [mode, setMode] = useState<'entrar' | 'criar'>(() => (new URL(location.href).searchParams.get('entrar') ? 'entrar' : 'criar'))
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')

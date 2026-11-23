@@ -6838,3 +6838,86 @@ textarea {
   font-size: 0.75rem;
   font-weight: 800;
 }
+
+/* ---------- saída de uma negativa: criar conta ---------- */
+.login-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  border-radius: 24px;
+  border: 2px solid var(--accent);
+}
+.login-cta > b {
+  font-size: 1.2rem;
+  line-height: 1.25;
+}
+.login-cta > p {
+  margin: 0 0 4px;
+  color: var(--fg-2);
+  line-height: 1.4;
+}
+.login-cta .cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.login-cta > .link {
+  align-self: center;
+}
+.login-cta-ic {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: #fff;
+}
+.login-cta.compact {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 10px;
+  padding: 10px 14px;
+  border-width: 1px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+.login-cta.compact small {
+  color: var(--fg-2);
+}
+.login-cta.compact .link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 800;
+}
+.how-steps {
+  list-style: none;
+  margin: 0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.how-steps li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  line-height: 1.35;
+}
+.how-steps li > span {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.85rem;
+  display: grid;
+  place-items: center;
+}

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { type RankRow, type SocialInfo, api, avatarUrl } from '../api'
 import { Icon } from '../components/Icon'
 import { Info } from '../components/Info'
+import { LoginCta } from '../components/LoginCta'
 import { t } from '../i18n'
 
 type Scope = 'amigos' | 'grupos' | 'geral'
@@ -114,9 +115,8 @@ export function Ranking({ online, onBack, notice }: { online: boolean; onBack?: 
     return (
       <div className="screen">
         <Head onBack={onBack} />
-        <div className="card rk-hero">
-          <b>{t('Disponível no app com login.')}</b>
-        </div>
+        <h1 className="ttl rk-title">{t('Ranking da semana')}</h1>
+        <LoginCta title={t('Crie sua conta para entrar no ranking')} text={t('Dispute pontos com seus amigos toda semana. Quem cumprir mais fica em 1º.')} />
       </div>
     )
 

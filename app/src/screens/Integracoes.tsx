@@ -5,6 +5,7 @@ import { Icon } from '../components/Icon'
 import { Info, WithInfo } from '../components/Info'
 import { t, weekdayShort } from '../i18n'
 import { isServerMode } from '../notify'
+import { LoginCta } from '../components/LoginCta'
 import { type AppState, type Profile, setState } from '../store'
 
 type Plat = 'google' | 'iphone' | 'android'
@@ -130,7 +131,7 @@ export function Integracoes({ s, user, onUser }: { s: AppState; user: User | nul
           <span className={`integ-status ${p.icalUrl ? 'on' : ''}`}>{p.icalUrl ? t('Ativa') : t('Desligada')}</span>
         </div>
 
-        {!server && <p className="muted">{t('A agenda funciona na versão com conta. Entre pelo endereço do app no Railway.')}</p>}
+        {!server && <LoginCta compact text={t('A agenda funciona na versão com conta.')} />}
 
         {server && p.icalUrl && (
           <>
@@ -221,7 +222,7 @@ export function Integracoes({ s, user, onUser }: { s: AppState; user: User | nul
           <span className={`integ-status ${user?.strava ? 'on' : ''}`}>{user?.strava ? t('Ativo') : t('Desligado')}</span>
         </div>
         {!server ? (
-          <p className="muted">{t('O Strava funciona na versão com conta.')}</p>
+          <LoginCta compact text={t('O Strava funciona na versão com conta.')} />
         ) : user?.strava ? (
           <>
             <p className="hint">{t('Em breve: o cardio do Strava entra sozinho na sua prestação de contas.')}</p>

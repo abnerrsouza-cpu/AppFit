@@ -8,6 +8,7 @@ import { type AppState, type CustomNudge, type Tone, defaultCustom, newId, setSt
 
 
 export function Alerts({ s, onBack }: { s: AppState; onBack: () => void }) {
+  const [help, setHelp] = useState(false)
   const [status, setStatus] = useState(notifyStatus())
   const now = new Date()
   const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
@@ -70,12 +71,30 @@ export function Alerts({ s, onBack }: { s: AppState; onBack: () => void }) {
               {status === 'unsupported' && t('Instale o app no celular para ativar.')}
             </small>
           </div>
+          {(status === 'denied' || status === 'needs-install' || status === 'unsupported') && (
+            <button type="button" className="pill-btn sm" onClick={() => setHelp(!help)}>
+              {t('Como fazer')}
+            </button>
+          )}
           {status === 'default' && (
             <button type="button" className="pill-btn sm" title={t('Ativar')} onClick={async () => setStatus(await enableNotifications())}>
               {t('Ativar')}
             </button>
           )}
         </section>
+      )}
+      {help && status !== 'granted' && (
+        <ol className="card how-steps">
+          {(status === 'denied'
+            ? [t('iPhone: abra Ajustes, toque em Notificações e depois em Sem Desculpa.'), t('Ligue Permitir Notificações.'), t('Android: toque no cadeado ao lado do endereço, depois em Permissões, e libere Notificações.'), t('Volte aqui e recarregue o app.')]
+            : [t('No Safari, toque em Compartilhar (o quadrado com a seta para cima).'), t('Toque em Adicionar à Tela de Início.'), t('Abra o app pelo ícone novo na tela do celular.'), t('Volte aqui e toque em Ativar.')]
+          ).map((x, i) => (
+            <li key={i}>
+              <span>{i + 1}</span>
+              {x}
+            </li>
+          ))}
+        </ol>
       )}
 
       <div className="chat">

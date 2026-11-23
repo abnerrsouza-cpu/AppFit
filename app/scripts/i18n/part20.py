@@ -1,0 +1,22 @@
+# Traduções (parte 20): saídas para negativas (criar conta, como liberar notificações).
+D = {
+ 'A agenda funciona na versão com conta.': ('The calendar works in the version with an account.', 'La agenda funciona en la versión con cuenta.'),
+ 'A leitura de PDF ainda não foi ativada. Por enquanto, preencha abaixo.': ('PDF reading is not turned on yet. For now, fill it in below.', 'La lectura de PDF aún no está activada. Por ahora, complétalo abajo.'),
+ 'Abra o app pelo ícone novo na tela do celular.': ('Open the app from the new icon on your home screen.', 'Abre la app desde el nuevo ícono en la pantalla del celular.'),
+ 'Android: toque no cadeado ao lado do endereço, depois em Permissões, e libere Notificações.': ('Android: tap the lock next to the address, then Permissions, and allow Notifications.', 'Android: toca el candado junto a la dirección, luego Permisos, y permite Notificaciones.'),
+ 'Com a conta, seus dados ficam salvos e você recebe as cobranças no celular.': ('With an account, your data is saved and you get the reminders on your phone.', 'Con la cuenta, tus datos quedan guardados y recibes las exigencias en el celular.'),
+ 'Como fazer': ('How to', 'Cómo hacerlo'),
+ 'Criar minha conta': ('Create my account', 'Crear mi cuenta'),
+ 'Crie sua conta para entrar no ranking': ('Create your account to join the ranking', 'Crea tu cuenta para entrar al ranking'),
+ 'Crie sua conta para liberar': ('Create your account to unlock', 'Crea tu cuenta para desbloquear'),
+ 'Dispute pontos com seus amigos toda semana. Quem cumprir mais fica em 1º.': ('Compete for points with your friends every week. Whoever sticks to it most is 1st.', 'Compite por puntos con tus amigos cada semana. Quien más cumpla queda 1º.'),
+ 'Enviar PDF funciona na versão com conta.': ('Uploading a PDF works in the version with an account.', 'Subir PDF funciona en la versión con cuenta.'),
+ 'Isso funciona na versão com conta.': ('This works in the version with an account.', 'Esto funciona en la versión con cuenta.'),
+ 'Já tenho conta: entrar': ('I already have an account: log in', 'Ya tengo cuenta: entrar'),
+ 'Ligue Permitir Notificações.': ('Turn on Allow Notifications.', 'Activa Permitir notificaciones.'),
+ 'No Safari, toque em Compartilhar (o quadrado com a seta para cima).': ('In Safari, tap Share (the square with the up arrow).', 'En Safari, toca Compartir (el cuadrado con la flecha hacia arriba).'),
+ 'Toque em Adicionar à Tela de Início.': ('Tap Add to Home Screen.', 'Toca Agregar a pantalla de inicio.'),
+ 'Volte aqui e recarregue o app.': ('Come back here and reload the app.', 'Vuelve aquí y recarga la app.'),
+ 'Volte aqui e toque em Ativar.': ('Come back here and tap Turn on.', 'Vuelve aquí y toca Activar.'),
+ 'iPhone: abra Ajustes, toque em Notificações e depois em Sem Desculpa.': ('iPhone: open Settings, tap Notifications and then Sem Desculpa.', 'iPhone: abre Ajustes, toca Notificaciones y luego Sem Desculpa.'),
+}
