@@ -265,7 +265,7 @@ export default function App() {
       {tab === 'conquistas' && <Conquistas s={s} onBack={() => setTab('inicio')} />}
       {tab === 'plano' && <Plano s={s} goMenu={goMenu} />}
       {tab === 'ranking' && <Ranking online={!!user} notice={rankNotice} />}
-      {tab === 'menu' && <Menu s={s} user={user} onUser={setUser} onHow={() => setHowAgain(true)} onConquistas={() => setTab('conquistas')} onRanking={() => setTab('ranking')} onPlano={() => setTab('plano')} onAdmin={isAdmin ? () => setTab('admin') : undefined} adminPending={pendingCount} onLogout={user ? logout : undefined} initialSec={menuSec} onOpened={() => setMenuSec(null)} />}
+      {tab === 'menu' && <Menu s={s} user={user} onUser={setUser} onHow={() => setHowAgain(true)} onConquistas={() => setTab('conquistas')} onRanking={() => setTab('ranking')} onPlano={() => setTab('plano')} onAdmin={isAdmin ? () => setTab('admin') : undefined} adminPending={pendingCount} onPreviewIntro={() => setIntro(true)} onLogout={user ? logout : undefined} initialSec={menuSec} onOpened={() => setMenuSec(null)} />}
       {tab === 'admin' && isAdmin && <Admin onPending={setPendingCount} onBack={() => setTab('menu')} />}
       <Toaster />
       <BottomNav

@@ -10,17 +10,19 @@ export function useLatestPhoto(s: AppState, userId?: number, hasAvatar?: boolean
   const latestId = Object.values(s.weekly)
     .filter((w) => w.photoId)
     .sort((a, b) => b.weekStart.localeCompare(a.weekStart))[0]?.photoId
+  const chosen = s.introMeId
   useEffect(() => {
     let alive = true
     const localAvatar = s.profile.avatarId
-    if (latestId) getPhoto(latestId).then((u) => alive && setUrl(u ?? null))
+    if (chosen) getPhoto(chosen).then((u) => alive && setUrl(u ?? null))
+    else if (latestId) getPhoto(latestId).then((u) => alive && setUrl(u ?? null))
     else if (localAvatar) getPhoto(localAvatar).then((u) => alive && setUrl(u ?? (userId && hasAvatar ? avatarUrl(userId) : null)))
     else setUrl(userId && hasAvatar ? avatarUrl(userId) : null)
     return () => {
       alive = false
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [latestId, userId, hasAvatar, s.profile.avatarId])
+  }, [chosen, latestId, userId, hasAvatar, s.profile.avatarId])
   return url
 }
 

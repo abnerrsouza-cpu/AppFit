@@ -7858,3 +7858,62 @@ textarea {
   background: var(--accent);
   color: #fff;
 }
+
+/* ---------- fotos da abertura ---------- */
+.ip-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ip-img {
+  position: relative;
+  width: min(100%, 300px);
+  aspect-ratio: 3 / 4;
+  align-self: center;
+  border-radius: 22px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  border: 2px dashed color-mix(in srgb, var(--accent) 40%, transparent);
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+}
+.ip-img.ok {
+  border: 2px solid var(--good);
+}
+.ip-img img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ip-tag {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+.ip-busy {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-weight: 700;
+}
+.ip-slot > small {
+  text-align: center;
+}
+.ip-preview {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}

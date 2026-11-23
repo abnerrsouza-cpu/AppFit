@@ -7,13 +7,14 @@ import { Integracoes } from './Integracoes'
 import { AvatarPicker } from '../components/AvatarPicker'
 import { PdfImport } from '../components/PdfImport'
 import { RoutineTasks } from '../components/RoutineTasks'
+import { IntroPhotos } from '../components/IntroPhotos'
 import { LoginCta } from '../components/LoginCta'
 import { toast } from '../components/Toast'
 import { type AppState, type Profile, bmi, currentWeight, newId, resetToBlank, resetToDemo, setLang, setState } from '../store'
 
-type Section = null | 'perfil' | 'rotina' | 'treino' | 'dieta' | 'agenda' | 'relogio' | 'carta' | 'integracoes'
+type Section = null | 'perfil' | 'fotos' | 'rotina' | 'treino' | 'dieta' | 'agenda' | 'relogio' | 'carta' | 'integracoes'
 
-export function Menu({ s, user = null, onUser, onLogout, onHow, onConquistas, onRanking, onPlano, onAdmin, adminPending = 0, initialSec = null, onOpened }: { s: AppState; user?: User | null; onUser?: (u: User) => void; onLogout?: () => void; onHow?: () => void; onConquistas?: () => void; onRanking?: () => void; onPlano?: () => void; onAdmin?: () => void; adminPending?: number; initialSec?: string | null; onOpened?: () => void }) {
+export function Menu({ s, user = null, onUser, onLogout, onHow, onConquistas, onRanking, onPlano, onAdmin, adminPending = 0, onPreviewIntro, initialSec = null, onOpened }: { s: AppState; user?: User | null; onUser?: (u: User) => void; onLogout?: () => void; onHow?: () => void; onConquistas?: () => void; onRanking?: () => void; onPlano?: () => void; onAdmin?: () => void; adminPending?: number; onPreviewIntro?: () => void; initialSec?: string | null; onOpened?: () => void }) {
   const [sec, setSec] = useState<Section>(initialSec as Section)
   useEffect(() => {
     if (initialSec) onOpened?.()
@@ -33,6 +34,7 @@ export function Menu({ s, user = null, onUser, onLogout, onHow, onConquistas, on
           <span className="eyebrow">{t('Perfil')}</span>
         </div>
         {sec === 'perfil' && <Perfil p={p} upd={upd} weight={currentWeight(s)} />}
+        {sec === 'fotos' && <IntroPhotos s={s} userId={user?.id} hasAvatar={user?.hasAvatar} onPreview={() => onPreviewIntro?.()} />}
         {sec === 'rotina' && <Rotina p={p} upd={upd} extra={<RoutineTasks tasks={p.tasks} upd={upd} online={!!user} lang={s.lang || 'pt'} />} />}
         {sec === 'treino' && <Treino p={p} upd={upd} pdf={<PdfImport kind="workout" online={!!user} lang={s.lang || 'pt'} upd={upd} />} />}
         {sec === 'dieta' && <Dieta p={p} upd={upd} pdf={<PdfImport kind="diet" online={!!user} lang={s.lang || 'pt'} upd={upd} />} />}
@@ -80,6 +82,7 @@ export function Menu({ s, user = null, onUser, onLogout, onHow, onConquistas, on
           <Info text={t('Peso, altura e objetivo; os horários da sua rotina; e a carta que o treinador usa para te cobrar.')} />
         </span>
         <Row id="perfil" icon="user" title={t('Perfil e medidas')} sub={t('Peso, altura, idade, objetivo')} />
+        <Row id="fotos" icon="camera" title={t('Editar fotos da abertura')} sub={t('"Esse é você" e "Sua referência"')} />
         <Row id="rotina" icon="sun" title={t('Rotina')} sub={t('Acorda {a} · treina {b} · dorme {c}', { a: p.wake, b: p.trainTime, c: p.sleep })} />
         <Row id="carta" icon="quote" title={t('Carta de compromisso')} sub={t('Usada nas cobranças')} />
       </div>

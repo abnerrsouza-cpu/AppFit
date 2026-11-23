@@ -94,6 +94,7 @@ export interface AppState {
   seenMedals?: string[] // medalhas já comemoradas
   seenHow?: boolean // já viu o "Como funciona"
   startPhotoId?: string // foto do antes (início do projeto)
+  introMeId?: string // foto escolhida para o "Esse é você" da abertura
   lastLevel?: number
   testEvery?: number // modo teste: dispara a cada N minutos (0 = desligado)
   projeto?: Projeto
