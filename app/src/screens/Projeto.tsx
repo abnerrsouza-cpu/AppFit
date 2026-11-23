@@ -7,7 +7,7 @@ import { toast } from '../components/Toast'
 import { ProjetoFunnel } from './ProjetoFunnel'
 import { Info, WithInfo } from '../components/Info'
 import { t } from '../i18n'
-import { type PjStep, projetoTodo } from '../game'
+import { type PjStep, efficacyLabel, projetoStats, projetoTodo } from '../game'
 import { compress, getPhoto, putPhoto } from '../photos'
 import {
   type AppState,
@@ -105,19 +105,41 @@ async function savePhoto(raw?: File, aspect = 3 / 4) {
 export function Projeto({ s, initialSec }: { s: AppState; initialSec?: Sec }) {
   const pj = getProjeto(s)
   const todo = projetoTodo(s)
-  const [sec, setSec] = useState<Sec>(() => initialSec ?? SECS.find((x) => todo.count[x.id] > 0)?.id ?? 'expectativa')
-  const next = todo.steps[0]
   const started = !!pj.startedAt
+  // depois de começar: a tela mostra o andamento; as seções abrem por botão
+  const [sec, setSecRaw] = useState<Sec | null>(() => initialSec ?? (started ? null : (SECS.find((x) => todo.count[x.id] > 0)?.id ?? 'expectativa')))
+  const setSec = (x: Sec | null) => {
+    setSecRaw(x)
+    window.scrollTo(0, 0)
+  }
+  const next = todo.steps[0]
   const [funnel, setFunnel] = useState(false)
   const [party, setParty] = useState(false)
   const go = (st: PjStep) => {
-    setSec(st.sec)
+    setSecRaw(st.sec)
     focusField(st.target)
   }
   const visionUrl = usePhoto(pj.vision.photoId)
   const left = Math.max(0, daysBetween(new Date(), parseYmd(pj.vision.targetDate)))
   const kept = pj.promises.filter((p) => p.status === 'cumprida').length
   const goalsDone = pj.goals.filter((g) => g.done).length
+
+  if (started && sec)
+    return (
+      <div className="screen">
+        <div className="sheet-h">
+          <button type="button" className="round-btn" onClick={() => setSec(null)} aria-label={t('Voltar')}>
+            <Icon name="back" />
+          </button>
+          <span className="eyebrow">{t({ expectativa: 'Meu objetivo', promessas: 'Promessas', metas: 'Metas', desabafo: 'Desabafo', fotos: 'Fotos' }[sec])}</span>
+        </div>
+        {sec === 'expectativa' && <Expectativa s={s} visionUrl={visionUrl} nextId={next?.sec === 'expectativa' ? next.target : undefined} />}
+        {sec === 'promessas' && <Promessas s={s} />}
+        {sec === 'metas' && <Metas s={s} />}
+        {sec === 'desabafo' && <Desabafo s={s} />}
+        {sec === 'fotos' && <Fotos s={s} />}
+      </div>
+    )
 
   return (
     <div className="screen">
@@ -148,6 +170,7 @@ export function Projeto({ s, initialSec }: { s: AppState; initialSec?: Sec }) {
           onClose={() => setFunnel(false)}
           onDone={() => {
             setFunnel(false)
+            setSecRaw(null)
             setParty(true)
             window.scrollTo(0, 0)
           }}
@@ -161,6 +184,7 @@ export function Projeto({ s, initialSec }: { s: AppState; initialSec?: Sec }) {
           title={t('Dia 1. Sem desculpa.')}
           desc={t('Faltam {n} dias para "{r}". Volte amanhã para dizer se cumpriu sua promessa.', { n: left, r: pj.vision.result })}
           button={t('Bora')}
+          top
           onClose={() => setParty(false)}
         />
       )}
@@ -197,6 +221,27 @@ export function Projeto({ s, initialSec }: { s: AppState; initialSec?: Sec }) {
         </section>
       )}
 
+      {started && <Andamento s={s} onSec={setSec} />}
+
+      {started && (
+        <>
+          <p className="ttl hint">{t('Seu projetinho')}</p>
+          <div className="pj-tiles">
+            {(['promessas', 'metas', 'desabafo', 'fotos', 'expectativa'] as Sec[]).map((x) => (
+              <button key={x} type="button" className="card pj-tile" onClick={() => setSec(x)}>
+                <span className="pj-tile-ic">
+                  <Icon name={{ promessas: 'star', metas: 'target', desabafo: 'quote', fotos: 'camera', expectativa: 'flame' }[x]} size={20} />
+                </span>
+                <b>{t({ expectativa: 'Meu objetivo', promessas: 'Promessas', metas: 'Metas', desabafo: 'Desabafo', fotos: 'Fotos' }[x])}</b>
+                {todo.count[x] > 0 && <i className="cat-badge">{todo.count[x]}</i>}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+
+      {!started && (
+      <>
       <p className="ttl hint">
         {t('Seções')}
         <Info text={t('Expectativa: o corpo que você quer. Promessas: compromissos para cumprir. Metas: objetivos com prazo. Desabafo: diário privado. Fotos: momentos do projeto.')} />
@@ -215,7 +260,127 @@ export function Projeto({ s, initialSec }: { s: AppState; initialSec?: Sec }) {
       {sec === 'metas' && <Metas s={s} />}
       {sec === 'desabafo' && <Desabafo s={s} />}
       {sec === 'fotos' && <Fotos s={s} />}
+      </>
+      )}
     </div>
+  )
+}
+
+const pct = (v: number | null) => (v === null ? '—' : `${Math.round(v * 100)}%`)
+
+/** Painel do andamento: tempo, eficácia, ritmo e o porquê. */
+function Andamento({ s, onSec }: { s: AppState; onSec: (x: Sec) => void }) {
+  const st = projetoStats(s)
+  const v = getProjeto(s).vision
+  const p = s.profile
+  const eff = st.efficacy
+  const R = 46
+  const C = 2 * Math.PI * R
+  const tone = eff === null ? '' : eff >= 0.8 ? 'good' : eff >= 0.6 ? 'ok' : eff >= 0.4 ? 'warn' : 'bad'
+  const rows: { l: string; v: number | null; d: string; i: string }[] = [
+    { l: t('Constância'), v: st.constancy, d: t('{a} de {b} noites com prestação de contas', { a: st.logs, b: st.closed }), i: 'list' },
+    { l: t('Treinos'), v: st.trainScore, d: t('dos treinos planejados cumpridos'), i: 'dumbbell' },
+    { l: t('Dieta'), v: st.diet, d: t('nota média que você deu para a dieta'), i: 'food' },
+    { l: t('Promessas'), v: st.promises, d: t('{a} cumpridas, {b} quebradas', { a: st.kept, b: st.broken }), i: 'star' },
+  ]
+  let pace = ''
+  if (st.weightPct !== null && st.closed >= 7) {
+    const diff = st.weightPct - st.timePct
+    pace = diff >= 0.05 ? t('Você está à frente do ritmo. Continue.') : diff <= -0.1 ? t('Você está atrás do ritmo. Precisa apertar para chegar a tempo.') : t('Você está no ritmo certo para chegar lá.')
+  }
+  return (
+    <>
+      <section className="card pj-time">
+        <div className="pj-time-h">
+          <span>
+            <small>{t('Dia {a} de {b}', { a: st.elapsed, b: st.total })}</small>
+            <b>{st.left === 1 ? t('Falta 1 dia') : t('Faltam {n} dias', { n: st.left })}</b>
+          </span>
+          <span className="pj-time-pct">{Math.round(st.timePct * 100)}%</span>
+        </div>
+        <div className="pl-bar">
+          <span style={{ width: `${st.timePct * 100}%` }} />
+        </div>
+        <small className="muted">{t('do tempo do seu projetinho já passou')}</small>
+      </section>
+
+      <section className="card pj-eff">
+        <div className="pj-eff-top">
+          <svg viewBox="0 0 110 110" className={`pj-ring ${tone}`} aria-hidden="true">
+            <circle cx="55" cy="55" r={R} className="bg" />
+            <circle cx="55" cy="55" r={R} className="fg" strokeDasharray={C} strokeDashoffset={C * (1 - (eff ?? 0))} />
+          </svg>
+          <span className="pj-eff-n">
+            <b>{pct(eff)}</b>
+            <small>{t('eficácia')}</small>
+          </span>
+          <span className="pj-eff-txt">
+            <b className="ttl">
+              {eff === null ? t('Ainda sem dados') : efficacyLabel(eff)}
+              <Info text={t('A média de constância, treinos, dieta e promessas desde o início do projetinho. Atualiza a cada prestação de contas.')} />
+            </b>
+            <small>{eff === null ? t('Preste contas hoje à noite para começar a medir.') : t('Desde {d}', { d: fmtDayMonth(parseYmd(st.start)) })}</small>
+          </span>
+        </div>
+        <ul className="pj-eff-list">
+          {rows.map((r) => (
+            <li key={r.l}>
+              <span className="pj-eff-ic">
+                <Icon name={r.i} size={16} />
+              </span>
+              <span className="pj-eff-l">
+                <b>{r.l}</b>
+                <small>{r.d}</small>
+              </span>
+              <span className="pj-eff-v">{pct(r.v)}</span>
+              <span className="pj-eff-bar">
+                <span style={{ width: `${(r.v ?? 0) * 100}%` }} />
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {st.weightPct !== null && (
+        <section className="card pj-pace">
+          <b className="ttl">{t('Ritmo até a meta')}</b>
+          <div className="pj-pace-row">
+            <span>
+              <small>{t('Início')}</small>
+              <b>{p.weightStart} kg</b>
+            </span>
+            <span>
+              <small>{t('Agora')}</small>
+              <b>{st.cur} kg</b>
+            </span>
+            <span>
+              <small>{t('Meta')}</small>
+              <b>{p.weightGoal} kg</b>
+            </span>
+          </div>
+          <div className="pj-pace-bars">
+            <small>{t('Caminho feito')}</small>
+            <div className="pl-bar">
+              <span style={{ width: `${st.weightPct * 100}%` }} />
+            </div>
+            <small>{t('Tempo passado')}</small>
+            <div className="pl-bar time">
+              <span style={{ width: `${st.timePct * 100}%` }} />
+            </div>
+          </div>
+          {pace && <p className="pj-pace-msg">{pace}</p>}
+          {!pace && <small className="muted">{t('Atualize o peso no check-in semanal para ver se você está no ritmo.')}</small>}
+        </section>
+      )}
+
+      {(v.why || v.feeling) && (
+        <button type="button" className="card pj-why" onClick={() => onSec('expectativa')}>
+          <small>{t('Lembre por que você começou')}</small>
+          {v.why && <b>"{v.why}"</b>}
+          {v.feeling && <span>{t('Quando chegar lá: {f}', { f: v.feeling })}</span>}
+        </button>
+      )}
+    </>
   )
 }
 

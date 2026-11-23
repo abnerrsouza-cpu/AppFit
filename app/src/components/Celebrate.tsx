@@ -2,10 +2,10 @@ import { t } from '../i18n'
 import { Icon } from './Icon'
 
 /** Comemoração em tela cheia: medalha nova ou subida de nível, com confete. */
-export function Celebrate({ kind, icon, title, desc, onClose, kicker, button }: { kind: 'medal' | 'level'; icon: string; title: string; desc: string; onClose: () => void; kicker?: string; button?: string }) {
+export function Celebrate({ kind, icon, title, desc, onClose, kicker, button, top = false }: { kind: 'medal' | 'level'; icon: string; title: string; desc: string; onClose: () => void; kicker?: string; button?: string; top?: boolean }) {
   const pieces = Array.from({ length: 36 }, (_, i) => i)
   return (
-    <div className="celebrate" role="dialog" aria-modal="true" aria-label={title}>
+    <div className={`celebrate ${top ? 'top' : ''}`} role="dialog" aria-modal="true" aria-label={title}>
       <div className="confetti" aria-hidden="true">
         {pieces.map((i) => (
           <i

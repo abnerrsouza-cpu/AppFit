@@ -183,3 +183,55 @@ export function projetoTodo(s: AppState) {
   const total = Object.values(count).reduce((a, b) => a + b, 0)
   return { count, steps, total, visionDone: 4 - vision.length }
 }
+
+// ---------- andamento do projetinho ----------
+export function projetoStats(s: AppState) {
+  const pj = getProjeto(s)
+  const p = s.profile
+  const key = today()
+  const start = pj.startedAt ? ymd(new Date(pj.startedAt)) : p.startDate
+  const startD = parseYmd(start)
+  const target = parseYmd(pj.vision.targetDate)
+  const dayMs = 86400000
+  const total = Math.max(1, Math.round((target.getTime() - startD.getTime()) / dayMs))
+  const elapsed = Math.max(1, Math.min(total, Math.round((parseYmd(key).getTime() - startD.getTime()) / dayMs) + 1))
+  const left = Math.max(0, total - elapsed + 1)
+
+  // dias já "fechados": de start até ontem, mais hoje se já prestou contas
+  const days: string[] = []
+  for (let d = startD; ymd(d) < key; d = addDays(d, 1)) days.push(ymd(d))
+  if (s.daily[key]) days.push(key)
+  const logs = days.map((d) => s.daily[d]).filter(Boolean)
+
+  const constancy = days.length ? logs.length / days.length : null
+  const planned = days.filter((d) => p.workouts.some((w) => w.weekday === parseYmd(d).getDay()))
+  const trainScore = planned.length
+    ? planned.reduce((acc, d) => {
+        const l = s.daily[d]
+        return acc + (!l ? 0 : l.trained === 'sim' ? 1 : l.trained === 'parcial' ? 0.5 : 0)
+      }, 0) / planned.length
+    : null
+  const diet = logs.length ? logs.reduce((a, l) => a + (l.dietScore || 0), 0) / logs.length / 10 : null
+  const kept = pj.promises.filter((x) => x.status === 'cumprida').length
+  const broken = pj.promises.filter((x) => x.status === 'quebrada').length
+  const promises = kept + broken ? kept / (kept + broken) : null
+
+  const parts = [constancy, trainScore, diet, promises].filter((x): x is number => x !== null)
+  const efficacy = parts.length ? parts.reduce((a, b) => a + b, 0) / parts.length : null
+
+  // ritmo do peso: quanto do caminho já foi feito x quanto do tempo já passou
+  const ws = Object.values(s.weekly).sort((a, b) => a.weekStart.localeCompare(b.weekStart))
+  const cur = ws.length ? ws[ws.length - 1].weight : p.weightStart
+  const way = p.weightStart - p.weightGoal
+  const weightPct = way ? Math.max(0, Math.min(1, (p.weightStart - cur) / way)) : null
+  const timePct = elapsed / total
+
+  return { start, total, elapsed, left, timePct, constancy, trainScore, diet, promises, kept, broken, efficacy, weightPct, cur, logs: logs.length, closed: days.length }
+}
+
+export function efficacyLabel(v: number) {
+  if (v >= 0.8) return t('Excelente. Continue assim.')
+  if (v >= 0.6) return t('Bom, mas dá para apertar.')
+  if (v >= 0.4) return t('Abaixo do necessário.')
+  return t('Você está se sabotando.')
+}
