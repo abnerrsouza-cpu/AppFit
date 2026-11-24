@@ -4,6 +4,7 @@ import { t } from '../i18n'
 import { compress, putPhoto } from '../photos'
 import { type AppState, type Profile, getProjeto, newId, setProjeto, setState } from '../store'
 import { usePhotoUrl } from '../usePhotos'
+import { AiTip } from './AiTip'
 import { Icon } from './Icon'
 import { PhotoButtons } from './PhotoButtons'
 import { editPhoto } from './PhotoEditor'
@@ -23,9 +24,6 @@ export function FirstPhotos({ s, onDone, embedded = false, profile }: { s: AppSt
   const me = usePhotoUrl(s.startPhotoId)
   const ref = usePhotoUrl(refId)
   const [busy, setBusy] = useState(false)
-  const [copied, setCopied] = useState(false)
-  const goal = pf.weightStart > pf.weightGoal ? t('{n} kg mais magro', { n: Math.round(pf.weightStart - pf.weightGoal) }) : t('mais forte')
-  const prompt = t('Use esta foto minha e me mostre {g}, com o abdômen definido e mais músculo, mesma pose, mesma luz e mesmo lugar. Realista, sem filtro.', { g: goal })
 
   const pickMe = async (f?: File) => {
     setBusy(true)
@@ -60,6 +58,9 @@ export function FirstPhotos({ s, onDone, embedded = false, profile }: { s: AppSt
             <span>
               <b>{t('Selecione a foto do seu shape atual')}</b>
               <small>{t('Corpo inteiro, de frente, roupa de treino. Vira o seu "antes".')}</small>
+              <small className="fp-ai-hint">
+                <Icon name="star" size={13} /> {t('Com essa mesma foto, no passo 2 você cria com IA como quer ficar.')}
+              </small>
             </span>
           </div>
           <div className={`fp-img ${me ? 'ok' : ''}`}>{me ? <img src={me} alt="" /> : <Icon name="camera" size={30} />}</div>
@@ -71,32 +72,10 @@ export function FirstPhotos({ s, onDone, embedded = false, profile }: { s: AppSt
             <span className={`fp-n ${refId ? 'is-done' : ''}`}>{refId ? <Icon name="check" size={14} stroke={3} /> : 2}</span>
             <span>
               <b>{t('Selecione a foto do seu shape referência')}</b>
-              <small>{t('O corpo que você quer ter.')}</small>
+              <small>{t('O corpo que você quer ter. O ideal: você mesmo, criado com IA.')}</small>
             </span>
           </div>
-          <div className="fp-tip">
-            <b>
-              <Icon name="star" size={15} /> {t('Dica: faça a sua com IA, para se visualizar')}
-            </b>
-            <small>{t('Abra o ChatGPT, o Gemini ou outro app de imagem, envie a sua foto e cole este pedido:')}</small>
-            <p>"{prompt}"</p>
-            <button
-              type="button"
-              className="link"
-              onClick={async () => {
-                try {
-                  await navigator.clipboard.writeText(prompt)
-                  setCopied(true)
-                  setTimeout(() => setCopied(false), 1800)
-                } catch {
-                  /* sem permissão */
-                }
-              }}
-            >
-              {copied ? t('Pedido copiado') : t('Copiar pedido')}
-            </button>
-            <small>{t('Salve a imagem que a IA criar e escolha ela aqui. Também vale uma foto sua de quando estava em forma.')}</small>
-          </div>
+          <AiTip profile={pf} />
           <div className={`fp-img ${ref ? 'ok' : ''}`}>{ref ? <img src={ref} alt="" /> : <Icon name="target" size={30} />}</div>
           <PhotoButtons onFile={pickRef} disabled={busy} />
         </section>

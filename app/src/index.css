@@ -9437,3 +9437,187 @@ html:has(.app) #root {
   padding: 18px;
   border-radius: 24px;
 }
+
+/* ---------- dica: foto de referência com IA ---------- */
+.ai-tip {
+  background: linear-gradient(150deg, color-mix(in srgb, #a78bfa 18%, transparent), color-mix(in srgb, #38bdf8 14%, transparent));
+  border: 1.5px solid color-mix(in srgb, #a78bfa 50%, transparent);
+  margin: 8px 0;
+}
+.ai-tip-h {
+  font-size: 1rem;
+}
+.ai-steps {
+  margin: 4px 0 2px;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.88rem;
+  color: var(--fg);
+}
+.ai-btns {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.ai-copy,
+.ai-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 0.88rem;
+  text-decoration: none;
+}
+.ai-copy {
+  background: #7c3aed;
+  color: #fff;
+  border: 0;
+}
+.ai-open {
+  background: var(--surface, #fff);
+  color: #7c3aed;
+  border: 1px solid color-mix(in srgb, #a78bfa 50%, transparent);
+}
+.fp-ai-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  color: #7c3aed !important;
+  font-weight: 700;
+}
+
+/* ---------- tela de vitória (treino feito) ---------- */
+.victory {
+  position: fixed;
+  inset: 0;
+  z-index: 190;
+  display: grid;
+  place-items: center;
+  padding: 24px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+  background: radial-gradient(120% 70% at 50% 0%, #2f7bff 0%, #1638a8 45%, #0a1438 100%);
+  color: #fff;
+  overflow: hidden;
+  animation: vic-in 0.35s ease-out;
+}
+@keyframes vic-in {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+}
+.victory .confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.victory-in {
+  position: relative;
+  width: min(100%, 380px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+}
+.victory-kicker {
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #ffd23f;
+}
+.victory-trophy {
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 35% 30%, #ffe680, #ffb020 70%);
+  color: #6b3d00;
+  box-shadow: 0 0 0 10px rgba(255, 210, 63, 0.18), 0 20px 50px -10px rgba(255, 176, 32, 0.7);
+  animation: vic-pop 0.7s cubic-bezier(0.2, 1.6, 0.4, 1) 0.1s both;
+}
+@keyframes vic-pop {
+  from {
+    transform: scale(0.2) rotate(-25deg);
+    opacity: 0;
+  }
+}
+.victory h1 {
+  margin: 4px 0 0;
+  font-size: 1.9rem;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+}
+.victory-week {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+.vw {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+.vw i {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.12);
+  color: #0a1438;
+}
+.vw.on i {
+  background: #ffd23f;
+}
+.vw.now i {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.85);
+  animation: vic-pop 0.6s cubic-bezier(0.2, 1.6, 0.4, 1) 0.6s both;
+}
+.vw small {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.75);
+}
+.victory-sub {
+  margin: 0;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+}
+.victory-letter {
+  margin: 4px 0 0;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  font-style: italic;
+  line-height: 1.4;
+}
+.victory-letter small {
+  display: block;
+  font-style: normal;
+  font-weight: 800;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.65);
+  margin-bottom: 4px;
+}
+.victory-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 18px;
+  border-radius: 18px;
+  border: 0;
+  background: #ffd23f;
+  color: #0a1438;
+  font-size: 1.15rem;
+  font-weight: 900;
+}

@@ -1,0 +1,23 @@
+# Traduções (parte 41): tela de vitória e dica de foto com IA.
+D = {
+ "1 treino nesta semana": ("1 workout this week", "1 entreno esta semana"),
+ "{n} treinos nesta semana": ("{n} workouts this week", "{n} entrenos esta semana"),
+ "{n} dias sem falhar": ("{n} days without missing", "{n} días sin fallar"),
+ "Bora!": ("Let's go!", "¡Vamos!"),
+ "Você escreveu:": ("You wrote:", "Escribiste:"),
+ "Treinou. O dia já é seu.": ("You trained. The day is yours.", "Entrenaste. El día ya es tuyo."),
+ "Você fez o que a maioria só promete.": ("You did what most people only promise.", "Hiciste lo que la mayoría solo promete."),
+ "Mais um tijolo no shape que você quer.": ("One more brick in the body you want.", "Un ladrillo más en el cuerpo que quieres."),
+ "Hoje não teve desculpa.": ("No excuses today.", "Hoy no hubo excusa."),
+ "É assim que se constrói o corpo: um dia de cada vez.": ("That's how a body is built: one day at a time.", "Así se construye el cuerpo: un día a la vez."),
+ "Seu eu do futuro agradece.": ("Your future self thanks you.", "Tu yo del futuro te lo agradece."),
+ "Abra o ChatGPT ou o Gemini, envie uma foto sua de corpo inteiro e cole o pedido.": ("Open ChatGPT or Gemini, send a full-body photo of yourself and paste the prompt.", "Abre ChatGPT o Gemini, envía una foto tuya de cuerpo entero y pega el pedido."),
+ "Abrir ChatGPT": ("Open ChatGPT", "Abrir ChatGPT"),
+ "Com essa mesma foto, no passo 2 você cria com IA como quer ficar.": ("With this same photo, in step 2 you'll use AI to create how you want to look.", "Con esta misma foto, en el paso 2 creas con IA cómo quieres verte."),
+ "Copie o pedido abaixo.": ("Copy the prompt below.", "Copia el pedido de abajo."),
+ "Crie com IA a sua versão de como quer ficar": ("Use AI to create the version of you that you want to become", "Crea con IA tu versión de cómo quieres verte"),
+ "O corpo que você quer ter. O ideal: você mesmo, criado com IA.": ("The body you want. Best option: you, created with AI.", "El cuerpo que quieres. Lo ideal: tú mismo, creado con IA."),
+ "O melhor: você mesmo, criado com IA no shape que quer ter. Veja como logo abaixo.": ("Best option: you, created with AI in the shape you want. See how below.", "Lo mejor: tú mismo, creado con IA con el cuerpo que quieres. Mira cómo abajo."),
+ "Salve a imagem que a IA criar e escolha ela aqui.": ("Save the image the AI creates and choose it here.", "Guarda la imagen que cree la IA y elígela aquí."),
+ "Ver você mesmo no shape que quer ter motiva muito mais do que a foto de outra pessoa.": ("Seeing yourself in the shape you want motivates far more than someone else's photo.", "Verte a ti mismo con el cuerpo que quieres motiva mucho más que la foto de otra persona."),
+}

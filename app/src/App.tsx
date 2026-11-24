@@ -6,6 +6,7 @@ import { Info } from './components/Info'
 import { Intro } from './components/Intro'
 import { HowItWorks } from './components/HowItWorks'
 import { Celebrate } from './components/Celebrate'
+import { Victory } from './components/Victory'
 import { type Mission, levelOf, medals, projetoTodo, totalXP } from './game'
 import { Conquistas } from './screens/Conquistas'
 import { getLang, t } from './i18n'
@@ -251,6 +252,21 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [s.onboarded, s.demo])
 
+  // tela de vitória: quando o treino de hoje passa de "não feito" para "feito" (em qualquer tela)
+  const trainedNow = !!s.checks[today()]?.train
+  const prevTrained = useRef<boolean | null>(null)
+  const [victory, setVictory] = useState(false)
+  useEffect(() => {
+    if (prevTrained.current === false && trainedNow && s.onboarded && !s.demo) {
+      setVictory(true)
+      const n = new Date()
+      const at = `${String(n.getHours()).padStart(2, '0')}:${String(n.getMinutes()).padStart(2, '0')}`
+      setState((x) => ({ ...x, trainDoneAt: { ...(x.trainDoneAt || {}), [today()]: at } }))
+    }
+    prevTrained.current = trainedNow
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trainedNow])
+
   // dia ruim: depois da abertura, o treinador puxa conversa (no máximo a cada 3 horas)
   useEffect(() => {
     if (!intro && phase === 'ready' && !fpOpen && coachShouldOpen(s)) setCoach(true)
@@ -299,10 +315,10 @@ export default function App() {
           }}
         />
       )}
-      {!intro && s.seenHow && !howAgain && !checkin && !needPhotos && fresh && (
+      {!intro && !victory && s.seenHow && !howAgain && !checkin && !needPhotos && fresh && (
         <Celebrate kind="medal" icon={fresh.icon} title={fresh.title} desc={fresh.desc} onClose={() => setState((st) => ({ ...st, seenMedals: [...(st.seenMedals || []), fresh.id] }))} />
       )}
-      {!intro && s.seenHow && !howAgain && !checkin && !needPhotos && !fresh && levelUp && (
+      {!intro && !victory && s.seenHow && !howAgain && !checkin && !needPhotos && !fresh && levelUp && (
         <Celebrate
           kind="level"
           icon="star"
@@ -311,6 +327,7 @@ export default function App() {
           onClose={() => setState((st) => ({ ...st, lastLevel: lvNow.n }))}
         />
       )}
+      {victory && <Victory s={s} onClose={() => setVictory(false)} />}
       {intro && <Intro s={s} userId={user?.id} hasAvatar={user?.hasAvatar} onDone={() => setIntro(false)} />}
       {s.demo && phase === 'local' && (
         <div className="demo-bar">

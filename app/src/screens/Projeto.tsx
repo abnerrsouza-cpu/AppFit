@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { editPhoto } from '../components/PhotoEditor'
+import { AiTip } from '../components/AiTip'
 import { Icon } from '../components/Icon'
 import { PhotoButtons } from '../components/PhotoButtons'
 import { Celebrate } from '../components/Celebrate'
@@ -451,12 +452,13 @@ function Expectativa({ s, visionUrl, nextId }: { s: AppState; visionUrl?: string
               {busy ? t('Salvando...') : t('Adicione uma foto do shape que você quer ter')}
               <Info text={t('Uma imagem do resultado que você quer. Ela vira o fundo do topo do Projetinho, para você ver todo dia.')} />
             </b>
-            <small>{t('Pode ser uma foto de referência ou uma foto sua de quando estava em forma.')}</small>
+            <small>{t('O melhor: você mesmo, criado com IA no shape que quer ter. Veja como logo abaixo.')}</small>
           </span>
         )}
         {visionUrl && <span className="pj-photo-tag">{t('Toque para trocar')}</span>}
       </label>
       <PhotoButtons onFile={pickVision} disabled={busy} />
+      {!visionUrl && <AiTip profile={s.profile} compact />}
 
       <div className="card field">
         <label className={`pj-step ${nx('pj-result')}`}>

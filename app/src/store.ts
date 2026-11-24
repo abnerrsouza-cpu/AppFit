@@ -109,6 +109,7 @@ export interface AppState {
   photosAsked?: boolean // já viu a tela "Suas duas fotos"
   introMeId?: string
   water?: Record<string, number> // ml de água por dia (total)
+  trainDoneAt?: Record<string, string> // hora em que marcou o treino do dia (para a notificação de vencedor)
   waterLog?: Record<string, { at: string; ml: number; kind: string }[]> // cada registro de água
   trainAt?: Record<string, string> // horário que a pessoa disse que vai treinar, por dia
   coachAt?: number // última vez que a conversa abriu sozinha // foto escolhida para o "Esse é você" da abertura

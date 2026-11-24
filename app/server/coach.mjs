@@ -84,6 +84,12 @@ const T = {
     chase5Body: 'Pensa só nos próximos 5 minutos: se arruma e sai de casa. O resto vem depois.',
     chaseMission: 'Missão de hoje: chegar na academia',
     chaseMissionBody: (s) => (s >= 7 ? 'Só chegar. Não precisa ser o melhor treino. Precisa existir.' : 'Só chegar já conta. 20 minutos e o dia é seu.'),
+    won: [
+      ['Viu que treinar 1 horinha não mata?', 'E o resto do dia fica mais leve. Agora é fechar com a dieta.'],
+      ['Treinou e matou o dia. Isso aí.', 'O mais difícil já foi. Hoje ninguém te segura.'],
+      ['Bom, né? Já ter treinado.', 'Essa sensação é o prêmio por não ter dado desculpa.'],
+      ['Treino pago. Dia ganho.', 'Amanhã você vai querer sentir isso de novo.'],
+    ],
     chaseWas: (h) => `Era às ${h}. Já saiu de casa?`,
     chaseWasBody: 'Ainda dá tempo. Abre e me diz se você está a caminho.',
   },
@@ -132,6 +138,12 @@ const T = {
     chase5Body: 'Just think about the next 5 minutes: get dressed and leave the house. The rest comes after.',
     chaseMission: "Today's mission: get to the gym",
     chaseMissionBody: (s) => (s >= 7 ? "Just get there. It doesn't need to be your best workout. It needs to happen." : 'Just showing up counts. 20 minutes and the day is yours.'),
+    won: [
+      ['See? One hour of training won\'t kill you.', 'And the rest of the day feels lighter. Now close it out with your diet.'],
+      ['You trained and won the day.', 'The hardest part is done. Nothing stops you today.'],
+      ['Feels good, right? Already trained.', 'That feeling is your prize for not making excuses.'],
+      ['Workout paid. Day won.', "Tomorrow you'll want to feel this again."],
+    ],
     chaseWas: (h) => `It was supposed to be at ${h}. Have you left yet?`,
     chaseWasBody: "There's still time. Open and tell me if you're on your way.",
   },
@@ -180,6 +192,12 @@ const T = {
     chase5Body: 'Piensa solo en los próximos 5 minutos: vístete y sal de casa. Lo demás viene después.',
     chaseMission: 'Misión de hoy: llegar al gimnasio',
     chaseMissionBody: (s) => (s >= 7 ? 'Solo llega. No tiene que ser tu mejor entreno. Tiene que existir.' : 'Solo llegar ya cuenta. 20 minutos y el día es tuyo.'),
+    won: [
+      ['¿Viste que entrenar una horita no mata?', 'Y el resto del día se siente más liviano. Ahora ciérralo con la dieta.'],
+      ['Entrenaste y ganaste el día.', 'Lo más difícil ya pasó. Hoy nadie te para.'],
+      ['Se siente bien, ¿no? Ya haber entrenado.', 'Esa sensación es el premio por no poner excusas.'],
+      ['Entreno pagado. Día ganado.', 'Mañana vas a querer sentir esto otra vez.'],
+    ],
     chaseWas: (h) => `Era a las ${h}. ¿Ya saliste de casa?`,
     chaseWasBody: 'Aún hay tiempo. Abre y dime si vas en camino.',
   },
@@ -379,9 +397,19 @@ async function tick() {
     const d = r.data || {}
     if (!d.onboarded || d.demo) continue
     const now = localNow(r.tz)
+    const L = T[d.lang || r.lang] || T.pt
+    // vencedor: de 40 min a 3 h depois de marcar o treino, uma vez por dia (fora do limite de 3 por período)
+    const doneAt = d.trainDoneAt?.[now.date]
+    if (doneAt && d.checks?.[now.date]?.train && now.min >= toMin(doneAt) + 40 && now.min <= Math.min(toMin(doneAt) + 180, 23 * 60 + 30)) {
+      const dk = `c:${now.date}:won`
+      const ins = await q(`insert into notif_log (user_id, kind, dedupe, title, body, ok) values ($1, 'coach', $2, '-', '-', true) on conflict do nothing`, [r.id, dk])
+      if (ins.rowCount) {
+        const [title, body] = L.won[daysBetween('2024-01-01', now.date) % L.won.length]
+        await sendToUser(r.id, { title, body, kind: 'rotina', dedupe: `${dk}:send`, url: '/?abrir=inicio' })
+      }
+    }
     const due = slotsFor(d, now).filter((sl) => now.min >= sl.m && now.min - sl.m <= 10)
     if (!due.length) continue
-    const L = T[d.lang || r.lang] || T.pt
     const s = { ...snapshot(d, now), custom: d.custom || [] }
     // o que já saiu hoje (para não repetir a mesma "situação")
     const sent = await q(`select dedupe from notif_log where user_id = $1 and dedupe like $2`, [r.id, `c:${now.date}:%`])

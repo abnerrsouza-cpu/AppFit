@@ -160,7 +160,6 @@ export function Plano({ s, goMenu }: { s: AppState; goMenu: (sec: string) => voi
                   className={`pl-big-check ${checks.train ? 'on' : ''}`}
                   onClick={() => {
                     toggle('train')
-                    if (!checks.train) toast(t('Treino feito'), t('Mais um dia sem desculpa.'))
                   }}
                 >
                   <Icon name="check" size={22} stroke={3} /> {checks.train ? t('Treino feito hoje') : t('Treinei hoje')}
@@ -209,7 +208,6 @@ export function Plano({ s, goMenu }: { s: AppState; goMenu: (sec: string) => voi
                           onClick={() => {
                             const willAll = !done && exDone + 1 === exercises.length
                             toggle(`ex:${i}`, willAll ? { train: true } : undefined)
-                            if (willAll) toast(t('Treino completo'), t('Marquei o treino como feito na tela Hoje.'))
                           }}
                         >
                           {done && <Icon name="check" size={16} stroke={3} />}

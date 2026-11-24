@@ -4,6 +4,7 @@ import { t } from '../i18n'
 import { compress, putPhoto } from '../photos'
 import { type AppState, newId, setProjeto, setState } from '../store'
 import { useLatestPhoto, useRefPhoto } from '../usePhotos'
+import { AiTip } from './AiTip'
 import { Icon } from './Icon'
 import { editPhoto } from './PhotoEditor'
 import { PhotoButtons } from './PhotoButtons'
@@ -74,6 +75,7 @@ export function IntroPhotos({ s, userId, hasAvatar, onPreview }: { s: AppState; 
         </button>
       )}
       <Slot k="ref" url={ref} label={t('Essa é sua referência')} sub={t('O shape que você quer ter. É a mesma foto do topo do Projetinho.')} onFile={pickRef} />
+      <AiTip profile={s.profile} compact />
       <button type="button" className="cta ip-preview" onClick={onPreview}>
         <Icon name="play" size={18} /> {t('Ver a abertura')}
       </button>
