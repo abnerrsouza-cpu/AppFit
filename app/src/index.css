@@ -9064,3 +9064,72 @@ html:has(.app) #root {
   font-size: 0.8rem;
   color: var(--fg-3);
 }
+
+/* água: azul-água claro, sem marca d'água */
+.water,
+.ag-hero {
+  background: linear-gradient(160deg, #4fd1f5 0%, #1fb3e6 45%, #0b8fd1 100%);
+  box-shadow: 0 14px 30px -16px rgba(11, 143, 209, 0.7);
+}
+.water.full,
+.ag-hero:has(.ag-bottle.full) {
+  background: linear-gradient(160deg, #5eead4 0%, #22c3c9 50%, #0e9fb8 100%);
+}
+.water-k,
+.ag-info small {
+  color: rgba(255, 255, 255, 0.85);
+}
+.water-n span,
+.water-sub,
+.ag-goal {
+  color: rgba(255, 255, 255, 0.92);
+}
+.water-bar {
+  background: rgba(255, 255, 255, 0.3);
+}
+.water-bar span,
+.water.full .water-bar span {
+  background: #fff;
+}
+.water-btns button {
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+}
+.water-btns button:active {
+  background: rgba(255, 255, 255, 0.35);
+}
+.water-undo {
+  color: #fff;
+}
+.ag-cap {
+  background: #fff;
+}
+.ag-body {
+  border-color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.15);
+}
+.ag-fill {
+  background: linear-gradient(180deg, #ffffff, #d6f4ff);
+}
+.ag-wave {
+  background-image: radial-gradient(circle at 10px -3px, transparent 9px, #ffffff 10px);
+}
+.ag-body b {
+  color: #0b6fa8;
+  text-shadow: none;
+}
+.ag-c svg,
+.ag-custom svg,
+.ag-ic {
+  color: #0ea5e9;
+}
+.ag-ic {
+  background: rgba(14, 165, 233, 0.12);
+}
+.ag-bar span {
+  background: #7dd3fc;
+}
+.ag-bar span.hit {
+  background: #0ea5e9;
+}

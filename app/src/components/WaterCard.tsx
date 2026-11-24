@@ -10,9 +10,6 @@ export function WaterCard({ s, onOpen }: { s: AppState; onOpen?: () => void }) {
   const pct = Math.min(1, ml / goal)
   return (
     <section className={`card water ${pct >= 1 ? 'full' : ''}`}>
-      <span className="water-bg" aria-hidden="true">
-        <Icon name="droplet" size={150} stroke={1.4} />
-      </span>
       <button type="button" className="water-open" onClick={onOpen}>
         <small className="water-k">{t('Água hoje')}</small>
         <span className="water-n">
