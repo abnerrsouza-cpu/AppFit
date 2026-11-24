@@ -11,7 +11,7 @@ import { Locked } from '../components/Locked'
 import { compress, putPhoto } from '../photos'
 import { WeekBars } from '../components/WeekBars'
 import { t } from '../i18n'
-import { type AppState, type WeeklyLog, currentWeight, fmtDayMonth, newId, parseYmd, setState, weekStartOf, weekStats, ymd } from '../store'
+import { type AppState, type WeeklyLog, addDays, currentWeight, fmtDayMonth, getProjeto, newId, parseYmd, setState, today, trainedOn, weekStartOf, weekStats, ymd } from '../store'
 
 const label = (w: WeeklyLog, i: number) => `${t('Sem.')} ${i + 1} · ${fmtDayMonth(parseYmd(w.weekStart))}`
 
@@ -44,7 +44,7 @@ export function Evolution({ s, openCheckin, openWeekly = false }: { s: AppState;
         </h1>
       </header>
 
-      {withPhoto.length < 2 ? (
+      {withPhoto.length < 2 || !evoUnlocked(s).ok ? (
         <StartPair s={s} weekPhotoId={s.weekly[thisWeek]?.photoId} openWeekly={() => setForm(true)} />
       ) : (
       <section className="card block">
@@ -401,10 +401,21 @@ function Journey({ s }: { s: AppState }) {
   )
 }
 
-/** Antes x Depois com 2 vagas: a foto do início (salva na hora) e a da semana. */
+/** O "depois" só libera depois do primeiro mês (28 dias) de projeto. */
+export function evoUnlocked(s: AppState) {
+  const start = parseYmd(s.profile.startDate || today())
+  const days = Math.max(0, Math.floor((Date.now() - start.getTime()) / 86400000))
+  let trains = 0
+  for (let i = 0; i <= Math.min(days, 60); i++) if (trainedOn(s, ymd(addDays(start, i))) >= 1) trains++
+  return { ok: days >= 28, days, left: Math.max(0, 28 - days), trains }
+}
+
+/** Antes x Depois: a foto de agora já; o depois fica bloqueado até completar o primeiro mês. */
 function StartPair({ s, weekPhotoId, openWeekly }: { s: AppState; weekPhotoId?: string; openWeekly: () => void }) {
   const before = usePhotoUrl(s.startPhotoId)
   const after = usePhotoUrl(weekPhotoId)
+  const refUrl = usePhotoUrl(getProjeto(s).vision.photoId)
+  const ev = evoUnlocked(s)
   const [busy, setBusy] = useState(false)
   const pick = async (raw?: File) => {
     const file = raw && (await editPhoto(raw, 3 / 4))
@@ -415,24 +426,25 @@ function StartPair({ s, weekPhotoId, openWeekly }: { s: AppState; weekPhotoId?: 
       const id = newId()
       await putPhoto(id, url)
       setState((st) => ({ ...st, startPhotoId: id }))
-      toast(t('Foto do antes salva'), t('Agora falta a foto de depois.'))
+      toast(t('Foto de agora salva'), t('Daqui a 4 semanas, você vai agradecer por ter tirado.'))
     } finally {
       setBusy(false)
     }
   }
-  const done = Number(!!s.startPhotoId) + Number(!!weekPhotoId)
+  const locked = !ev.ok
   return (
     <section className="card block pair">
       <div className="block-h">
         <h2 className="ttl">
-          {t('Monte seu antes e depois')}
-          <Info text={t('Antes: uma foto de corpo inteiro de hoje ou do início. Depois: a foto do check-in semanal. Com as duas, a comparação aparece aqui.')} />
+          {t('Seu antes e depois')}
+          <Info text={t('Antes: a sua foto de agora. Depois: libera quando você completar o primeiro mês de treino, com a foto do check-in semanal. É aqui que você vai ver que valeu a pena.')} />
         </h2>
-        <small className="pair-count">{t('{a} de {b}', { a: done, b: 2 })}</small>
+        <small className="pair-count">{locked ? t('Dia {a} de 28', { a: Math.min(28, ev.days + 1) }) : t('Liberado')}</small>
       </div>
+      {!s.startPhotoId && <p className="pair-hook">{t('Daqui a 4 semanas, você vai querer ver essa foto. Tire hoje.')}</p>}
       <div className="pair-grid">
-        <div className={`pair-slot ${before ? 'ok' : ''}`}>
-          <span className="pair-tag">{t('Antes')}</span>
+        <div className={`pair-slot ${before ? 'ok' : 'now'}`}>
+          <span className="pair-tag">{t('Agora')}</span>
           {before ? <img src={before} alt="" /> : <Icon name="camera" size={28} />}
           {before && (
             <span className="pair-saved">
@@ -440,29 +452,55 @@ function StartPair({ s, weekPhotoId, openWeekly }: { s: AppState; weekPhotoId?: 
             </span>
           )}
         </div>
-        <div className={`pair-slot ${after ? 'ok' : ''}`}>
+        <div className={`pair-slot ${locked ? 'locked' : after ? 'ok' : ''}`}>
           <span className="pair-tag">{t('Depois')}</span>
-          {after ? <img src={after} alt="" /> : <Icon name="camera" size={28} />}
-          {after && (
-            <span className="pair-saved">
-              <Icon name="check" size={12} stroke={3} /> {t('Salva')}
-            </span>
+          {locked ? (
+            <>
+              {refUrl && <img className="pair-ghost" src={refUrl} alt="" />}
+              <span className="pair-lock">
+                <Icon name="lock" size={26} />
+                <b>{t('Bloqueada')}</b>
+                <small>{ev.left === 1 ? t('Falta 1 dia') : t('Faltam {n} dias', { n: ev.left })}</small>
+              </span>
+            </>
+          ) : after ? (
+            <img src={after} alt="" />
+          ) : (
+            <Icon name="camera" size={28} />
           )}
         </div>
       </div>
+      {locked && (
+        <div className="pair-unlock">
+          <b>
+            <Icon name="lock" size={15} /> {t('Complete seu primeiro mês de treino para desbloquear sua evolução')}
+          </b>
+          <div className="pl-bar">
+            <span style={{ width: `${(Math.min(28, ev.days + 1) / 28) * 100}%` }} />
+          </div>
+          <small className="muted">
+            {t('Dia {a} de 28', { a: Math.min(28, ev.days + 1) })} · {ev.trains === 1 ? t('1 treino feito') : t('{n} treinos feitos', { n: ev.trains })}
+          </small>
+        </div>
+      )}
       {!s.startPhotoId ? (
         <>
-          <p className="lead">{t('Passo 1: tire ou escolha uma foto de corpo inteiro para ser o seu antes.')}</p>
+          <p className="lead">{t('Passo 1: tire agora uma foto de corpo inteiro, de frente, com roupa de treino. É o seu ponto de partida.')}</p>
           <PhotoButtons onFile={pick} disabled={busy} />
         </>
-      ) : !weekPhotoId ? (
+      ) : locked ? (
         <>
-          <p className="lead">{t('Passo 2: faça o check-in semanal com uma foto nova. Ela vira o seu depois.')}</p>
+          <p className="lead">{t('Foto de agora guardada. Toda semana, faça o check-in com foto: é dele que sai o seu depois.')}</p>
           <button type="button" className="cta" onClick={openWeekly}>
             {t('Fazer check-in semanal')}
           </button>
-          <PhotoButtons onFile={pick} disabled={busy} />
-          <small className="muted center-txt">{t('Os botões acima trocam a foto do antes.')}</small>
+        </>
+      ) : !weekPhotoId ? (
+        <>
+          <p className="lead">{t('Primeiro mês completo. Faça o check-in semanal com uma foto nova: ela vira o seu depois.')}</p>
+          <button type="button" className="cta" onClick={openWeekly}>
+            {t('Fazer check-in semanal')}
+          </button>
         </>
       ) : null}
     </section>
