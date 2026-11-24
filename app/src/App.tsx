@@ -206,7 +206,7 @@ export default function App() {
   }, [s.lang])
 
   useEffect(() => {
-    window.scrollTo(0, 0)
+    document.querySelector('.app')?.scrollTo(0, 0)
   }, [tab, checkin])
 
   const logout = async () => {

@@ -4,7 +4,7 @@ import { Info, WithInfo } from '../components/Info'
 import { feedback, nudge } from '../psych'
 import { t } from '../i18n'
 import { XP, nextStreakMedal } from '../game'
-import { streak } from '../store'
+import { streak, planMeals } from '../store'
 import { type AppState, type DailyLog, type Trained, setState, today, workoutFor } from '../store'
 
 // Escalas de carinha: viram nota 0-10 por baixo, mas a pessoa só toca.
@@ -30,7 +30,7 @@ export function Checkin({ s, onClose }: { s: AppState; onClose: () => void }) {
       cardioMin: 0,
       cardioType: 'Esteira',
       dietScore: 8,
-      mealsOk: Object.fromEntries(p.meals.map((m) => [m.id, checks[m.id] ?? true])),
+      mealsOk: Object.fromEntries(planMeals(p).map((m) => [m.id, checks[m.id] ?? true])),
       ate: '',
       focus: 8,
       water: 2,
@@ -44,7 +44,8 @@ export function Checkin({ s, onClose }: { s: AppState; onClose: () => void }) {
   const [result, setResult] = useState<ReturnType<typeof feedback> | null>(null)
   const [reward, setReward] = useState<{ xp: number; streak: number; next: { target: number; left: number } | null } | null>(null)
   const set = <K extends keyof DailyLog>(k: K, v: DailyLog[K]) => setF((x) => ({ ...x, [k]: v }))
-  const missed = p.meals.filter((m) => !f.mealsOk[m.id])
+  const meals = planMeals(p)
+  const missed = meals.filter((m) => !f.mealsOk[m.id])
   const STEPS = 6
 
   const submit = () => {
@@ -162,10 +163,15 @@ export function Checkin({ s, onClose }: { s: AppState; onClose: () => void }) {
 
         {step === 2 && (
           <>
-            <h1>{t('Você seguiu as refeições do plano?')}</h1>
-            <p className="lead">{t('Toque nas refeições que você não seguiu.')}</p>
+            <h1>{meals.length ? t('Você seguiu as refeições do plano?') : t('O que você comeu hoje?')}</h1>
+            <p className="lead">{meals.length ? t('Toque nas refeições que você não seguiu.') : t('Você ainda não cadastrou sua dieta. Escreva o que comeu, sem mentir para você.')}</p>
+            {!meals.length && (
+              <label className="soft-input">
+                <textarea id="ci-ate-free" rows={3} value={f.ate} placeholder={t('Ex.: pão com ovo, marmita de frango, um doce à tarde')} onChange={(e) => set('ate', e.target.value)} />
+              </label>
+            )}
             <div className="plates">
-              {p.meals.map((m) => {
+              {meals.map((m) => {
                 const ok = f.mealsOk[m.id]
                 return (
                   <button key={m.id} type="button" className={`plate ${ok ? 'ok' : 'no'}`} onClick={() => set('mealsOk', { ...f.mealsOk, [m.id]: !ok })}>

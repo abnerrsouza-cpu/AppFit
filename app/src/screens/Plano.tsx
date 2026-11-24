@@ -4,7 +4,7 @@ import { Icon } from '../components/Icon'
 import { Info } from '../components/Info'
 import { toast } from '../components/Toast'
 import { t, weekday } from '../i18n'
-import { type AppState, setState, today } from '../store'
+import { type AppState, planMeals, setState, today } from '../store'
 
 type View = 'treino' | 'dieta'
 
@@ -63,7 +63,7 @@ export function Plano({ s, goMenu }: { s: AppState; goMenu: (sec: string) => voi
   const p = s.profile
   const now = new Date()
   const [day, setDay] = useState(now.getDay())
-  const [view, setView] = useState<View>(() => (now.getHours() < 11 || !p.workouts.some((w) => w.weekday === now.getDay()) ? 'dieta' : 'treino'))
+  const [view, setView] = useState<View>(() => (now.getHours() < 11 || !p.workouts.some((w) => w.weekday === now.getDay() && w.items.trim()) ? 'dieta' : 'treino'))
   const isToday = day === now.getDay()
   const key = today()
   const checks = s.checks[key] || {}
@@ -71,10 +71,10 @@ export function Plano({ s, goMenu }: { s: AppState; goMenu: (sec: string) => voi
   const toggle = (id: string, extra?: Record<string, boolean>) =>
     setState((x) => ({ ...x, checks: { ...x.checks, [key]: { ...(x.checks[key] || {}), [id]: !x.checks[key]?.[id], ...(extra || {}) } } }))
 
-  const wk = p.workouts.find((w) => w.weekday === day)
+  const wk = p.workouts.find((w) => w.weekday === day && w.items.trim())
   const exercises = wk ? lines(wk.items).map(parseExercise) : []
   const exDone = exercises.filter((_, i) => checks[`ex:${i}`]).length
-  const meals = p.meals.slice().sort((a, b) => a.time.localeCompare(b.time))
+  const meals = planMeals(p).sort((a, b) => a.time.localeCompare(b.time))
   const mealsDone = meals.filter((m) => checks[m.id]).length
   const nextMeal = meals.find((m) => !checks[m.id] && m.time >= hhmm)
 
@@ -92,7 +92,7 @@ export function Plano({ s, goMenu }: { s: AppState; goMenu: (sec: string) => voi
 
       <div className="pl-days" role="tablist">
         {order.map((d) => {
-          const has = p.workouts.some((w) => w.weekday === d)
+          const has = p.workouts.some((w) => w.weekday === d && w.items.trim())
           return (
             <button key={d} type="button" role="tab" aria-selected={day === d} className={`pl-day ${day === d ? 'on' : ''} ${d === now.getDay() ? 'today' : ''}`} onClick={() => setDay(d)}>
               <small>{weekday(d).slice(0, 3)}</small>
@@ -113,7 +113,7 @@ export function Plano({ s, goMenu }: { s: AppState; goMenu: (sec: string) => voi
 
       {view === 'treino' && (
         <>
-          {p.workouts.length === 0 ? (
+          {!p.workouts.some((w) => w.items.trim()) ? (
             <section className="card pl-empty">
               <b>{t('Você ainda não cadastrou sua ficha de treino')}</b>
               <p>{t('Escreva os exercícios de cada dia ou envie o PDF do seu personal.')}</p>
@@ -181,7 +181,7 @@ export function Plano({ s, goMenu }: { s: AppState; goMenu: (sec: string) => voi
               {isToday && <RestTimer />}
             </section>
           )}
-          {p.workouts.length > 0 && (
+          {p.workouts.some((w) => w.items.trim()) && (
             <button type="button" className="link pl-edit" onClick={() => goMenu('treino')}>
               <Icon name="list" size={16} /> {t('Editar ficha de treino')}
             </button>

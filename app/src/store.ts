@@ -509,8 +509,11 @@ export function bmi(weight: number, heightCm: number) {
   return weight / (h * h)
 }
 
+/** Treino do dia: só conta se a ficha daquele dia tiver exercícios (modelo vazio não é plano). */
 export function workoutFor(p: Profile, d: Date) {
-  return p.workouts.find((w) => w.weekday === d.getDay())
+  return p.workouts.find((w) => w.weekday === d.getDay() && w.items.trim())
 }
+/** Refeições cadastradas de verdade (com o que comer). As do modelo vazio não viram tarefa nem cobrança. */
+export const planMeals = (p: Profile) => p.meals.filter((m) => m.items.trim())
 
 export const newId = uid

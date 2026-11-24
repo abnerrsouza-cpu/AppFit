@@ -12,7 +12,7 @@ import { Rings } from '../components/Rings'
 import type { Tab } from '../components/BottomNav'
 import { headline } from '../psych'
 import { t, weekdayShort } from '../i18n'
-import { type AppState, addDays, currentWeight, cycleInfo, getProjeto, weekStats, setState, streak, today, weekDays, workoutFor, ymd } from '../store'
+import { type AppState, addDays, planMeals, currentWeight, cycleInfo, getProjeto, weekStats, setState, streak, today, weekDays, workoutFor, ymd } from '../store'
 
 type Kind = 'wake' | 'meal' | 'train' | 'checkin' | 'event' | 'task'
 interface Task {
@@ -39,7 +39,7 @@ export function todayProgress(s: AppState) {
   const checks = s.checks[key] || {}
   const wk = workoutFor(p, new Date())
   const dailyCardio = Math.max(10, Math.round(p.cardioGoalMin / 5))
-  const meals = p.meals.length || 1
+  const meals = planMeals(p).length || 1
   if (log) {
     return {
       train: log.trained === 'sim' || log.trained === 'descanso' ? 1 : log.trained === 'parcial' ? 0.5 : 0,
@@ -48,7 +48,7 @@ export function todayProgress(s: AppState) {
       rest: !wk,
     }
   }
-  return { train: !wk ? 1 : checks.train ? 1 : 0, diet: p.meals.filter((m) => checks[m.id]).length / meals, cardio: 0, rest: !wk }
+  return { train: !wk ? 1 : checks.train ? 1 : 0, diet: planMeals(p).filter((m) => checks[m.id]).length / meals, cardio: 0, rest: !wk }
 }
 
 export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openCoach, onLocked }: { s: AppState; user?: User | null; go: (tab: Tab) => void; goMenu: (sec: string) => void; openCheckin: () => void; owes: boolean; onMission: (a: Mission['action']) => void; openCoach?: () => void; onLocked?: () => void }) {
@@ -102,7 +102,7 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openC
 
   const tasks: Task[] = [
     { id: 'wake', time: p.wake, title: t('Acordar e beber água'), kind: 'wake' as Kind, done: !!checks.wake },
-    ...p.meals.map((m) => ({ id: m.id, time: m.time, title: m.name, detail: m.items, kind: 'meal' as Kind, done: !!checks[m.id] })),
+    ...planMeals(p).map((m) => ({ id: m.id, time: m.time, title: m.name, detail: m.items, kind: 'meal' as Kind, done: !!checks[m.id] })),
     ...(p.tasks ?? []).filter((x) => x.title.trim()).map((x) => ({ id: x.id, time: x.time, title: x.title, kind: 'task' as Kind, done: !!checks[x.id] })),
     ...(wk ? [{ id: 'train', time: p.trainTime, title: wk.title, detail: wk.items, kind: 'train' as Kind, done: !!checks.train }] : []),
     { id: 'checkin', time: p.checkinTime, title: t('Prestar contas do dia'), kind: 'checkin' as Kind, done: !!log },
@@ -651,7 +651,7 @@ function PlanCard({ s, go }: { s: AppState; go: (tab: Tab) => void }) {
   const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
   const wk = workoutFor(p, now)
   const checks = s.checks[today()] || {}
-  const next = p.meals.slice().sort((a, b) => a.time.localeCompare(b.time)).find((m) => !checks[m.id] && m.time >= hhmm)
+  const next = planMeals(p).sort((a, b) => a.time.localeCompare(b.time)).find((m) => !checks[m.id] && m.time >= hhmm)
   return (
     <button type="button" className="card plan-card" onClick={() => go('plano')}>
       <span className="plan-card-h">
@@ -673,7 +673,7 @@ function PlanCard({ s, go }: { s: AppState; go: (tab: Tab) => void }) {
         </span>
         <span>
           <small>{t('Próxima refeição')}</small>
-          <b>{next ? `${next.name} · ${next.time}` : t('Nenhuma pendente')}</b>
+          <b>{next ? `${next.name} · ${next.time}` : planMeals(p).length ? t('Nenhuma pendente') : t('Dieta não cadastrada')}</b>
         </span>
       </span>
     </button>

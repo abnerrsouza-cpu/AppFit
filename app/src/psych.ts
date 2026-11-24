@@ -9,6 +9,7 @@ import {
   defaultCustom,
   streak,
   today,
+  planMeals,
   workoutFor,
 } from './store'
 
@@ -160,7 +161,7 @@ export function dailySchedule(s: AppState, d = new Date()): Nudge[] {
     list.push({ moment, time, title: title ?? t(TITLES[moment]), body: nudge(s, moment, { hora: time, ...extra }) })
 
   add('acordar', p.wake)
-  p.meals.forEach((m) => add('refeicao', m.time, { refeicao: m.name, itens: m.items || t('o que está no plano') }, m.name))
+  planMeals(p).forEach((m) => add('refeicao', m.time, { refeicao: m.name, itens: m.items }, m.name))
   const w = workoutFor(p, d)
   if (w) {
     const [h, mi] = p.trainTime.split(':').map(Number)

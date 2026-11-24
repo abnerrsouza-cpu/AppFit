@@ -184,7 +184,7 @@ function snapshot(d, now) {
   const checks = d.checks?.[date] || {}
   const daily = d.daily || {}
   const log = daily[date]
-  const meals = [...(p.meals || [])].sort((a, b) => toMin(a.time) - toMin(b.time))
+  const meals = (p.meals || []).filter((m) => String(m.items || '').trim()).sort((a, b) => toMin(a.time) - toMin(b.time))
   const mealsDone = meals.filter((m) => checks[m.id]).length
   const mealsMissed = meals.filter((m) => !checks[m.id] && toMin(m.time) + 30 <= now.min)
   const tasks = (p.tasks || []).filter((x) => x.title?.trim())
@@ -230,7 +230,7 @@ export function slotsFor(d, now) {
   const sleep = Math.min(toMin(p.sleep || '23:00') || 1380, 23 * 60 + 40)
   const ci = toMin(p.checkinTime || '21:30')
   const ev = [{ m: wake + 5, kind: 'wake' }]
-  for (const m of p.meals || []) ev.push({ m: toMin(m.time), kind: 'meal', ref: m.id })
+  for (const m of p.meals || []) if (String(m.items || '').trim()) ev.push({ m: toMin(m.time), kind: 'meal', ref: m.id })
   for (const x of p.tasks || []) if (x.title?.trim()) ev.push({ m: toMin(x.time), kind: 'task', ref: x.id })
   for (const c of d.custom || []) if (c.on && String(c.text || '').trim()) ev.push({ m: toMin(c.time), kind: 'custom', ref: c.id })
   const hasPlan = (p.workouts || []).some((w) => String(w.items || '').trim())

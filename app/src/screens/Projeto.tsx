@@ -112,7 +112,7 @@ export function Projeto({ s, initialSec }: { s: AppState; initialSec?: Sec }) {
   const [sec, setSecRaw] = useState<Sec | null>(() => initialSec ?? (started ? null : (SECS.find((x) => todo.count[x.id] > 0)?.id ?? 'expectativa')))
   const setSec = (x: Sec | null) => {
     setSecRaw(x)
-    window.scrollTo(0, 0)
+    document.querySelector('.app')?.scrollTo(0, 0)
   }
   const next = todo.steps[0]
   const [funnel, setFunnel] = useState(false)
@@ -174,7 +174,7 @@ export function Projeto({ s, initialSec }: { s: AppState; initialSec?: Sec }) {
             setFunnel(false)
             setSecRaw(null)
             setParty(true)
-            window.scrollTo(0, 0)
+            document.querySelector('.app')?.scrollTo(0, 0)
           }}
         />
       )}

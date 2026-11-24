@@ -2,7 +2,7 @@
 // Mostra uma prévia real (com os dados dela), o que ela ganha e o passo a passo do aparelho.
 import { t } from '../i18n'
 import { isStandalone, notifyStatus, sendTest } from '../notify'
-import { type AppState, streak, today } from '../store'
+import { type AppState, planMeals, streak, today } from '../store'
 import { Icon } from './Icon'
 import { InstallStep, NotifyStep } from './InstallGuide'
 import { toast } from './Toast'
@@ -12,7 +12,7 @@ export function NotifyActivate({ s, onGranted }: { s: AppState; onGranted: () =>
   const now = new Date()
   const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
   const checks = s.checks[today()] || {}
-  const meals = p.meals.slice().sort((a, b) => a.time.localeCompare(b.time))
+  const meals = planMeals(p).sort((a, b) => a.time.localeCompare(b.time))
   const next = meals.find((m) => m.time > hhmm && !checks[m.id])
   const st = streak(s)
   // prévia com os dados da própria pessoa
