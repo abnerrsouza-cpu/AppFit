@@ -96,8 +96,6 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openC
   const weightLeft = Math.max(0, +(weight - p.weightGoal).toFixed(1))
   const overall = (Math.min(1, prog.train) + Math.min(1, prog.diet) + Math.min(1, prog.cardio)) / 3
   const lv = levelOf(totalXP(s))
-  const ms = missions(s)
-  const msDone = ms.filter((m) => m.done).length
   const nextMedal = nextStreakMedal(s)
   const atRisk = !log && hhmm >= '19:00'
 
@@ -116,6 +114,9 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openC
   const current = due.length ? due[due.length - 1] : pending[0]
   const late = current && current.time <= hhmm
   const doneCount = tasks.filter((x) => x.done).length
+  const dayTicks = tasks.filter((x) => x.kind !== 'checkin')
+  const ms = missions(s, { done: dayTicks.filter((x) => x.done).length, total: dayTicks.length })
+  const msDone = ms.filter((m) => m.done).length
 
   const toggle = (id: string) =>
     setState((x) => ({ ...x, checks: { ...x.checks, [key]: { ...(x.checks[key] || {}), [id]: !x.checks[key]?.[id] } } }))
@@ -212,6 +213,77 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openC
               <Icon name="chevR" />
             </button>
           )}
+          <WaterCard s={s} onOpen={() => go('agua')} />
+
+          <section className="card block">
+            <div className="block-h">
+              <h2 className="ttl">
+                {t('Você hoje x Referência')}
+                <Info text={t('À esquerda, sua foto mais recente. À direita, o shape que você quer. Toque para ver sua evolução.')} />
+              </h2>
+            </div>
+            <button type="button" className="vs" onClick={() => go(refPhoto ? 'evolucao' : 'projeto')}>
+              <span className="vs-photo">
+                {myPhoto ? <img src={myPhoto} alt="" /> : <Icon name="camera" size={26} />}
+                <small>{t('Você hoje')}</small>
+              </span>
+              <span className="vs-mid">
+                <b>{weightLeft > 0 ? `${String(weightLeft).replace('.', ',')} kg` : t('Meta')}</b>
+                <small>{weightLeft > 0 ? t('para a meta') : t('batida')}</small>
+                <Icon name="arrow" size={18} />
+              </span>
+              <span className="vs-photo ref">
+                {refPhoto ? <img src={refPhoto} alt="" /> : <Icon name="target" size={26} />}
+                <small>{t('Referência')}</small>
+              </span>
+            </button>
+          </section>
+
+          <div className="grid2">
+            <div className="card tile">
+              <span className="tile-h">
+                {t('Treinos')} <Icon name="dumbbell" size={18} />
+              </span>
+              <b className="tile-n">
+                {ws.trained}
+                <small>/{ws.planned}</small>
+              </b>
+              <span className="tile-s">{t('nesta semana')}</span>
+            </div>
+            <div className="card tile">
+              <span className="tile-h">
+                {t('Cardio')} <Icon name="run" size={18} />
+              </span>
+              <b className="tile-n">
+                {ws.cardio}
+                <small> min</small>
+              </b>
+              <div className="meter">
+                <span style={{ width: `${Math.min(100, (ws.cardio / p.cardioGoalMin) * 100)}%` }} />
+              </div>
+            </div>
+            <div className="card tile">
+              <span className="tile-h">
+                {t('Dieta')} <Icon name="food" size={18} />
+              </span>
+              <b className={`tile-n ${ws.diet >= 8 ? 'ok' : ws.diet >= 6 ? 'warn' : ws.checkins ? 'bad' : ''}`}>
+                {ws.checkins ? ws.diet.toFixed(1) : '—'}
+                <small>/10</small>
+              </b>
+              <span className="tile-s">{t('média da semana')}</span>
+            </div>
+            <div className="card tile">
+              <span className="tile-h">
+                {t('Peso')} <Icon name="scale" size={18} />
+              </span>
+              <b className="tile-n">
+                {weight.toFixed(1)}
+                <small> kg</small>
+              </b>
+              <span className="tile-s">{t('meta {n} kg', { n: p.weightGoal })}</span>
+            </div>
+          </div>
+
           <section className="prog-card">
             <div className="prog-head">
               <span>{t('Progresso de hoje')}</span>
@@ -308,11 +380,9 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openC
             </div>
           )}
 
-          <Setup s={s} go={go} goMenu={goMenu} />
 
 
           <PlanCard s={s} go={go} />
-          <WaterCard s={s} onOpen={() => go('agua')} />
           <RankCard online={!!user} go={go} />
 
           <button type="button" className="level-card" onClick={() => go('conquistas')}>
@@ -332,75 +402,6 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openC
             </span>
             <Icon name="chevR" />
           </button>
-
-          <section className="card block">
-            <div className="block-h">
-              <h2 className="ttl">
-                {t('Você hoje x Referência')}
-                <Info text={t('À esquerda, sua foto mais recente. À direita, o shape que você quer. Toque para ver sua evolução.')} />
-              </h2>
-            </div>
-            <button type="button" className="vs" onClick={() => go(refPhoto ? 'evolucao' : 'projeto')}>
-              <span className="vs-photo">
-                {myPhoto ? <img src={myPhoto} alt="" /> : <Icon name="camera" size={26} />}
-                <small>{t('Você hoje')}</small>
-              </span>
-              <span className="vs-mid">
-                <b>{weightLeft > 0 ? `${String(weightLeft).replace('.', ',')} kg` : t('Meta')}</b>
-                <small>{weightLeft > 0 ? t('para a meta') : t('batida')}</small>
-                <Icon name="arrow" size={18} />
-              </span>
-              <span className="vs-photo ref">
-                {refPhoto ? <img src={refPhoto} alt="" /> : <Icon name="target" size={26} />}
-                <small>{t('Referência')}</small>
-              </span>
-            </button>
-          </section>
-
-          <div className="grid2">
-            <div className="card tile">
-              <span className="tile-h">
-                {t('Treinos')} <Icon name="dumbbell" size={18} />
-              </span>
-              <b className="tile-n">
-                {ws.trained}
-                <small>/{ws.planned}</small>
-              </b>
-              <span className="tile-s">{t('nesta semana')}</span>
-            </div>
-            <div className="card tile">
-              <span className="tile-h">
-                {t('Cardio')} <Icon name="run" size={18} />
-              </span>
-              <b className="tile-n">
-                {ws.cardio}
-                <small> min</small>
-              </b>
-              <div className="meter">
-                <span style={{ width: `${Math.min(100, (ws.cardio / p.cardioGoalMin) * 100)}%` }} />
-              </div>
-            </div>
-            <div className="card tile">
-              <span className="tile-h">
-                {t('Dieta')} <Icon name="food" size={18} />
-              </span>
-              <b className={`tile-n ${ws.diet >= 8 ? 'ok' : ws.diet >= 6 ? 'warn' : ws.checkins ? 'bad' : ''}`}>
-                {ws.checkins ? ws.diet.toFixed(1) : '—'}
-                <small>/10</small>
-              </b>
-              <span className="tile-s">{t('média da semana')}</span>
-            </div>
-            <div className="card tile">
-              <span className="tile-h">
-                {t('Peso')} <Icon name="scale" size={18} />
-              </span>
-              <b className="tile-n">
-                {weight.toFixed(1)}
-                <small> kg</small>
-              </b>
-              <span className="tile-s">{t('meta {n} kg', { n: p.weightGoal })}</span>
-            </div>
-          </div>
 
       <section className="streak-card">
         <div className="streak-main">
@@ -429,6 +430,8 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openC
           })}
         </div>
       </section>
+
+          <Setup s={s} go={go} goMenu={goMenu} />
         </>
       )}
 
@@ -601,7 +604,7 @@ function Setup({ s, go, goMenu }: { s: AppState; go: (tab: Tab) => void; goMenu:
   const done = items.filter((i) => i.done).length
   if (done === items.length) return null
   return (
-    <section className="setup">
+    <section className="setup is-muted">
       <div className="setup-h">
         <h2 className="ttl">
           {t('Complete para liberar tudo')}

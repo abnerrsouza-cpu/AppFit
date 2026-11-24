@@ -18,4 +18,6 @@ D = {
  "{n} de 7 dias na meta": ("{n} of 7 days on target", "{n} de 7 días en la meta"),
  "Água": ("Water", "Agua"),
  "Últimos 7 dias": ("Last 7 days", "Últimos 7 días"),
+ "Marque 1 tarefa do seu dia": ("Check off 1 task today", "Marca 1 tarea de tu día"),
+ "Marque {n} tarefas do seu dia": ("Check off {n} tasks today", "Marca {n} tareas de tu día"),
 }

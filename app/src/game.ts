@@ -115,11 +115,13 @@ export interface Mission {
   action: 'dia' | 'checkin' | 'semanal' | 'referencia' | 'dieta' | 'carta' | 'integracoes' | 'promessas'
 }
 
-export function missions(s: AppState): Mission[] {
+/** day: tarefas que aparecem em "Seu dia" (feitas / total, sem contar a prestação de contas). */
+export function missions(s: AppState, day?: { done: number; total: number }): Mission[] {
   const key = today()
-  const ticks = Object.values(s.checks[key] || {}).filter(Boolean).length
+  const ticks = day ? day.done : Object.values(s.checks[key] || {}).filter(Boolean).length
+  const goal = Math.max(1, Math.min(3, day ? day.total : 3))
   const list: Mission[] = [
-    { id: 'tasks', icon: 'check', title: t('Marque 3 tarefas do seu dia'), xp: 30, done: ticks >= 3, progress: [Math.min(ticks, 3), 3], action: 'dia' },
+    { id: 'tasks', icon: 'check', title: goal === 3 ? t('Marque 3 tarefas do seu dia') : goal === 1 ? t('Marque 1 tarefa do seu dia') : t('Marque {n} tarefas do seu dia', { n: goal }), xp: 30, done: ticks >= goal, progress: [Math.min(ticks, goal), goal], action: 'dia' },
     { id: 'checkin', icon: 'list', title: t('Preste contas hoje à noite'), xp: XP.checkin, done: !!s.daily[key], action: 'checkin' },
   ]
   const wk = ymd(weekStartOf(new Date()))

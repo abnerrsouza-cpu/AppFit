@@ -8872,7 +8872,7 @@ html:has(.app) #root {
   transform: scale(0.94);
 }
 .ag-c small {
-  color: var(--muted, #888);
+  color: var(--fg-3);
   font-weight: 700;
 }
 .ag-custom {
@@ -8937,7 +8937,7 @@ html:has(.app) #root {
   flex-direction: column;
 }
 .ag-log small {
-  color: var(--muted, #888);
+  color: var(--fg-3);
 }
 .ag-ml {
   font-variant-numeric: tabular-nums;
@@ -8949,7 +8949,7 @@ html:has(.app) #root {
   display: grid;
   place-items: center;
   background: transparent;
-  color: var(--muted, #888);
+  color: var(--fg-3);
   border: 1px solid var(--line, rgba(127, 127, 127, 0.25));
 }
 .ag-week {
@@ -8981,7 +8981,7 @@ html:has(.app) #root {
   min-height: 14px;
   font-size: 0.66rem;
   font-weight: 700;
-  color: var(--muted, #888);
+  color: var(--fg-3);
   white-space: nowrap;
 }
 .ag-bar {
@@ -9007,10 +9007,60 @@ html:has(.app) #root {
   position: absolute;
   bottom: -20px;
   font-size: 0.7rem;
-  color: var(--muted, #888);
+  color: var(--fg-3);
   text-transform: capitalize;
 }
 .ag-day.is-today small {
   color: inherit;
   font-weight: 800;
+}
+
+/* pendências de configuração no fim do painel, em cinza (não atrapalham o uso) */
+.setup.is-muted {
+  margin-top: 6px;
+  opacity: 0.85;
+}
+.setup.is-muted .setup-h h2 {
+  font-size: 0.95rem;
+  color: var(--fg-3);
+}
+.setup.is-muted .locked-ic {
+  background: color-mix(in srgb, var(--fg-3) 14%, transparent);
+  color: var(--fg-3);
+}
+.setup.is-muted .locked-ic i {
+  background: var(--fg-3);
+}
+.setup.is-muted .locked-txt b {
+  font-weight: 600;
+  color: var(--fg-2);
+}
+.setup.is-muted svg[class*='chev'],
+.setup.is-muted .locked > svg:last-child {
+  color: var(--fg-3);
+}
+.setup.is-muted .locked-bar {
+  background: color-mix(in srgb, var(--fg-3) 15%, transparent);
+}
+.setup.is-muted .locked-bar span {
+  background: var(--fg-3);
+}
+.setup.is-muted .locked-prog small {
+  color: var(--fg-3);
+}
+.setup.is-muted .alert-card {
+  padding: 12px 14px;
+  background: var(--surface-2);
+  box-shadow: none;
+  border-color: transparent;
+}
+.setup.is-muted .alert-card > svg {
+  color: var(--fg-3);
+}
+.setup.is-muted .locked-txt b {
+  font-size: 0.88rem;
+}
+.setup.is-muted .locked-txt small {
+  font-size: 0.8rem;
+  color: var(--fg-3);
 }
