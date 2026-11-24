@@ -1551,6 +1551,7 @@ export const DICT: Record<string, [string, string]> = {
   "{a} de {b} pontos para o próximo nível": ["{a} of {b} points to the next level", "{a} de {b} puntos para el siguiente nivel"],
   "{a} de {b} prontos": ["{a} of {b} done", "{a} de {b} listos"],
   "{a} de {b} refeições": ["{a} of {b} meals", "{a} de {b} comidas"],
+  "{a} de {b} treinos feitos": ["{a} of {b} workouts done", "{a} de {b} entrenos hechos"],
   "{a} pontos": ["{a} points", "{a} puntos"],
   "{a} pontos · nível máximo": ["{a} points · max level", "{a} puntos · nivel máximo"],
   "{a} promessas cumpridas": ["{a} promises kept", "{a} promesas cumplidas"],

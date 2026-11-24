@@ -207,7 +207,11 @@ export function projetoStats(s: AppState) {
   const logs = days.map((d) => s.daily[d]).filter(Boolean)
 
   const constancy = days.length ? logs.length / days.length : null
-  const planned = days.filter((d) => workoutFor(p, parseYmd(d)))
+  // treinos: dias planejados já fechados + hoje se já marcou treino (sem esperar a prestação de contas)
+  // + dias fora do plano em que treinou mesmo assim
+  const tDays = [...days]
+  if (!tDays.includes(key) && trainedOn(s, key) > 0) tDays.push(key)
+  const planned = tDays.filter((d) => workoutFor(p, parseYmd(d)) || trainedOn(s, d) > 0)
   const trainScore = planned.length
     ? planned.reduce((acc, d) => {
         return acc + trainedOn(s, d)
@@ -228,7 +232,8 @@ export function projetoStats(s: AppState) {
   const weightPct = way ? Math.max(0, Math.min(1, (p.weightStart - cur) / way)) : null
   const timePct = elapsed / total
 
-  return { start, total, elapsed, left, timePct, constancy, trainScore, diet, promises, kept, broken, efficacy, weightPct, cur, logs: logs.length, closed: days.length }
+  const trainsDone = planned.reduce((a, d) => a + (trainedOn(s, d) >= 1 ? 1 : 0), 0)
+  return { trainsDone, trainsPlanned: planned.length, start, total, elapsed, left, timePct, constancy, trainScore, diet, promises, kept, broken, efficacy, weightPct, cur, logs: logs.length, closed: days.length }
 }
 
 export function efficacyLabel(v: number) {

@@ -286,7 +286,7 @@ function Andamento({ s, onSec }: { s: AppState; onSec: (x: Sec) => void }) {
   const tone = eff === null ? '' : eff >= 0.8 ? 'good' : eff >= 0.6 ? 'ok' : eff >= 0.4 ? 'warn' : 'bad'
   const rows: { l: string; v: number | null; d: string; i: string }[] = [
     { l: t('Constância'), v: st.constancy, d: t('{a} de {b} noites com prestação de contas', { a: st.logs, b: st.closed }), i: 'list' },
-    { l: t('Treinos'), v: st.trainScore, d: t('dos treinos planejados cumpridos'), i: 'dumbbell' },
+    { l: t('Treinos'), v: st.trainScore, d: st.trainsPlanned ? t('{a} de {b} treinos feitos', { a: st.trainsDone, b: st.trainsPlanned }) : t('dos treinos planejados cumpridos'), i: 'dumbbell' },
     { l: t('Dieta'), v: st.diet, d: t('nota média que você deu para a dieta'), i: 'food' },
     { l: t('Promessas'), v: st.promises, d: t('{a} cumpridas, {b} quebradas', { a: st.kept, b: st.broken }), i: 'star' },
   ]
