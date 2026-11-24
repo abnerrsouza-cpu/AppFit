@@ -216,6 +216,44 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openC
               <Icon name="chevR" />
             </button>
           )}
+          <section className="prog-card">
+            <div className="prog-head">
+              <span>{t('Progresso de hoje')}</span>
+              <Info light text={t('Quanto do seu dia você já cumpriu: treino, refeições do plano e cardio. Fecha em 100% quando tudo estiver feito.')} />
+            </div>
+            <div className="prog-body">
+              <div className="prog-ring">
+                <Rings size={128} values={[{ v: overall, color: 'var(--accent)' }]} />
+                <b>
+                  {Math.round(overall * 100)}
+                  <small>%</small>
+                </b>
+              </div>
+              <ul className="prog-list">
+                <li>
+                  <i className="dot" style={{ background: 'var(--ring-1)' }} />
+                  <span>{t('Treino')}</span>
+                  <b>{prog.rest ? (s.profile.workouts.some((w) => w.items.trim()) ? t('Descanso') : t('Sem ficha')) : prog.train >= 1 ? t('Feito') : t('Falta')}</b>
+                </li>
+                <li>
+                  <i className="dot" style={{ background: 'var(--ring-2)' }} />
+                  <span>{t('Dieta')}</span>
+                  <b>{Math.round(prog.diet * 100)}%</b>
+                </li>
+                <li>
+                  <i className="dot" style={{ background: 'var(--ring-3)' }} />
+                  <span>{t('Cardio')}</span>
+                  <b>{prog.cardio >= 1 ? t('Feito') : t('Falta')}</b>
+                </li>
+                <li>
+                  <i className="dot" style={{ background: '#ffb020' }} />
+                  <span>{t('Sequência')}</span>
+                  <b>{st === 1 ? t('1 dia') : t('{n} dias', { n: st })}</b>
+                </li>
+              </ul>
+            </div>
+          </section>
+
           <WaterCard s={s} onOpen={() => go('agua')} />
 
           <section className="card block">
@@ -287,43 +325,6 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openC
             </button>
           </div>
 
-          <section className="prog-card">
-            <div className="prog-head">
-              <span>{t('Progresso de hoje')}</span>
-              <Info light text={t('Quanto do seu dia você já cumpriu: treino, refeições do plano e cardio. Fecha em 100% quando tudo estiver feito.')} />
-            </div>
-            <div className="prog-body">
-              <div className="prog-ring">
-                <Rings size={128} values={[{ v: overall, color: 'var(--accent)' }]} />
-                <b>
-                  {Math.round(overall * 100)}
-                  <small>%</small>
-                </b>
-              </div>
-              <ul className="prog-list">
-                <li>
-                  <i className="dot" style={{ background: 'var(--ring-1)' }} />
-                  <span>{t('Treino')}</span>
-                  <b>{prog.rest ? (s.profile.workouts.some((w) => w.items.trim()) ? t('Descanso') : t('Sem ficha')) : prog.train >= 1 ? t('Feito') : t('Falta')}</b>
-                </li>
-                <li>
-                  <i className="dot" style={{ background: 'var(--ring-2)' }} />
-                  <span>{t('Dieta')}</span>
-                  <b>{Math.round(prog.diet * 100)}%</b>
-                </li>
-                <li>
-                  <i className="dot" style={{ background: 'var(--ring-3)' }} />
-                  <span>{t('Cardio')}</span>
-                  <b>{prog.cardio >= 1 ? t('Feito') : t('Falta')}</b>
-                </li>
-                <li>
-                  <i className="dot" style={{ background: '#ffb020' }} />
-                  <span>{t('Sequência')}</span>
-                  <b>{st === 1 ? t('1 dia') : t('{n} dias', { n: st })}</b>
-                </li>
-              </ul>
-            </div>
-          </section>
 
           <section className="card missions">
             <div className="block-h">
