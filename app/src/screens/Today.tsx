@@ -3,6 +3,7 @@ import { Info, WithInfo } from '../components/Info'
 import { Locked } from '../components/Locked'
 import { notifyStatus } from '../notify'
 import { trainLocked } from '../focus'
+import { WaterCard } from '../components/WaterCard'
 import { type RankRow, type User, api } from '../api'
 import { useLatestPhoto, useRefPhoto } from '../usePhotos'
 import { type Mission, levelOf, missions, nextStreakMedal, totalXP } from '../game'
@@ -173,6 +174,7 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openC
             </button>
           </section>
           <PlanCard s={s} go={go} />
+          <WaterCard s={s} />
           <p className="ttl hint">
             <Icon name="lock" size={14} /> {t('Libera depois do treino')}
           </p>
@@ -310,6 +312,7 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openC
 
 
           <PlanCard s={s} go={go} />
+          <WaterCard s={s} />
           <RankCard online={!!user} go={go} />
 
           <button type="button" className="level-card" onClick={() => go('conquistas')}>

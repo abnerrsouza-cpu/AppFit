@@ -96,6 +96,7 @@ export interface AppState {
   startPhotoId?: string // foto do antes (início do projeto)
   photosAsked?: boolean // já viu a tela "Suas duas fotos"
   introMeId?: string
+  water?: Record<string, number> // ml de água por dia
   trainAt?: Record<string, string> // horário que a pessoa disse que vai treinar, por dia
   coachAt?: number // última vez que a conversa abriu sozinha // foto escolhida para o "Esse é você" da abertura
   lastLevel?: number

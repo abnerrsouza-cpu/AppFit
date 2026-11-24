@@ -33,7 +33,7 @@ export function Checkin({ s, onClose }: { s: AppState; onClose: () => void }) {
       mealsOk: Object.fromEntries(planMeals(p).map((m) => [m.id, checks[m.id] ?? true])),
       ate: '',
       focus: 8,
-      water: 2,
+      water: s.water?.[key] ? Math.round(s.water[key] / 500) / 2 : 2,
       sleepH: 7,
       dayNote: '',
       submittedAt: '',

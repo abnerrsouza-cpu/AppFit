@@ -8647,3 +8647,87 @@ html:has(.app) #root {
 .bnav {
   bottom: calc(8px + env(safe-area-inset-bottom, 0px) * 0.6);
 }
+
+/* ---------- água ---------- */
+.water {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px;
+  border-radius: 26px;
+  background: linear-gradient(150deg, #1e4b6e, #12324d);
+  color: #fff;
+  border: 0;
+}
+.water.full {
+  background: linear-gradient(150deg, #0f766e, #115e59);
+}
+.water-bg {
+  position: absolute;
+  right: -18px;
+  top: 6px;
+  color: rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+}
+.water-k {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #b9d6ec;
+}
+.water-n b {
+  font-size: 2.6rem;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+.water-n span {
+  font-size: 1.15rem;
+  color: #d4e6f3;
+  font-weight: 600;
+}
+.water-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  overflow: hidden;
+}
+.water-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #67d4ff;
+  transition: width 0.4s ease;
+}
+.water.full .water-bar span {
+  background: #5eead4;
+}
+.water-sub {
+  color: #d4e6f3;
+}
+.water-btns {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.water-btns button {
+  padding: 13px 4px;
+  border-radius: 16px;
+  background: rgba(5, 15, 30, 0.55);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.98rem;
+}
+.water-btns button:active {
+  transform: scale(0.96);
+}
+.water-undo {
+  position: relative;
+  align-self: flex-start;
+  color: #b9d6ec;
+  font-weight: 700;
+  font-size: 0.82rem;
+}
