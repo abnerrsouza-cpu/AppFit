@@ -24,6 +24,7 @@ import { Today } from './screens/Today'
 import { Ranking } from './screens/Ranking'
 import { Plano } from './screens/Plano'
 import { Agua } from './screens/Agua'
+import { Detalhe, type DetailKind } from './screens/Detalhe'
 import { Toaster, toast } from './components/Toast'
 import { applyImport, captureImport, isDemoHost } from './migrate'
 import { MoveToApp } from './components/MoveToApp'
@@ -49,6 +50,7 @@ export default function App() {
   const synced = useRef(false)
   const [intro, setIntro] = useState(true)
   const [openWeekly, setOpenWeekly] = useState(false)
+  const [detail, setDetail] = useState<DetailKind>('treinos')
   const [pjSec, setPjSec] = useState<PjSec | undefined>(undefined)
   const [howAgain, setHowAgain] = useState(false)
   const [rankNotice, setRankNotice] = useState<string | null>(null)
@@ -384,7 +386,7 @@ export default function App() {
           <Icon name="chevR" size={18} />
         </button>
       )}
-      {tab === 'inicio' && <Today s={s} user={user} onMission={onMission} go={setTab} goMenu={goMenu} openCheckin={() => setCheckin(true)} owes={owes} openCoach={() => setCoach(true)} onLocked={() => setGate(true)} />}
+      {tab === 'inicio' && <Today s={s} user={user} onMission={onMission} go={setTab} goMenu={goMenu} openCheckin={() => setCheckin(true)} owes={owes} openCoach={() => setCoach(true)} onLocked={() => setGate(true)} openDetail={(k) => { setDetail(k); setTab('detalhe') }} />}
       {tab === 'evolucao' && <Evolution key={openWeekly ? 'w' : 'n'} s={s} openWeekly={openWeekly} openCheckin={() => setCheckin(true)} />}
       {tab === 'cobrancas' && <Alerts s={s} onBack={() => setTab('inicio')} />}
       {tab === 'projeto' && (
@@ -403,6 +405,21 @@ export default function App() {
       )}
       {tab === 'conquistas' && <Conquistas s={s} onBack={() => setTab('inicio')} />}
       {tab === 'plano' && <Plano s={s} goMenu={goMenu} />}
+      {tab === 'detalhe' && (
+        <Detalhe
+          s={s}
+          kind={detail}
+          onBack={() => setTab('inicio')}
+          go={(to) => {
+            if (to === 'checkin') return setCheckin(true)
+            if (to === 'semanal') {
+              setOpenWeekly(true)
+              return setTab('evolucao')
+            }
+            setTab(to === 'plano' || to === 'dieta' ? 'plano' : 'evolucao')
+          }}
+        />
+      )}
       {tab === 'agua' && <Agua s={s} onBack={() => setTab('inicio')} />}
       {tab === 'ranking' && <Ranking online={!!user} notice={rankNotice} />}
       {tab === 'menu' && <Menu s={s} user={user} onUser={setUser} onHow={() => setHowAgain(true)} onConquistas={() => setTab('conquistas')} onRanking={() => setTab('ranking')} onPlano={() => setTab('plano')} onAgua={() => setTab('agua')} onAdmin={isAdmin ? () => setTab('admin') : undefined} adminPending={pendingCount} onPreviewIntro={() => setIntro(true)} onLogout={user ? logout : undefined} initialSec={menuSec} onOpened={() => setMenuSec(null)} />}

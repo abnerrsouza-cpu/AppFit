@@ -4,6 +4,7 @@ import { Locked } from '../components/Locked'
 import { notifyStatus } from '../notify'
 import { trainLocked } from '../focus'
 import { WaterCard } from '../components/WaterCard'
+import type { DetailKind } from './Detalhe'
 import { type RankRow, type User, api } from '../api'
 import { useLatestPhoto, useRefPhoto } from '../usePhotos'
 import { type Mission, levelOf, missions, nextStreakMedal, totalXP } from '../game'
@@ -52,7 +53,7 @@ export function todayProgress(s: AppState) {
   return { train: !wk ? 1 : checks.train ? 1 : 0, diet: dietSimple(p) ? (checks.diet ? 1 : 0) : planMeals(p).filter((m) => checks[m.id]).length / meals, cardio: checks.cardio ? 1 : 0, rest: !wk }
 }
 
-export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openCoach, onLocked }: { s: AppState; user?: User | null; go: (tab: Tab) => void; goMenu: (sec: string) => void; openCheckin: () => void; owes: boolean; onMission: (a: Mission['action']) => void; openCoach?: () => void; onLocked?: () => void }) {
+export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openCoach, onLocked, openDetail }: { s: AppState; openDetail?: (k: DetailKind) => void; user?: User | null; go: (tab: Tab) => void; goMenu: (sec: string) => void; openCheckin: () => void; owes: boolean; onMission: (a: Mission['action']) => void; openCoach?: () => void; onLocked?: () => void }) {
   const [view, setView] = useState<'geral' | 'dia'>(() => {
     try {
       if (sessionStorage.getItem('sd:view') === 'dia') {
@@ -242,7 +243,7 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openC
           </section>
 
           <div className="grid2">
-            <div className="card tile">
+            <button type="button" className="card tile tile-btn" onClick={() => openDetail?.('treinos')}>
               <span className="tile-h">
                 {t('Treinos')} <Icon name="dumbbell" size={18} />
               </span>
@@ -251,8 +252,8 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openC
                 {ws.planned > 0 && <small>/{ws.planned}</small>}
               </b>
               <span className="tile-s">{t('nesta semana')}</span>
-            </div>
-            <div className="card tile">
+            </button>
+            <button type="button" className="card tile tile-btn" onClick={() => openDetail?.('cardio')}>
               <span className="tile-h">
                 {t('Cardio')} <Icon name="run" size={18} />
               </span>
@@ -263,8 +264,8 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openC
               <div className="meter">
                 <span style={{ width: `${Math.min(100, (ws.cardio / p.cardioGoalMin) * 100)}%` }} />
               </div>
-            </div>
-            <div className="card tile">
+            </button>
+            <button type="button" className="card tile tile-btn" onClick={() => openDetail?.('dieta')}>
               <span className="tile-h">
                 {t('Dieta')} <Icon name="food" size={18} />
               </span>
@@ -273,8 +274,8 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openC
                 <small>/10</small>
               </b>
               <span className="tile-s">{t('média da semana')}</span>
-            </div>
-            <div className="card tile">
+            </button>
+            <button type="button" className="card tile tile-btn" onClick={() => openDetail?.('peso')}>
               <span className="tile-h">
                 {t('Peso')} <Icon name="scale" size={18} />
               </span>
@@ -283,7 +284,7 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openC
                 <small> kg</small>
               </b>
               <span className="tile-s">{t('meta {n} kg', { n: p.weightGoal })}</span>
-            </div>
+            </button>
           </div>
 
           <section className="prog-card">

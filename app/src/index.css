@@ -10550,3 +10550,236 @@ html:has(.app) #root {
   flex: none;
   margin-top: 2px;
 }
+
+/* ---------- quadros clicáveis e página de detalhe ---------- */
+.tile-btn {
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: transform 0.12s;
+}
+.tile-btn:active {
+  transform: scale(0.97);
+}
+.dt-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.dt-ic {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+}
+.dt-ic.treinos {
+  background: var(--pastel-blue, #dcebff);
+}
+.dt-ic.cardio {
+  background: var(--pastel-mint, #dcf3e4);
+}
+.dt-ic.dieta {
+  background: var(--pastel-butter, #fbf0c8);
+}
+.dt-ic.peso {
+  background: var(--pastel-peach, #fde2d6);
+}
+.dt-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px;
+  border-radius: 24px;
+  margin-bottom: 12px;
+}
+.dt-big {
+  font-size: 3rem;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+.dt-big small {
+  font-size: 1.2rem;
+  color: var(--fg-3);
+  letter-spacing: 0;
+}
+.dt-big.good {
+  color: #15803d;
+}
+.dt-big.warn {
+  color: #b45309;
+}
+.dt-big.bad {
+  color: var(--bad, #dc2626);
+}
+.dt-week {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+.dw {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.dw i {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  color: var(--fg-3);
+}
+.dw.dw-on i {
+  background: #16a34a;
+  color: #fff;
+}
+.dw.dw-miss i {
+  background: color-mix(in srgb, var(--bad, #dc2626) 14%, transparent);
+  color: var(--bad, #dc2626);
+}
+.dw.dw-todo i {
+  border: 2px dashed var(--accent);
+}
+.dw.dw-now i {
+  box-shadow: 0 0 0 2px var(--fg);
+}
+.dw small {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--fg-3);
+}
+.dt .pl-big-check {
+  margin-bottom: 12px;
+}
+.dt .block {
+  margin-bottom: 12px;
+}
+.dt-bars {
+  position: relative;
+  display: flex;
+  gap: 6px;
+  height: 150px;
+  margin-top: 12px;
+}
+.dt-goal {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 2px dashed color-mix(in srgb, #16a34a 55%, transparent);
+  pointer-events: none;
+}
+.dt-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.dt-v {
+  min-height: 14px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--fg-2);
+}
+.dt-bar {
+  flex: 1;
+  width: 100%;
+  max-width: 30px;
+  display: flex;
+  align-items: flex-end;
+  border-radius: 9px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.dt-bar span {
+  width: 100%;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--accent) 55%, transparent);
+}
+.dt-bar span.hit {
+  background: #16a34a;
+}
+.dt-col small {
+  min-height: 18px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--fg-3);
+  white-space: nowrap;
+}
+.dt-col.now small {
+  color: var(--fg);
+  font-weight: 900;
+}
+.dt-tip {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 0;
+  color: var(--fg-2);
+  line-height: 1.4;
+}
+.dt-tip svg {
+  flex: none;
+  margin-top: 2px;
+  color: #f59e0b;
+}
+.dt-trio {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  text-align: center;
+}
+.dt-trio span {
+  display: flex;
+  flex-direction: column;
+}
+.dt-trio small {
+  color: var(--fg-3);
+}
+.dt-trio b {
+  font-size: 1.3rem;
+}
+.dt-trio .cur b {
+  font-size: 1.6rem;
+  color: var(--accent);
+}
+.dt-line {
+  width: 100%;
+  height: auto;
+  margin: 10px 0;
+}
+.dt-line polyline {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.dt-line circle {
+  fill: var(--surface, #fff);
+  stroke: var(--accent);
+  stroke-width: 2.5;
+}
+.dt-line circle.last {
+  fill: var(--accent);
+}
+.dt-line .goal {
+  stroke: #16a34a;
+  stroke-width: 1.5;
+  stroke-dasharray: 5 5;
+}
+.dt-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.dt-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}

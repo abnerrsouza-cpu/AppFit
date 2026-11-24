@@ -1,7 +1,7 @@
 import { t } from '../i18n'
 import { Icon } from './Icon'
 
-export type Tab = 'inicio' | 'evolucao' | 'projeto' | 'cobrancas' | 'menu' | 'admin' | 'conquistas' | 'ranking' | 'plano' | 'agua'
+export type Tab = 'inicio' | 'evolucao' | 'projeto' | 'cobrancas' | 'menu' | 'admin' | 'conquistas' | 'ranking' | 'plano' | 'agua' | 'detalhe'
 
 const ITEMS: { id: Tab; label: string; icon: string }[] = [
   { id: 'inicio', label: 'Hoje', icon: 'sun' },
