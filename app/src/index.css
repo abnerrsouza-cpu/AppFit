@@ -10783,3 +10783,6 @@ html:has(.app) #root {
   padding: 10px 0;
   border-top: 1px solid var(--line);
 }
+.pj-time {
+  margin-bottom: 12px;
+}

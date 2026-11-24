@@ -160,6 +160,8 @@ export function Projeto({ s, initialSec, autoFunnel, onFunnelDone, onAgua }: { s
         </h1>
       </header>
 
+      {started && <TimeCard s={s} />}
+
       <section className="pj-hero" style={visionUrl ? { backgroundImage: `linear-gradient(180deg, rgba(5,15,40,.15), rgba(5,15,40,.85)), url(${visionUrl})` } : undefined}>
         <span className="pj-count">
           <b>{left}</b> {t('dias')}
@@ -292,6 +294,26 @@ const F_TIP: Record<Factor, string> = {
 }
 const wk = (n: number) => (n === 1 ? t('1 semana') : t('{n} semanas', { n: String(n).replace('.', ',') }))
 const dmy = (d: Date) => d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: d.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined }).replace('.', '')
+
+/** Tempo do projetinho: dia X de Y, quanto falta. Fica no topo. */
+function TimeCard({ s }: { s: AppState }) {
+  const st = projetoStats(s)
+  return (
+    <section className="card pj-time">
+        <div className="pj-time-h">
+          <span>
+            <small>{t('Dia {a} de {b}', { a: st.elapsed, b: st.total })}</small>
+            <b>{st.left === 1 ? t('Falta 1 dia') : t('Faltam {n} dias', { n: st.left })}</b>
+          </span>
+          <span className="pj-time-pct">{Math.round(st.timePct * 100)}%</span>
+        </div>
+        <div className="pl-bar">
+          <span style={{ width: `${st.timePct * 100}%` }} />
+        </div>
+        <small className="muted">{t('do tempo do seu projetinho já passou')}</small>
+      </section>
+  )
+}
 
 /** Hoje: treino, cardio, água e dieta, um toque para marcar. */
 function DayChecks({ s, onAgua }: { s: AppState; onAgua?: () => void }) {
@@ -496,19 +518,6 @@ function Andamento({ s, onSec }: { s: AppState; onSec: (x: Sec) => void }) {
           </p>
         </section>
       )}
-      <section className="card pj-time">
-        <div className="pj-time-h">
-          <span>
-            <small>{t('Dia {a} de {b}', { a: st.elapsed, b: st.total })}</small>
-            <b>{st.left === 1 ? t('Falta 1 dia') : t('Faltam {n} dias', { n: st.left })}</b>
-          </span>
-          <span className="pj-time-pct">{Math.round(st.timePct * 100)}%</span>
-        </div>
-        <div className="pl-bar">
-          <span style={{ width: `${st.timePct * 100}%` }} />
-        </div>
-        <small className="muted">{t('do tempo do seu projetinho já passou')}</small>
-      </section>
 
       <Previsao s={s} />
 
