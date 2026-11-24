@@ -2,7 +2,7 @@
 import { type AppState, hasTrainPlan, today, workoutFor } from './store'
 
 export function trainLocked(s: AppState) {
-  if (!s.onboarded || s.demo) return false
+  if (!s.onboarded || s.demo || s.firstRun) return false
   const p = s.profile
   const hasPlan = hasTrainPlan(p)
   if (hasPlan && !workoutFor(p, new Date())) return false // dia de descanso

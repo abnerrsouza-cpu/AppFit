@@ -7,6 +7,7 @@ import { Intro } from './components/Intro'
 import { HowItWorks } from './components/HowItWorks'
 import { Celebrate } from './components/Celebrate'
 import { Victory } from './components/Victory'
+import { FirstWorkout } from './components/FirstWorkout'
 import { type Mission, levelOf, medals, projetoTodo, totalXP } from './game'
 import { Conquistas } from './screens/Conquistas'
 import { getLang, t } from './i18n'
@@ -299,9 +300,13 @@ export default function App() {
     <div className="app">
       {!intro && (howAgain || (!s.seenHow && !s.demo)) && (
         <HowItWorks
+          firstRun={s.firstRun === 'aulas' && !howAgain}
+          moment={s.profile.moment}
           onDone={() => {
+            const goProjeto = s.firstRun === 'aulas' && !howAgain
             setHowAgain(false)
-            setState((st) => ({ ...st, seenHow: true }))
+            setState((st) => ({ ...st, seenHow: true, ...(goProjeto ? { firstRun: 'projeto' as const } : {}) }))
+            if (goProjeto) setTab('projeto')
           }}
         />
       )}
@@ -316,10 +321,10 @@ export default function App() {
           }}
         />
       )}
-      {!intro && !victory && s.seenHow && !howAgain && !checkin && !needPhotos && fresh && (
+      {!intro && !victory && !s.firstRun && s.seenHow && !howAgain && !checkin && !needPhotos && fresh && (
         <Celebrate kind="medal" icon={fresh.icon} title={fresh.title} desc={fresh.desc} onClose={() => setState((st) => ({ ...st, seenMedals: [...(st.seenMedals || []), fresh.id] }))} />
       )}
-      {!intro && !victory && s.seenHow && !howAgain && !checkin && !needPhotos && !fresh && levelUp && (
+      {!intro && !victory && !s.firstRun && s.seenHow && !howAgain && !checkin && !needPhotos && !fresh && levelUp && (
         <Celebrate
           kind="level"
           icon="star"
@@ -329,6 +334,7 @@ export default function App() {
         />
       )}
       {victory && <Victory s={s} onClose={() => setVictory(false)} />}
+      {s.firstRun === 'treino' && !intro && <FirstWorkout s={s} onDone={() => setTab('inicio')} />}
       {intro && <Intro s={s} userId={user?.id} hasAvatar={user?.hasAvatar} onDone={() => setIntro(false)} />}
       {s.demo && phase === 'local' && (
         <div className="demo-bar">
@@ -344,7 +350,19 @@ export default function App() {
       {tab === 'inicio' && <Today s={s} user={user} onMission={onMission} go={setTab} goMenu={goMenu} openCheckin={() => setCheckin(true)} owes={owes} openCoach={() => setCoach(true)} onLocked={() => setGate(true)} />}
       {tab === 'evolucao' && <Evolution key={openWeekly ? 'w' : 'n'} s={s} openWeekly={openWeekly} openCheckin={() => setCheckin(true)} />}
       {tab === 'cobrancas' && <Alerts s={s} onBack={() => setTab('inicio')} />}
-      {tab === 'projeto' && <Projeto key={pjSec || 'x'} s={s} initialSec={pjSec} />}
+      {tab === 'projeto' && (
+        <Projeto
+          key={pjSec || 'x'}
+          s={s}
+          initialSec={pjSec}
+          autoFunnel={s.firstRun === 'projeto'}
+          onFunnelDone={() => {
+            if (s.firstRun !== 'projeto') return
+            setState((st) => ({ ...st, firstRun: 'treino' }))
+            setTab('inicio')
+          }}
+        />
+      )}
       {tab === 'conquistas' && <Conquistas s={s} onBack={() => setTab('inicio')} />}
       {tab === 'plano' && <Plano s={s} goMenu={goMenu} />}
       {tab === 'agua' && <Agua s={s} onBack={() => setTab('inicio')} />}

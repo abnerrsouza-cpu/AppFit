@@ -44,12 +44,22 @@ export interface Profile {
   tasks?: RoutineTask[] // afazeres extras da rotina (água, creatina, caminhada...)
   /** 'ficha': cadastra (escrevendo ou enviando arquivo). 'check': não cadastra, só marca quando fez. */
   trainMode?: PlanMode
+  /** momento de vida: muda o jeito de cobrar */
+  moment?: Moment
   dietMode?: PlanMode
   trainFiles?: PlanFile[] // PDFs/fotos da ficha, guardados no aparelho
   dietFiles?: PlanFile[]
 }
 
 export type PlanMode = 'ficha' | 'check'
+export type Moment = 'nunca' | 'parei' | 'desanimado' | 'treino'
+/** Jeito de falar com a pessoa: 'leve' (primeiros passos, 5 minutos), 'medio' ou 'serio' (projeto à risca). */
+export function coachStyle(p: Profile, streakDays: number): 'leve' | 'medio' | 'serio' {
+  if (p.moment === 'treino') return streakDays >= 3 || streakDays === 0 ? 'serio' : 'medio'
+  if (p.moment === 'nunca' || p.moment === 'desanimado') return streakDays >= 21 ? 'medio' : 'leve'
+  if (p.moment === 'parei') return streakDays >= 14 ? 'serio' : streakDays >= 5 ? 'medio' : 'leve'
+  return streakDays >= 7 ? 'serio' : 'medio'
+}
 export interface PlanFile {
   id: string
   name: string
@@ -109,6 +119,8 @@ export interface AppState {
   photosAsked?: boolean // já viu a tela "Suas duas fotos"
   introMeId?: string
   water?: Record<string, number> // ml de água por dia (total)
+  /** primeiro acesso: aulas do app → montar o projetinho → primeiro treino (vazio = concluído) */
+  firstRun?: 'aulas' | 'projeto' | 'treino'
   trainDoneAt?: Record<string, string> // hora em que marcou o treino do dia (para a notificação de vencedor)
   waterLog?: Record<string, { at: string; ml: number; kind: string }[]> // cada registro de água
   trainAt?: Record<string, string> // horário que a pessoa disse que vai treinar, por dia

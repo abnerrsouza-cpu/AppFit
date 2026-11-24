@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { api } from '../api'
 import { t } from '../i18n'
-import { type AppState, addDays, cycleInfo, getProjeto, hasTrainPlan, setState, streak, today, workoutFor, ymd } from '../store'
+import { type AppState, addDays, coachStyle, cycleInfo, getProjeto, hasTrainPlan, setState, streak, today, workoutFor, ymd } from '../store'
 import { useRefPhoto } from '../usePhotos'
 import { Icon } from './Icon'
 import { toast } from './Toast'
@@ -30,6 +30,7 @@ function nextTimes(n = 3) {
 
 /** Abre sozinha? Dia de treino (ou sem ficha), treino ainda não feito, e o horário não marcado ou já passou. */
 export function coachShouldOpen(s: AppState) {
+  if (s.firstRun) return false
   if (!s.onboarded || s.demo) return false
   const p = s.profile
   const hasPlan = hasTrainPlan(p)
@@ -50,6 +51,7 @@ export function CoachChat({ s, onClose, online }: { s: AppState; onClose: () => 
   const first = (p.name || '').split(' ')[0] || t('você')
   const st = streak(s)
   const vet = st >= 7
+  const style = coachStyle(p, st)
   const pj = getProjeto(s)
   const why = pj.vision.why?.trim()
   const ref = useRefPhoto(s)
@@ -106,7 +108,13 @@ export function CoachChat({ s, onClose, online }: { s: AppState; onClose: () => 
         { label: t('Não vou conseguir'), go: () => (me(t('Não vou conseguir')), why_()) },
       ])
     }
-    const hello = vet ? t('{n}, são {d} dias seguidos. Hoje ainda não conta.', { n: first, d: st }) : t('Oi, {n}. Hoje ainda não conta.', { n: first })
+    const hello = vet
+      ? t('{n}, são {d} dias seguidos. Hoje ainda não conta.', { n: first, d: st })
+      : style === 'serio'
+        ? t('{n}, projeto é para seguir à risca. Hoje ainda não conta.', { n: first })
+        : style === 'leve'
+          ? t('Oi, {n}. Sem pressão: hoje a gente só precisa dar o primeiro passo.', { n: first })
+          : t('Oi, {n}. Hoje ainda não conta.', { n: first })
     say([hello, wk ? t('Que horas você vai treinar hoje? Não achei no seu dia.') : t('Que horas você vai se mexer hoje?')], timeOpts())
   }
   function timeOpts(): Opt[] {
@@ -208,7 +216,7 @@ export function CoachChat({ s, onClose, online }: { s: AppState; onClose: () => 
       try {
         const c = cycleInfo(p)
         const history = [...msgs, { from: 'me', text: txt }].map((m) => ({ role: m.from === 'me' ? ('user' as const) : ('assistant' as const), text: m.text }))
-        const r = await api.coachChat({ name: first, streak: st, day: c.day, cycle: p.cycleDays, workout: wk?.title || '', trainAt: at || '', why: why || '', letter: p.letter.slice(0, 300), tone: p.tone, lang: s.lang || 'pt' }, history)
+        const r = await api.coachChat({ name: first, streak: st, day: c.day, cycle: p.cycleDays, workout: wk?.title || '', trainAt: at || '', why: why || '', letter: p.letter.slice(0, 300), tone: p.tone, lang: s.lang || 'pt', style, moment: p.moment || '' }, history)
         setTyping(false)
         if (r.text) {
           setMsgs((m) => [...m, { from: 'coach', text: r.text! }])

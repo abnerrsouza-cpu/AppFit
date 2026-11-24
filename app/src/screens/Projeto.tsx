@@ -108,7 +108,7 @@ async function savePhoto(raw?: File, aspect = 3 / 4) {
   return id
 }
 
-export function Projeto({ s, initialSec }: { s: AppState; initialSec?: Sec }) {
+export function Projeto({ s, initialSec, autoFunnel, onFunnelDone }: { s: AppState; initialSec?: Sec; autoFunnel?: boolean; onFunnelDone?: () => void }) {
   const pj = getProjeto(s)
   const todo = projetoTodo(s)
   const started = !!pj.startedAt
@@ -119,7 +119,7 @@ export function Projeto({ s, initialSec }: { s: AppState; initialSec?: Sec }) {
     document.querySelector('.app')?.scrollTo(0, 0)
   }
   const next = todo.steps[0]
-  const [funnel, setFunnel] = useState(false)
+  const [funnel, setFunnel] = useState(() => !!autoFunnel && !started)
   const [party, setParty] = useState(false)
   const go = (st: PjStep) => {
     setSecRaw(st.sec)
@@ -191,7 +191,10 @@ export function Projeto({ s, initialSec }: { s: AppState; initialSec?: Sec }) {
           desc={t('Faltam {n} dias para "{r}". Volte amanhã para dizer se cumpriu sua promessa.', { n: left, r: pj.vision.result })}
           button={t('Bora')}
           top
-          onClose={() => setParty(false)}
+          onClose={() => {
+            setParty(false)
+            onFunnelDone?.()
+          }}
         />
       )}
 

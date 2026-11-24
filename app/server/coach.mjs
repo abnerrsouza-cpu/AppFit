@@ -4,6 +4,14 @@
 import { getSetting, q } from './db.mjs'
 import { sendToUser } from './push.mjs'
 
+/** Jeito de cobrar pelo momento da pessoa (igual ao app): leve = primeiros passos, serio = à risca. */
+function coachStyle(p, streak) {
+  if (p.moment === 'treino') return streak >= 3 || streak === 0 ? 'serio' : 'medio'
+  if (p.moment === 'nunca' || p.moment === 'desanimado') return streak >= 21 ? 'medio' : 'leve'
+  if (p.moment === 'parei') return streak >= 14 ? 'serio' : streak >= 5 ? 'medio' : 'leve'
+  return streak >= 7 ? 'serio' : 'medio'
+}
+
 /** Dias de treino: com exercícios escritos ou, no modo "só marcar" (ou ficha só em arquivo), os dias escolhidos. */
 function trainDays(p) {
   const ws = p.workouts || []
@@ -112,6 +120,14 @@ const T = {
     waterBehindBody: (c) => `Pelo horário, você já devia estar em ${c} L. Bebe um copo agora.`,
     chaseAsk2: 'Metade do dia e nada de horário pro treino',
     chaseAsk2Body: 'Quem não marca horário não vai. Escolhe agora: fim de tarde ou noite?',
+    askLeve: 'Bom dia. Que horas sai o treino de hoje?',
+    askLeveBody: 'Não precisa ser longo: 20 minutos já contam. Me diz um horário.',
+    askSerio: 'Que horas é o treino de hoje?',
+    askSerioBody: 'Projeto à risca: treino tem horário marcado. Me diz agora.',
+    lateSerio: 'O dia está acabando e o treino não saiu',
+    lateSerioBody: 'Quem leva a sério não negocia com a preguiça. Vai agora.',
+    missLeve: (h) => `Era às ${h}. Tudo bem, ainda dá.`,
+    missLeveBody: 'Pensa só nos próximos 5 minutos: troca de roupa e sai de casa. Só isso.',
     chaseWas: (h) => `Era às ${h}. Já saiu de casa?`,
     chaseWasBody: 'Ainda dá tempo. Abre e me diz se você está a caminho.',
   },
@@ -188,6 +204,14 @@ const T = {
     waterBehindBody: (c) => `By now you should be at ${c} L. Drink a glass now.`,
     chaseAsk2: 'Half the day gone and no workout time yet',
     chaseAsk2Body: "If you don't set a time, you don't go. Pick now: late afternoon or evening?",
+    askLeve: "Good morning. What time is today's workout?",
+    askLeveBody: "It doesn't have to be long: 20 minutes counts. Tell me a time.",
+    askSerio: "What time is today's workout?",
+    askSerioBody: 'Following the plan to the letter: workouts have a set time. Tell me now.',
+    lateSerio: "The day is ending and the workout didn't happen",
+    lateSerioBody: "If you're serious, you don't negotiate with laziness. Go now.",
+    missLeve: (h) => `It was at ${h}. That's okay, there's still time.`,
+    missLeveBody: 'Just think about the next 5 minutes: change clothes and leave the house. That is all.',
     chaseWas: (h) => `It was supposed to be at ${h}. Have you left yet?`,
     chaseWasBody: "There's still time. Open and tell me if you're on your way.",
   },
@@ -264,6 +288,14 @@ const T = {
     waterBehindBody: (c) => `A esta hora ya deberías estar en ${c} L. Bebe un vaso ahora.`,
     chaseAsk2: 'Medio día y tu entreno sigue sin horario',
     chaseAsk2Body: 'Quien no fija horario no va. Elige ahora: ¿tarde o noche?',
+    askLeve: 'Buenos días. ¿A qué hora es el entreno de hoy?',
+    askLeveBody: 'No tiene que ser largo: 20 minutos ya cuentan. Dime una hora.',
+    askSerio: '¿A qué hora es el entreno de hoy?',
+    askSerioBody: 'Proyecto al pie de la letra: el entreno tiene hora fija. Dímela ahora.',
+    lateSerio: 'El día se acaba y el entreno no salió',
+    lateSerioBody: 'Quien va en serio no negocia con la pereza. Ve ahora.',
+    missLeve: (h) => `Era a las ${h}. Tranquilo, aún hay tiempo.`,
+    missLeveBody: 'Piensa solo en los próximos 5 minutos: cámbiate y sal de casa. Solo eso.',
     chaseWas: (h) => `Era a las ${h}. ¿Ya saliste de casa?`,
     chaseWasBody: 'Aún hay tiempo. Abre y dime si vas en camino.',
   },
@@ -323,7 +355,7 @@ function snapshot(d, now) {
   const allDone = (trainDone || !wantTrain) && ateOk && !cardioPending
   const lunch = meals.find((m) => /almo|lunch|comida/i.test(m.name)) || null
   const doneAt = d.trainDoneAt?.[date] || ''
-  return { waterMl, waterGoal, allDone, wantTrain, lunch, doneAt, cardioDone, cardioDaily, cardioPending, trainAt, p, date, checks, log, meals, mealsDone, mealsMissed, tasks, tasksDone, hasPlan, wk, trainDone, streak, dayX, cycle, planned, trainedWeek, cardioWeek, cardioGoal, weight, pj, openPromise, target, letter, weeklyDone: !!d.weekly?.[ws], everReported: Object.keys(daily).length > 0, yesterdayReported: !!daily[addDays(date, -1)] }
+  return { style: coachStyle(p, streak), waterMl, waterGoal, allDone, wantTrain, lunch, doneAt, cardioDone, cardioDaily, cardioPending, trainAt, p, date, checks, log, meals, mealsDone, mealsMissed, tasks, tasksDone, hasPlan, wk, trainDone, streak, dayX, cycle, planned, trainedWeek, cardioWeek, cardioGoal, weight, pj, openPromise, target, letter, weeklyDone: !!d.weekly?.[ws], everReported: Object.keys(daily).length > 0, yesterdayReported: !!daily[addDays(date, -1)] }
 }
 
 // ---------- os 3 horários de cada período ----------
@@ -411,9 +443,11 @@ function compose(slot, s, now, L, usedStatus) {
       if (slot.stage === 'was') return atMin !== null && now.min >= atMin + 15 ? { title: L.chaseWas(s.trainAt), body: L.chaseWasBody, key: 'chase:was' } : null
       if (atMin !== null && now.min < atMin + 15) return null // tem horário e ainda não chegou: deixa o lembrete do treino agir
       if (slot.stage === 'ask') return s.trainAt ? null : now.min >= 13 * 60 ? { title: L.chaseAsk2, body: L.chaseAsk2Body, key: 'chase:ask2' } : { title: L.chaseAsk, body: L.chaseAskBody(s.streak), key: 'chase:ask' }
+      if (slot.stage === 'late' && s.style === 'leve' && s.streak < 7) return { title: L.chase5, body: L.chase5Body, key: 'chase:late' }
+      if (slot.stage === 'late' && s.style === 'serio' && s.streak < 7) return { title: L.lateSerio, body: L.lateSerioBody, key: 'chase:late' }
       if (slot.stage === 'late') return { title: L.chaseLate(s.streak), body: L.chaseLateBody(s.streak), key: 'chase:late' }
       if (slot.stage === 'five') return { title: L.chaseMission, body: L.chase5Body, key: 'chase:five' }
-      if (slot.stage === 'miss') return atMin !== null && now.min >= atMin + 60 ? { title: L.miss(s.trainAt), body: L.missBody(s.streak), key: 'chase:miss' } : null
+      if (slot.stage === 'miss') return atMin !== null && now.min >= atMin + 60 ? (s.style === 'leve' ? { title: L.missLeve(s.trainAt), body: L.missLeveBody, key: 'chase:miss' } : { title: L.miss(s.trainAt), body: L.missBody(s.streak), key: 'chase:miss' }) : null
       return null
     }
     case 'go': {
@@ -443,7 +477,11 @@ function compose(slot, s, now, L, usedStatus) {
     }
     case 'wake': {
       if (s.trainDone) return null // já treinou cedo: o "vencedor" e a água/dieta assumem
-      if ((s.wk || !s.hasPlan) && !s.trainAt && !s.trainDone) return { title: L.ask, body: L.askBody(s.streak), key: 'ask' }
+      if ((s.wk || !s.hasPlan) && !s.trainAt && !s.trainDone) {
+        if (s.style === 'leve' && s.streak < 7) return { title: L.askLeve, body: L.askLeveBody, key: 'ask' }
+        if (s.style === 'serio' && s.streak < 7) return { title: L.askSerio, body: L.askSerioBody, key: 'ask' }
+        return { title: L.ask, body: L.askBody(s.streak), key: 'ask' }
+      }
       if (s.everReported && !s.yesterdayReported && s.streak === 0) return { title: L.wakeRestart, body: L.wakeBody(0, nextItem?.t, nextItem && hhmm(nextItem.m)), key: 'wake' }
       const title = s.wk ? L.wakeTrain(s.dayX, s.cycle, cut(s.wk.title, 24), p.trainTime) : L.wakeRest(s.dayX, s.cycle)
       return { title, body: L.wakeBody(s.streak, nextItem?.t, nextItem && hhmm(nextItem.m)), key: 'wake' }

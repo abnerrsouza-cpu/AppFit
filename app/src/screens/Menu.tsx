@@ -164,7 +164,7 @@ export function Menu({ s, user = null, onUser, onLogout, onHow, onConquistas, on
             <Icon name="list" size={20} />
           </span>
           <span>
-            <b>{t('Como funciona')}</b>
+            <b>{t('Aulas do app')}</b>
             <small>{t('Reveja o passo a passo do app')}</small>
           </span>
           <Icon name="chevR" size={18} />
@@ -249,6 +249,25 @@ function Perfil({ p, upd, weight }: { p: Profile; upd: Upd; weight: number }) {
               <option key={g} value={g}>{t(g)}</option>
             ))}
           </select>
+        </label>
+        <label>
+          {t('Seu momento')}
+          <select id="pf-moment" value={p.moment || ''} onChange={(e) => upd({ moment: (e.target.value || undefined) as Profile['moment'] })}>
+            <option value="">—</option>
+            {(
+              [
+                ['nunca', 'Nunca treinei de verdade'],
+                ['parei', 'Já treinei, mas parei'],
+                ['desanimado', 'Estou desanimado'],
+                ['treino', 'Já treino'],
+              ] as const
+            ).map(([v, l]) => (
+              <option key={v} value={v}>
+                {t(l)}
+              </option>
+            ))}
+          </select>
+          <small className="muted">{t('Muda o jeito que o treinador fala com você.')}</small>
         </label>
         <div className="row2">
           <label>
