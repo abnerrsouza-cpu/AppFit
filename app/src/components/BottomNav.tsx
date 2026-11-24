@@ -12,7 +12,7 @@ const ITEMS: { id: Tab; label: string; icon: string }[] = [
   { id: 'menu', label: 'Perfil', icon: 'user' },
 ]
 
-export function BottomNav({ tab, onTab, dots, admin = false }: { tab: Tab; onTab: (t: Tab) => void; dots: Partial<Record<Tab, boolean>>; admin?: boolean }) {
+export function BottomNav({ tab, onTab, dots, admin = false, locked = [], onLocked }: { tab: Tab; onTab: (t: Tab) => void; dots: Partial<Record<Tab, boolean>>; admin?: boolean; locked?: Tab[]; onLocked?: () => void }) {
   // o Admin fica no Perfil, para o rodapé não passar de 6 abas
   void admin
   const items = ITEMS
@@ -22,13 +22,13 @@ export function BottomNav({ tab, onTab, dots, admin = false }: { tab: Tab; onTab
         <button
           key={it.id}
           type="button"
-          className={`bnav-item ${tab === it.id ? 'is-active' : ''}`}
-          onClick={() => onTab(it.id)}
+          className={`bnav-item ${tab === it.id ? 'is-active' : ''} ${locked.includes(it.id) ? 'is-locked' : ''}`}
+          onClick={() => (locked.includes(it.id) ? onLocked?.() : onTab(it.id))}
           aria-current={tab === it.id ? 'page' : undefined}
         >
           <span className="bnav-icon">
             <Icon name={it.icon} size={24} stroke={1.8} />
-            {dots[it.id] && <i className="bnav-dot" />}
+            {locked.includes(it.id) ? <i className="bnav-lock"><Icon name="lock" size={9} stroke={2.6} /></i> : dots[it.id] && <i className="bnav-dot" />}
           </span>
           <span>{t(it.label)}</span>
         </button>

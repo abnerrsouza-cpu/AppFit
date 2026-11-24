@@ -2,6 +2,7 @@ import { Icon } from '../components/Icon'
 import { Info, WithInfo } from '../components/Info'
 import { Locked } from '../components/Locked'
 import { notifyStatus } from '../notify'
+import { trainLocked } from '../focus'
 import { type RankRow, type User, api } from '../api'
 import { useLatestPhoto, useRefPhoto } from '../usePhotos'
 import { type Mission, levelOf, missions, nextStreakMedal, totalXP } from '../game'
@@ -50,7 +51,7 @@ export function todayProgress(s: AppState) {
   return { train: !wk ? 1 : checks.train ? 1 : 0, diet: p.meals.filter((m) => checks[m.id]).length / meals, cardio: 0, rest: !wk }
 }
 
-export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openCoach }: { s: AppState; user?: User | null; go: (tab: Tab) => void; goMenu: (sec: string) => void; openCheckin: () => void; owes: boolean; onMission: (a: Mission['action']) => void; openCoach?: () => void }) {
+export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openCoach, onLocked }: { s: AppState; user?: User | null; go: (tab: Tab) => void; goMenu: (sec: string) => void; openCheckin: () => void; owes: boolean; onMission: (a: Mission['action']) => void; openCoach?: () => void; onLocked?: () => void }) {
   const [view, setView] = useState<'geral' | 'dia'>(() => {
     try {
       if (sessionStorage.getItem('sd:view') === 'dia') {
@@ -66,7 +67,7 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openC
   const needNotif = notifyStatus() !== 'granted'
   // dia ruim: pouca leitura, só o porquê e uma ação
   const stk = streak(s)
-  const lowDay = !s.demo && (!!workoutFor(s.profile, new Date()) || !s.profile.workouts.some((w) => w.items.trim())) && !s.checks[today()]?.train && !s.checks[today()]?.gym && !s.daily[today()] && (stk === 0 || new Date().getHours() >= 17)
+  const focus = trainLocked(s)
   const lowTitle = stk >= 7 ? t('{n} dias seguidos. Não para hoje.', { n: stk }) : Object.keys(s.daily).length && !s.daily[ymd(addDays(new Date(), -1))] ? t('Ontem não contou. Hoje recomeça.') : t('Hoje é dia de chegar na academia.')
   const refPhoto = useRefPhoto(s)
   const p = s.profile
@@ -158,21 +159,45 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openC
         </button>
       </div>
 
-      {view === 'geral' && (
+      {view === 'geral' && focus && (
         <>
-          {lowDay && (
-            <section className="low" style={refPhoto ? { backgroundImage: `linear-gradient(180deg, rgba(5,10,25,.25), rgba(5,10,25,.92)), url(${refPhoto})` } : undefined}>
-              <b className="low-h">{lowTitle}</b>
-              {getProjeto(s).vision.why?.trim() && <p className="low-why">"{getProjeto(s).vision.why}"</p>}
-              <span className="low-m">{t('Missão de hoje: chegar na academia')}</span>
-              <button type="button" className="cta" onClick={openCoach}>
-                {t('Falar com o treinador')}
+          <section className="low" style={refPhoto ? { backgroundImage: `linear-gradient(180deg, rgba(5,10,25,.25), rgba(5,10,25,.92)), url(${refPhoto})` } : undefined}>
+            <b className="low-h">{lowTitle}</b>
+            {getProjeto(s).vision.why?.trim() && <p className="low-why">"{getProjeto(s).vision.why}"</p>}
+            <span className="low-m">{t('Missão de hoje: chegar na academia')}</span>
+            <button type="button" className="cta" onClick={openCoach}>
+              {t('Falar com o treinador')}
+            </button>
+            <button type="button" className="low-ok" onClick={() => setState((x) => ({ ...x, checks: { ...x.checks, [key]: { ...(x.checks[key] || {}), gym: true } } }))}>
+              <Icon name="check" size={16} stroke={3} /> {t('Cheguei na academia')}
+            </button>
+          </section>
+          <PlanCard s={s} go={go} />
+          <p className="ttl hint">
+            <Icon name="lock" size={14} /> {t('Libera depois do treino')}
+          </p>
+          <div className="lock-grid">
+            {[
+              ['flame', t('Progresso de hoje')],
+              ['check', t('Missões')],
+              ['trophy', t('Ranking')],
+              ['star', t('Seu nível')],
+              ['photo', t('Antes x Depois')],
+              ['target', t('Projetinho')],
+            ].map(([ic, l]) => (
+              <button key={l} type="button" className="card lock-tile" onClick={onLocked}>
+                <Icon name={ic} size={20} />
+                <span>{l}</span>
+                <i>
+                  <Icon name="lock" size={12} stroke={2.6} />
+                </i>
               </button>
-              <button type="button" className="low-ok" onClick={() => setState((x) => ({ ...x, checks: { ...x.checks, [key]: { ...(x.checks[key] || {}), gym: true } } }))}>
-                <Icon name="check" size={16} stroke={3} /> {t('Cheguei na academia')}
-              </button>
-            </section>
-          )}
+            ))}
+          </div>
+        </>
+      )}
+      {view === 'geral' && !focus && (
+        <>
           {atRisk && (
             <button type="button" className="risk" onClick={openCheckin}>
               <span className="risk-ic">

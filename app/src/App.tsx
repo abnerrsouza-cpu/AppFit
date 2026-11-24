@@ -26,6 +26,8 @@ import { applyImport, captureImport, isDemoHost } from './migrate'
 import { MoveToApp } from './components/MoveToApp'
 import { FirstPhotos } from './components/FirstPhotos'
 import { CoachChat, coachShouldOpen } from './components/CoachChat'
+import { TrainGate } from './components/TrainGate'
+import { trainLocked } from './focus'
 import { getProjeto, resetToBlank, setState, today, useAppState } from './store'
 import { startSync } from './sync'
 import { refreshEvents } from './calendar'
@@ -48,6 +50,7 @@ export default function App() {
   const [rankNotice, setRankNotice] = useState<string | null>(null)
   const [fpOpen, setFpOpen] = useState(false)
   const [coach, setCoach] = useState(false)
+  const [gate, setGate] = useState(false)
   const fpWanted = s.onboarded && !s.demo && !!s.seenHow && !s.photosAsked && !(s.startPhotoId && getProjeto(s).vision.photoId)
   useEffect(() => {
     if (fpWanted) setFpOpen(true)
@@ -284,6 +287,7 @@ export default function App() {
           }}
         />
       )}
+      {gate && <TrainGate onClose={() => setGate(false)} onCoach={() => setCoach(true)} />}
       {coach && !intro && <CoachChat s={s} online={!!user} onClose={() => setCoach(false)} />}
       {needPhotos && (
         <FirstPhotos
@@ -318,7 +322,7 @@ export default function App() {
           </button>
         </div>
       )}
-      {tab === 'inicio' && <Today s={s} user={user} onMission={onMission} go={setTab} goMenu={goMenu} openCheckin={() => setCheckin(true)} owes={owes} openCoach={() => setCoach(true)} />}
+      {tab === 'inicio' && <Today s={s} user={user} onMission={onMission} go={setTab} goMenu={goMenu} openCheckin={() => setCheckin(true)} owes={owes} openCoach={() => setCoach(true)} onLocked={() => setGate(true)} />}
       {tab === 'evolucao' && <Evolution key={openWeekly ? 'w' : 'n'} s={s} openWeekly={openWeekly} openCheckin={() => setCheckin(true)} />}
       {tab === 'cobrancas' && <Alerts s={s} onBack={() => setTab('inicio')} />}
       {tab === 'projeto' && <Projeto key={pjSec || 'x'} s={s} initialSec={pjSec} />}
@@ -338,6 +342,8 @@ export default function App() {
         }}
         dots={{ menu: isAdmin && pendingCount > 0, projeto: tab !== 'projeto' && projetoTodo(s).total > 0 }}
         admin={isAdmin}
+        locked={trainLocked(s) ? ['evolucao', 'projeto', 'ranking'] : []}
+        onLocked={() => setGate(true)}
       />
     </div>
   )
