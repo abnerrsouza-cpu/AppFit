@@ -45,6 +45,7 @@ export default function App() {
   const [checkin, setCheckin] = useState(false)
   const [menuSec, setMenuSec] = useState<string | null>(null)
   const [pendingCount, setPendingCount] = useState(0)
+  const [pendingNames, setPendingNames] = useState<string[]>([])
   const synced = useRef(false)
   const [intro, setIntro] = useState(true)
   const [openWeekly, setOpenWeekly] = useState(false)
@@ -129,6 +130,7 @@ export default function App() {
         else if (abrir === 'coach') setCoach(true)
         else if (abrir === 'plano') setTab('plano')
         else if (abrir === 'agua') setTab('agua')
+        else if (abrir === 'admin') setTab('admin')
         else if (abrir === 'evolucao') setTab('evolucao')
         else if (abrir === 'semanal') {
           setOpenWeekly(true)
@@ -150,7 +152,20 @@ export default function App() {
       setTab('menu')
     }
     void acceptInvite()
-    if (u.role === 'admin') api.admin.users().then((r) => setPendingCount(r.users.filter((x) => x.status === 'pending').length)).catch(() => {})
+    if (u.role === 'admin') {
+      const load = () =>
+        api.admin
+          .users()
+          .then((r) => {
+            const pend = r.users.filter((x) => x.status === 'pending')
+            setPendingCount(pend.length)
+            setPendingNames(pend.map((x) => x.name))
+          })
+          .catch(() => {})
+      load()
+      // admin: confere de novo quando o app volta para a tela
+      document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && load())
+    }
     setPhase('ready')
   }, [acceptInvite])
 
@@ -259,6 +274,11 @@ export default function App() {
   const prevTrained = useRef<boolean | null>(null)
   const [victory, setVictory] = useState(false)
   useEffect(() => {
+    // só depois que o app carregou e sincronizou: a marcação que vem do servidor não é um toque agora
+    if (phase !== 'ready' && phase !== 'local') {
+      prevTrained.current = null
+      return
+    }
     if (prevTrained.current === false && trainedNow && s.onboarded && !s.demo) {
       setVictory(true)
       const n = new Date()
@@ -267,7 +287,7 @@ export default function App() {
     }
     prevTrained.current = trainedNow
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trainedNow])
+  }, [trainedNow, phase])
 
   // dia ruim: depois da abertura, o treinador puxa conversa (no máximo a cada 3 horas)
   useEffect(() => {
@@ -347,6 +367,23 @@ export default function App() {
           </button>
         </div>
       )}
+      {isAdmin && pendingCount > 0 && tab !== 'admin' && (
+        <button type="button" className="adm-alert" onClick={() => setTab('admin')}>
+          <span className="adm-alert-ic">
+            <Icon name="user" size={18} />
+            <i>{pendingCount}</i>
+          </span>
+          <span>
+            <b>
+              {pendingCount === 1 && pendingNames.length === 1
+                ? t('{n} aguarda sua aprovação', { n: pendingNames[0].split(' ')[0] })
+                : t('{n} pessoas aguardam sua aprovação', { n: pendingCount })}
+            </b>
+            <small>{pendingCount === 1 ? t('Novo cliente. Toque para aprovar.') : t('Novos clientes. Toque para aprovar.')}</small>
+          </span>
+          <Icon name="chevR" size={18} />
+        </button>
+      )}
       {tab === 'inicio' && <Today s={s} user={user} onMission={onMission} go={setTab} goMenu={goMenu} openCheckin={() => setCheckin(true)} owes={owes} openCoach={() => setCoach(true)} onLocked={() => setGate(true)} />}
       {tab === 'evolucao' && <Evolution key={openWeekly ? 'w' : 'n'} s={s} openWeekly={openWeekly} openCheckin={() => setCheckin(true)} />}
       {tab === 'cobrancas' && <Alerts s={s} onBack={() => setTab('inicio')} />}
@@ -368,7 +405,7 @@ export default function App() {
       {tab === 'agua' && <Agua s={s} onBack={() => setTab('inicio')} />}
       {tab === 'ranking' && <Ranking online={!!user} notice={rankNotice} />}
       {tab === 'menu' && <Menu s={s} user={user} onUser={setUser} onHow={() => setHowAgain(true)} onConquistas={() => setTab('conquistas')} onRanking={() => setTab('ranking')} onPlano={() => setTab('plano')} onAgua={() => setTab('agua')} onAdmin={isAdmin ? () => setTab('admin') : undefined} adminPending={pendingCount} onPreviewIntro={() => setIntro(true)} onLogout={user ? logout : undefined} initialSec={menuSec} onOpened={() => setMenuSec(null)} />}
-      {tab === 'admin' && isAdmin && <Admin onPending={setPendingCount} onBack={() => setTab('menu')} />}
+      {tab === 'admin' && isAdmin && <Admin onPending={(n) => { setPendingCount(n); if (n !== pendingNames.length) setPendingNames([]) }} onBack={() => setTab('menu')} />}
       <Toaster />
       <BottomNav
         tab={tab}

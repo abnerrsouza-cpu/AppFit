@@ -128,7 +128,7 @@ route('POST', '/api/auth/signup', async (req, res) => {
   )
   const u = r.rows[0]
   const token = await newSession(u.id)
-  if (!isAdmin) notifyAdmins('Nova solicitação de acesso', `${name} (${email}) quer entrar no app.`).catch(() => {})
+  if (!isAdmin) notifyAdmins(`${name.split(' ')[0]} aguarda sua aprovação`, `Novo cliente: ${name} (${email}). Toque para aprovar.`, '/?abrir=admin').catch(() => {})
   send(res, 201, { user: publicUser(u) }, { 'Set-Cookie': sessionCookie(req, token, SESSION_DAYS * 86400) })
 })
 
@@ -209,7 +209,7 @@ route('GET', '/api/auth/:provider/callback', async (req, res, p) => {
       [u.id, info.sub, info.tokens.access, info.tokens.refresh, info.tokens.expiresAt],
     )
   }
-  if (created) notifyAdmins('Nova solicitação de acesso', `${u.name} (via ${PROVIDER_NAME[prov]}) quer entrar no app.`).catch(() => {})
+  if (created) notifyAdmins(`${String(u.name || '').split(' ')[0]} aguarda sua aprovação`, `Novo cliente: ${u.name} (via ${PROVIDER_NAME[prov]}). Toque para aprovar.`, '/?abrir=admin').catch(() => {})
   const token = await newSession(u.id)
   redirect(res, '/', { 'Set-Cookie': sessionCookie(req, token, SESSION_DAYS * 86400) })
 })

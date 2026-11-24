@@ -37,9 +37,9 @@ export async function sendToUser(userId, { title, body, kind, dedupe = null, url
   return ok
 }
 
-export async function notifyAdmins(title, body) {
+export async function notifyAdmins(title, body, url = '/') {
   const r = await q(`select id from users where role = 'admin'`)
-  for (const u of r.rows) await sendToUser(u.id, { title, body, kind: 'admin' })
+  for (const u of r.rows) await sendToUser(u.id, { title, body, kind: 'admin', url })
 }
 
 // ---------- agendador ----------

@@ -38,6 +38,17 @@ export function Auth({ s, onUser }: { s: AppState; onUser: (u: User) => void }) 
   const [err, setErr] = useState('')
   const [forgot, setForgot] = useState(false)
   const [prov, setProv] = useState<{ google?: boolean; strava?: boolean }>({})
+  const [socialMsg, setSocialMsg] = useState('')
+  // Google/Strava ainda não ligados: leva para a criação de conta normal
+  const noSocial = (name: string) => {
+    setMode('criar')
+    setSocialMsg(t('Entrar com {p} chega em breve. Por enquanto, crie sua conta com e-mail: leva 30 segundos.', { p: name }))
+    setTimeout(() => {
+      const el = document.querySelector<HTMLInputElement>('form.card.field input')
+      el?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+      el?.focus()
+    }, 50)
+  }
   useEffect(() => {
     fetch('/api/auth/providers').then((r) => r.json()).then(setProv, () => {})
   }, [])
@@ -103,24 +114,35 @@ export function Auth({ s, onUser }: { s: AppState; onUser: (u: User) => void }) 
           </button>
         </div>
 
-        {(prov.google || prov.strava) && (
         <div className="social">
-          {prov.google && (
-          <a className="social-btn google" href="/api/auth/google">
+          <a
+            className="social-btn google"
+            href="/api/auth/google"
+            onClick={(e) => {
+              if (prov.google) return
+              e.preventDefault()
+              noSocial('Google')
+            }}
+          >
             <GoogleLogo /> {mode === 'criar' ? t('Criar conta com Google') : t('Entrar com Google')}
           </a>
-          )}
-          {prov.strava && (
-          <a className="social-btn strava" href="/api/auth/strava">
+          <a
+            className="social-btn strava"
+            href="/api/auth/strava"
+            onClick={(e) => {
+              if (prov.strava) return
+              e.preventDefault()
+              noSocial('Strava')
+            }}
+          >
             <StravaLogo /> {mode === 'criar' ? t('Criar conta com Strava') : t('Entrar com Strava')}
           </a>
-          )}
+          {socialMsg && <p className="social-msg">{socialMsg}</p>}
           <p className="hint center-txt ttl">
             {t('ou com e-mail e senha')}
             <Info text={t('Com Google ou Strava você não precisa criar senha. Quem entra pelo Strava já deixa o relógio conectado ao app. Em todos os casos, a conta passa pela aprovação.')} />
           </p>
         </div>
-        )}
 
         <form className="card field" onSubmit={submit}>
           {mode === 'criar' && (
@@ -184,7 +206,7 @@ export function Auth({ s, onUser }: { s: AppState; onUser: (u: User) => void }) 
               </li>
             </ol>
           )}
-          {mode === 'entrar' && <p className="muted center-txt">{t('Se você criou a conta com Google ou Strava, use o mesmo botão lá em cima.')}</p>}
+          {mode === 'entrar' && (prov.google || prov.strava) && <p className="muted center-txt">{t('Se você criou a conta com Google ou Strava, use o mesmo botão lá em cima.')}</p>}
         </form>
         <LangPicker s={s} />
       </div>
