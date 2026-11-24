@@ -217,26 +217,7 @@ export function Projeto({ s, initialSec, autoFunnel, onFunnelDone, onAgua }: { s
             {t('Começar projetinho')} <Icon name="arrow" size={18} />
           </button>
         </section>
-      ) : next ? (
-        <section className="card next-step">
-          <span className="next-eyebrow">
-            <i>{todo.total}</i> {todo.total === 1 ? t('coisa para fazer aqui') : t('coisas para fazer aqui')}
-          </span>
-          <small className="next-lbl">{t('Próximo passo')}</small>
-          <b>{next.title}</b>
-          <p>{next.why}</p>
-          <button type="button" className="cta" onClick={() => go(next)}>
-            {t('Fazer agora')} <Icon name="arrow" size={18} />
-          </button>
-        </section>
-      ) : (
-        <section className="card next-step done">
-          <b>
-            <Icon name="check" size={20} stroke={3} /> {t('Tudo em dia no seu projetinho.')}
-          </b>
-          <p>{t('Volte amanhã para fazer uma nova promessa e contar como foi o dia.')}</p>
-        </section>
-      )}
+      ) : null}
 
       {started && <Andamento s={s} onSec={setSec} />}
 
@@ -254,6 +235,26 @@ export function Projeto({ s, initialSec, autoFunnel, onFunnelDone, onAgua }: { s
               </button>
             ))}
           </div>
+          {next ? (
+        <section className="card next-step">
+          <span className="next-eyebrow">
+            <i>{todo.total}</i> {todo.total === 1 ? t('coisa para fazer aqui') : t('coisas para fazer aqui')}
+          </span>
+          <small className="next-lbl">{t('Próximo passo')}</small>
+          <b>{next.title}</b>
+          <p>{next.why}</p>
+          <button type="button" className="cta" onClick={() => go(next)}>
+            {t('Fazer agora')} <Icon name="arrow" size={18} />
+          </button>
+        </section>
+          ) : (
+        <section className="card next-step done">
+          <b>
+            <Icon name="check" size={20} stroke={3} /> {t('Tudo em dia no seu projetinho.')}
+          </b>
+          <p>{t('Volte amanhã para fazer uma nova promessa e contar como foi o dia.')}</p>
+        </section>
+          )}
           <NewProject s={s} onStart={() => setFunnel(true)} />
         </>
       )}

@@ -10786,3 +10786,6 @@ html:has(.app) #root {
 .pj-time {
   margin-bottom: 12px;
 }
+.pj-tiles + .next-step {
+  margin-top: 14px;
+}
