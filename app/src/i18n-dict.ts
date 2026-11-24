@@ -216,6 +216,7 @@ export const DICT: Record<string, [string, string]> = {
   "Cardio": ["Cardio", "Cardio"],
   "Cardio leve que funciona: o que é a tal \"zona 2\"": ["Easy cardio that works: what \"zone 2\" really is", "Cardio suave que funciona: qué es la famosa \"zona 2\""],
   "Cardio na semana": ["Cardio this week", "Cardio de la semana"],
+  "Cardio · {n} min": ["Cardio · {n} min", "Cardio · {n} min"],
   "Carta de compromisso": ["Commitment letter", "Carta de compromiso"],
   "Carta escrita": ["Letter written", "Carta escrita"],
   "Carta para o seu eu de daqui a {n} dias": ["A letter to yourself {n} days from now", "Carta para tu yo de dentro de {n} días"],

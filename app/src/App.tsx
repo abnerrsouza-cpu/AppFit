@@ -127,6 +127,7 @@ export default function App() {
         if (abrir === 'checkin') setCheckin(true)
         else if (abrir === 'coach') setCoach(true)
         else if (abrir === 'plano') setTab('plano')
+        else if (abrir === 'agua') setTab('agua')
         else if (abrir === 'evolucao') setTab('evolucao')
         else if (abrir === 'semanal') {
           setOpenWeekly(true)

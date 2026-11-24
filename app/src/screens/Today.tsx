@@ -15,7 +15,7 @@ import { headline } from '../psych'
 import { t, weekdayShort } from '../i18n'
 import { type AppState, addDays, dietSimple, trainedOn, hasTrainPlan, planMeals, currentWeight, cycleInfo, getProjeto, weekStats, setState, streak, today, weekDays, workoutFor, ymd } from '../store'
 
-type Kind = 'wake' | 'meal' | 'train' | 'checkin' | 'event' | 'task'
+type Kind = 'wake' | 'meal' | 'train' | 'checkin' | 'event' | 'task' | 'cardio'
 interface Task {
   id: string
   time: string
@@ -25,7 +25,7 @@ interface Task {
   done: boolean
 }
 
-const ICON: Record<Kind, string> = { wake: 'sun', meal: 'food', train: 'dumbbell', checkin: 'list', event: 'calendar', task: 'check' }
+const ICON: Record<Kind, string> = { wake: 'sun', meal: 'food', train: 'dumbbell', checkin: 'list', event: 'calendar', task: 'check', cardio: 'run' }
 
 function greeting() {
   const h = new Date().getHours()
@@ -45,11 +45,11 @@ export function todayProgress(s: AppState) {
     return {
       train: log.trained === 'descanso' ? 1 : trainedOn(s, key),
       diet: dietSimple(p) || !planMeals(p).length ? log.dietScore / 10 : Object.values(log.mealsOk || {}).filter(Boolean).length / meals,
-      cardio: log.cardioMin / dailyCardio,
+      cardio: Math.max(log.cardioMin / dailyCardio, checks.cardio ? 1 : 0),
       rest: !wk,
     }
   }
-  return { train: !wk ? 1 : checks.train ? 1 : 0, diet: dietSimple(p) ? (checks.diet ? 1 : 0) : planMeals(p).filter((m) => checks[m.id]).length / meals, cardio: 0, rest: !wk }
+  return { train: !wk ? 1 : checks.train ? 1 : 0, diet: dietSimple(p) ? (checks.diet ? 1 : 0) : planMeals(p).filter((m) => checks[m.id]).length / meals, cardio: checks.cardio ? 1 : 0, rest: !wk }
 }
 
 export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openCoach, onLocked }: { s: AppState; user?: User | null; go: (tab: Tab) => void; goMenu: (sec: string) => void; openCheckin: () => void; owes: boolean; onMission: (a: Mission['action']) => void; openCoach?: () => void; onLocked?: () => void }) {
@@ -104,7 +104,8 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openC
     ...planMeals(p).map((m) => ({ id: m.id, time: m.time, title: m.name, detail: m.items, kind: 'meal' as Kind, done: !!checks[m.id] })),
     ...(dietSimple(p) ? [{ id: 'diet', time: p.checkinTime, title: t('Segui a dieta hoje'), kind: 'meal' as Kind, done: !!checks.diet }] : []),
     ...(p.tasks ?? []).filter((x) => x.title.trim()).map((x) => ({ id: x.id, time: x.time, title: x.title, kind: 'task' as Kind, done: !!checks[x.id] })),
-    ...(wk ? [{ id: 'train', time: p.trainTime, title: wk.title, detail: wk.items, kind: 'train' as Kind, done: !!checks.train }] : []),
+    ...(wk ? [{ id: 'train', time: s.trainAt?.[key] || p.trainTime, title: wk.title, detail: wk.items, kind: 'train' as Kind, done: !!checks.train }] : []),
+    ...(p.cardioGoalMin > 0 ? [{ id: 'cardio', time: wk ? s.trainAt?.[key] || p.trainTime : '17:00', title: t('Cardio · {n} min', { n: Math.max(10, Math.round(p.cardioGoalMin / 5)) }), kind: 'cardio' as Kind, done: !!checks.cardio }] : []),
     { id: 'checkin', time: p.checkinTime, title: t('Prestar contas do dia'), kind: 'checkin' as Kind, done: !!log },
     ...todayEvents.map((e) => ({ id: `ev:${e.uid}`, time: hhmmOf(e.start), title: e.title, kind: 'event' as Kind, done: !!checks[`ev:${e.uid}`] })),
   ].sort((a, b) => a.time.localeCompare(b.time))

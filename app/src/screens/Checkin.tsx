@@ -27,7 +27,7 @@ export function Checkin({ s, onClose }: { s: AppState; onClose: () => void }) {
     prev ?? {
       date: key,
       trained: wk || !hasTrainPlan(p) ? (checks.train ? 'sim' : 'nao') : 'descanso',
-      cardioMin: 0,
+      cardioMin: checks.cardio ? Math.max(10, Math.round(p.cardioGoalMin / 5)) : 0,
       cardioType: 'Esteira',
       dietScore: dietSimple(p) && checks.diet ? 9 : 8,
       mealsOk: Object.fromEntries(planMeals(p).map((m) => [m.id, checks[m.id] ?? true])),

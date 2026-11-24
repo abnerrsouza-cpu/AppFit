@@ -90,6 +90,28 @@ const T = {
       ['Bom, né? Já ter treinado.', 'Essa sensação é o prêmio por não ter dado desculpa.'],
       ['Treino pago. Dia ganho.', 'Amanhã você vai querer sentir isso de novo.'],
     ],
+    locale: 'pt-BR',
+    go: (h) => `Treino às ${h}: hora de se arrumar`,
+    goBody: 'Roupa, garrafinha e porta. Em 15 minutos você tem que estar saindo.',
+    miss: (h) => `Você disse ${h}. Não foi.`,
+    missBody: (s) => (s >= 7 ? `${s} dias seguidos não podem morrer hoje. Ainda dá: 30 minutos já contam.` : 'Sem desculpa. Ainda dá tempo: me diz agora que horas você vai.'),
+    lunchDone: 'Cuidado pra não perder seu treino em 20 min de almoço',
+    lunchDoneBody: (it) => (it ? `Você já treinou. No prato: ${it}.` : 'Você já treinou. Prato limpo: proteína, salada e sem exagero.'),
+    lunchBefore: (h) => `Almoço leve: treino às ${h}`,
+    lunchBeforeBody: 'Comer pesado agora vira desculpa pronta mais tarde.',
+    lunchAsk: 'Hora do almoço e você ainda não marcou o treino',
+    lunchAskBody: 'Decide agora: que horas você vai? Me diz que eu te ajudo a chegar lá.',
+    lunchRest: 'Dia de descanso não é dia de jacar',
+    lunchRestBody: (it) => (it ? `No prato: ${it}.` : 'Proteína, salada e sem exagero. O músculo cresce com o que você come hoje.'),
+    cardioToday: (n) => `Falta o cardio de hoje: ${n} min`,
+    cardioAfter: 'Você já treinou. Fecha com o cardio e o dia fica completo. Marque no app.',
+    cardioPlain: 'Esteira, bike ou caminhada. Marque no app quando fizer.',
+    waterLast: (l) => `Só falta a água: ${l} L`,
+    waterLastBody: 'Treino, dieta e cardio feitos. Fecha o dia 100%: bebe agora e marque no app.',
+    waterBehind: (a, b) => `Água: ${a} L de ${b} L`,
+    waterBehindBody: (c) => `Pelo horário, você já devia estar em ${c} L. Bebe um copo agora.`,
+    chaseAsk2: 'Metade do dia e nada de horário pro treino',
+    chaseAsk2Body: 'Quem não marca horário não vai. Escolhe agora: fim de tarde ou noite?',
     chaseWas: (h) => `Era às ${h}. Já saiu de casa?`,
     chaseWasBody: 'Ainda dá tempo. Abre e me diz se você está a caminho.',
   },
@@ -144,6 +166,28 @@ const T = {
       ['Feels good, right? Already trained.', 'That feeling is your prize for not making excuses.'],
       ['Workout paid. Day won.', "Tomorrow you'll want to feel this again."],
     ],
+    locale: 'en-US',
+    go: (h) => `Workout at ${h}: time to get ready`,
+    goBody: 'Clothes, bottle, door. In 15 minutes you need to be leaving.',
+    miss: (h) => `You said ${h}. You didn't go.`,
+    missBody: (s) => (s >= 7 ? `${s} days in a row can't die today. There's still time: 30 minutes counts.` : "No excuses. There's still time: tell me now what time you're going."),
+    lunchDone: "Don't throw away your workout in a 20-minute lunch",
+    lunchDoneBody: (it) => (it ? `You already trained. On the plate: ${it}.` : 'You already trained. Clean plate: protein, salad, no overdoing it.'),
+    lunchBefore: (h) => `Light lunch: workout at ${h}`,
+    lunchBeforeBody: 'Eating heavy now becomes a ready-made excuse later.',
+    lunchAsk: "It's lunchtime and your workout still has no time",
+    lunchAskBody: "Decide now: what time are you going? Tell me and I'll help you get there.",
+    lunchRest: "Rest day isn't cheat day",
+    lunchRestBody: (it) => (it ? `On the plate: ${it}.` : 'Protein, salad, no overdoing it. Muscle grows from what you eat today.'),
+    cardioToday: (n) => `Today's cardio is missing: ${n} min`,
+    cardioAfter: 'You already trained. Finish with cardio and the day is complete. Check it in the app.',
+    cardioPlain: 'Treadmill, bike or a walk. Check it in the app when done.',
+    waterLast: (l) => `Only water left: ${l} L`,
+    waterLastBody: 'Workout, diet and cardio done. Close the day at 100%: drink now and log it.',
+    waterBehind: (a, b) => `Water: ${a} L of ${b} L`,
+    waterBehindBody: (c) => `By now you should be at ${c} L. Drink a glass now.`,
+    chaseAsk2: 'Half the day gone and no workout time yet',
+    chaseAsk2Body: "If you don't set a time, you don't go. Pick now: late afternoon or evening?",
     chaseWas: (h) => `It was supposed to be at ${h}. Have you left yet?`,
     chaseWasBody: "There's still time. Open and tell me if you're on your way.",
   },
@@ -198,6 +242,28 @@ const T = {
       ['Se siente bien, ¿no? Ya haber entrenado.', 'Esa sensación es el premio por no poner excusas.'],
       ['Entreno pagado. Día ganado.', 'Mañana vas a querer sentir esto otra vez.'],
     ],
+    locale: 'es',
+    go: (h) => `Entreno a las ${h}: hora de prepararte`,
+    goBody: 'Ropa, botella y puerta. En 15 minutos tienes que estar saliendo.',
+    miss: (h) => `Dijiste ${h}. No fuiste.`,
+    missBody: (s) => (s >= 7 ? `${s} días seguidos no pueden morir hoy. Aún hay tiempo: 30 minutos cuentan.` : 'Sin excusas. Aún hay tiempo: dime ahora a qué hora vas.'),
+    lunchDone: 'Cuidado de no tirar tu entreno en 20 min de almuerzo',
+    lunchDoneBody: (it) => (it ? `Ya entrenaste. En el plato: ${it}.` : 'Ya entrenaste. Plato limpio: proteína, ensalada y sin exagerar.'),
+    lunchBefore: (h) => `Almuerzo liviano: entreno a las ${h}`,
+    lunchBeforeBody: 'Comer pesado ahora se vuelve excusa lista más tarde.',
+    lunchAsk: 'Hora del almuerzo y tu entreno sigue sin horario',
+    lunchAskBody: 'Decide ahora: ¿a qué hora vas? Dime y te ayudo a llegar.',
+    lunchRest: 'Día de descanso no es día de trampa',
+    lunchRestBody: (it) => (it ? `En el plato: ${it}.` : 'Proteína, ensalada y sin exagerar. El músculo crece con lo que comes hoy.'),
+    cardioToday: (n) => `Falta el cardio de hoy: ${n} min`,
+    cardioAfter: 'Ya entrenaste. Cierra con el cardio y el día queda completo. Márcalo en la app.',
+    cardioPlain: 'Cinta, bici o caminata. Márcalo en la app cuando lo hagas.',
+    waterLast: (l) => `Solo falta el agua: ${l} L`,
+    waterLastBody: 'Entreno, dieta y cardio hechos. Cierra el día al 100%: bebe ahora y regístralo.',
+    waterBehind: (a, b) => `Agua: ${a} L de ${b} L`,
+    waterBehindBody: (c) => `A esta hora ya deberías estar en ${c} L. Bebe un vaso ahora.`,
+    chaseAsk2: 'Medio día y tu entreno sigue sin horario',
+    chaseAsk2Body: 'Quien no fija horario no va. Elige ahora: ¿tarde o noche?',
     chaseWas: (h) => `Era a las ${h}. ¿Ya saliste de casa?`,
     chaseWasBody: 'Aún hay tiempo. Abre y dime si vas en camino.',
   },
@@ -236,8 +302,11 @@ function snapshot(d, now) {
   for (let k = ws; k <= date; k = addDays(k, 1)) weekDays.push(k)
   const planned = hasPlan ? weekDays.filter((k) => trainDays(p).includes(dowOf(k))).length : 0
   const trainedWeek = weekDays.filter((k) => daily[k]?.trained === 'sim' || d.checks?.[k]?.train || d.checks?.[k]?.gym).length
-  const cardioWeek = weekDays.reduce((a, k) => a + (Number(daily[k]?.cardioMin) || 0), 0)
   const cardioGoal = Number(p.cardioGoalMin) || 0
+  const cardioDaily = Math.max(10, Math.round(cardioGoal / 5))
+  const cardioWeek = weekDays.reduce((a, k) => a + (Number(daily[k]?.cardioMin) || (d.checks?.[k]?.cardio ? cardioDaily : 0)), 0)
+  const cardioDone = !!checks.cardio || (Number(log?.cardioMin) || 0) > 0
+  const cardioPending = cardioGoal > 0 && !cardioDone && cardioWeek < cardioGoal
   // peso
   const weeks = Object.values(d.weekly || {}).sort((a, b) => String(a.weekStart).localeCompare(String(b.weekStart)))
   const weight = weeks.length ? Number(weeks[weeks.length - 1].weight) || p.weightStart : p.weightStart
@@ -245,13 +314,23 @@ function snapshot(d, now) {
   const openPromise = (pj.promises || []).find((x) => x.status === 'aberta' && x.date < date)
   const target = pj.vision?.targetDate
   const letter = String(p.letter || '').trim().split(/(?<=[.!?])\s/)[0]
-  return { trainAt, p, date, checks, log, meals, mealsDone, mealsMissed, tasks, tasksDone, hasPlan, wk, trainDone, streak, dayX, cycle, planned, trainedWeek, cardioWeek, cardioGoal, weight, pj, openPromise, target, letter, weeklyDone: !!d.weekly?.[ws], everReported: Object.keys(daily).length > 0, yesterdayReported: !!daily[addDays(date, -1)] }
+  // água e "dia completo"
+  const waterMl = Number(d.water?.[date]) || 0
+  const waterGoal = Math.max(1500, Math.round(((Number(weight) || 70) * 35) / 500) * 500)
+  const dietSimple = p.dietMode === 'check' || ((p.dietFiles || []).length > 0 && !meals.length)
+  const ateOk = meals.length ? mealsMissed.length === 0 : dietSimple ? !!checks.diet || now.min < 20 * 60 : true
+  const wantTrain = !!wk || !hasPlan
+  const allDone = (trainDone || !wantTrain) && ateOk && !cardioPending
+  const lunch = meals.find((m) => /almo|lunch|comida/i.test(m.name)) || null
+  const doneAt = d.trainDoneAt?.[date] || ''
+  return { waterMl, waterGoal, allDone, wantTrain, lunch, doneAt, cardioDone, cardioDaily, cardioPending, trainAt, p, date, checks, log, meals, mealsDone, mealsMissed, tasks, tasksDone, hasPlan, wk, trainDone, streak, dayX, cycle, planned, trainedWeek, cardioWeek, cardioGoal, weight, pj, openPromise, target, letter, weeklyDone: !!d.weekly?.[ws], everReported: Object.keys(daily).length > 0, yesterdayReported: !!daily[addDays(date, -1)] }
 }
 
 // ---------- os 3 horários de cada período ----------
-const PRIO = { checkin: 1, chase: 1.5, late: 2, chaseask: 2.5, train: 3, wake: 4, weekly: 5, meal: 6, task: 7, custom: 8, status: 9 }
+const PRIO = { checkin: 1, chase: 1.5, late: 2, chaseask: 2.5, train: 3, wake: 4, weekly: 5, meal: 6, water: 6.5, task: 7, custom: 8, status: 9 }
 export function slotsFor(d, now) {
   const p = d.profile || {}
+  const s = snapshot(d, now)
   const wake = toMin(p.wake || '06:30')
   const sleep = Math.min(toMin(p.sleep || '23:00') || 1380, 23 * 60 + 40)
   const ci = toMin(p.checkinTime || '21:30')
@@ -259,17 +338,32 @@ export function slotsFor(d, now) {
   for (const m of p.meals || []) if (String(m.items || '').trim()) ev.push({ m: toMin(m.time), kind: 'meal', ref: m.id })
   for (const x of p.tasks || []) if (x.title?.trim()) ev.push({ m: toMin(x.time), kind: 'task', ref: x.id })
   for (const c of d.custom || []) if (c.on && String(c.text || '').trim()) ev.push({ m: toMin(c.time), kind: 'custom', ref: c.id })
-  const hasPlan = trainDays(p).length > 0
-  const trainDay = trainDays(p).includes(now.dow)
-  const at = d.trainAt?.[now.date]
-  if (trainDay) ev.push({ m: Math.max(0, toMin(at || p.trainTime) - 60), kind: 'train' })
-  // perseguir o treino ao longo do dia (dia de treino, ou sem ficha cadastrada)
-  const c = d.checks?.[now.date] || {}
-  const trained = c.train || c.gym || d.daily?.[now.date]?.trained === 'sim'
-  if ((trainDay || !hasPlan) && !trained) {
-    if (!at) ev.push({ m: 14 * 60, kind: 'chaseask', stage: 'ask' })
+  const at = s.trainAt ? toMin(s.trainAt) : null
+  // sequência do treino: 1) descobrir o horário  2) acompanhar até ir  3) cobrar se não foi
+  if (s.wantTrain && !s.trainDone) {
+    if (at === null) {
+      ev.push({ m: Math.max(wake + 150, 10 * 60), kind: 'chaseask', stage: 'ask' }, { m: 14 * 60, kind: 'chaseask', stage: 'ask' })
+      if (s.wk) ev.push({ m: Math.max(0, toMin(p.trainTime) - 60), kind: 'train' })
+    } else {
+      if (s.wk) ev.push({ m: Math.max(0, at - 60), kind: 'train' })
+      ev.push({ m: Math.max(0, at - 15), kind: 'go', p: 1.2 })
+      ev.push({ m: at + 20, kind: 'chase', stage: 'was', p: 1.3 })
+      ev.push({ m: at + 75, kind: 'chase', stage: 'miss', p: 1.4 })
+    }
     ev.push({ m: 18 * 60 + 30, kind: 'chase', stage: 'late' }, { m: 19 * 60 + 45, kind: 'chase', stage: 'five' })
-    if (at) ev.push({ m: toMin(at) + 20, kind: 'chase', stage: 'was' })
+  }
+  // almoço: proteger o treino (feito ou por fazer)
+  ev.push({ m: (s.lunch ? toMin(s.lunch.time) : 12 * 60 + 30) - 10, kind: 'lunch', p: s.trainDone ? 2.2 : 3.5 })
+  // cardio do dia
+  if (s.cardioPending) {
+    const base = s.trainDone && s.doneAt ? toMin(s.doneAt) + 45 : 16 * 60 + 30
+    ev.push({ m: Math.min(Math.max(base, wake + 60), 20 * 60), kind: 'cardio', p: s.trainDone ? 2.4 : 5.5 }, { m: 15 * 60 + 30, kind: 'cardio', p: s.trainDone ? 2.4 : 5.5 })
+    if (s.trainDone || !s.wantTrain) ev.push({ m: 19 * 60 + 15, kind: 'cardio', p: 5.5 }) // à noite, sem treino, o foco é o treino
+  }
+  // água: ao longo do dia; com treino, dieta e cardio feitos, fica em cima até bater a meta
+  if (s.waterMl < s.waterGoal) {
+    const times = s.allDone ? [10 * 60 + 30, 12 * 60 + 15, 14 * 60, 15 * 60 + 30, 17 * 60, 18 * 60 + 30, 20 * 60, 21 * 60 + 15] : [10 * 60 + 30, 15 * 60, 20 * 60]
+    for (const m of times) if (m > wake + 60 && m < sleep - 30) ev.push({ m, kind: 'water', p: s.allDone ? 1.6 : 6.5 })
   }
   ev.push({ m: ci, kind: 'checkin' })
   ev.push({ m: Math.min(ci + 90, sleep - 20), kind: 'late' })
@@ -282,20 +376,21 @@ export function slotsFor(d, now) {
   const out = []
   periods.forEach(([a, b], pi) => {
     if (b - a < 30) return
-    const inside = ev.filter((e) => e.m >= a && e.m < b).sort((x, y) => PRIO[x.kind] - PRIO[y.kind] || x.m - y.m)
+    const inside = ev.filter((e) => e.m >= a && e.m < b).sort((x, y) => (x.p ?? PRIO[x.kind]) - (y.p ?? PRIO[y.kind]) || x.m - y.m)
     const chosen = []
     for (const e of inside) {
-      if (chosen.length >= 3) break
-      if (chosen.every((c) => Math.abs(c.m - e.m) >= 45)) chosen.push(e)
+      if (chosen.length >= 5) break
+      if (chosen.every((c) => Math.abs(c.m - e.m) >= 30)) chosen.push(e)
     }
     // completa com "situação" em horários livres do período
     const span = b - a
     for (const f of [0.3, 0.6, 0.85, 0.15, 0.45, 0.72]) {
-      if (chosen.length >= 3) break
+      if (chosen.length >= 4) break
       const m = Math.round(a + span * f)
       if (chosen.every((c) => Math.abs(c.m - m) >= 45)) chosen.push({ m, kind: 'status' })
     }
-    chosen.sort((x, y) => x.m - y.m).forEach((c, i) => out.push({ ...c, id: `${pi}${i}` }))
+    // id estável (período + tipo + horário): o estado muda ao longo do dia e a lista é recalculada a cada minuto
+    chosen.sort((x, y) => x.m - y.m).forEach((c) => out.push({ ...c, pi, id: `${pi}-${c.kind}-${c.stage || c.ref || ''}-${c.m}` }))
   })
   return out
 }
@@ -315,12 +410,39 @@ function compose(slot, s, now, L, usedStatus) {
       const atMin = s.trainAt ? toMin(s.trainAt) : null
       if (slot.stage === 'was') return atMin !== null && now.min >= atMin + 15 ? { title: L.chaseWas(s.trainAt), body: L.chaseWasBody, key: 'chase:was' } : null
       if (atMin !== null && now.min < atMin + 15) return null // tem horário e ainda não chegou: deixa o lembrete do treino agir
-      if (slot.stage === 'ask') return s.trainAt ? null : { title: L.chaseAsk, body: L.chaseAskBody(s.streak), key: 'chase:ask' }
+      if (slot.stage === 'ask') return s.trainAt ? null : now.min >= 13 * 60 ? { title: L.chaseAsk2, body: L.chaseAsk2Body, key: 'chase:ask2' } : { title: L.chaseAsk, body: L.chaseAskBody(s.streak), key: 'chase:ask' }
       if (slot.stage === 'late') return { title: L.chaseLate(s.streak), body: L.chaseLateBody(s.streak), key: 'chase:late' }
       if (slot.stage === 'five') return { title: L.chaseMission, body: L.chase5Body, key: 'chase:five' }
+      if (slot.stage === 'miss') return atMin !== null && now.min >= atMin + 60 ? { title: L.miss(s.trainAt), body: L.missBody(s.streak), key: 'chase:miss' } : null
+      return null
+    }
+    case 'go': {
+      if (s.trainDone || !s.trainAt) return null
+      return { title: L.go(s.trainAt), body: L.goBody, key: 'go' }
+    }
+    case 'lunch': {
+      const items = s.lunch ? cut(firstLine(s.lunch.items), 60) : ''
+      if (s.trainDone) return { title: L.lunchDone, body: L.lunchDoneBody(items), key: 'lunch' }
+      if (s.wantTrain && s.trainAt && toMin(s.trainAt) > now.min) return { title: L.lunchBefore(s.trainAt), body: L.lunchBeforeBody, key: 'lunch' }
+      if (s.wantTrain && !s.trainAt) return { title: L.lunchAsk, body: L.lunchAskBody, key: 'lunch' }
+      return { title: L.lunchRest, body: L.lunchRestBody(items), key: 'lunch' }
+    }
+    case 'cardio': {
+      if (!s.cardioPending) return null
+      return { title: L.cardioToday(s.cardioDaily), body: s.trainDone ? L.cardioAfter : L.cardioPlain, key: `cardio:${slot.m}` }
+    }
+    case 'water': {
+      if (s.waterMl >= s.waterGoal) return null
+      const wake = toMin(p.wake || '06:30')
+      const end = Math.min(toMin(p.sleep || '23:00') || 1380, 23 * 60) - 60
+      const expected = Math.round((s.waterGoal * Math.max(0, Math.min(1, (now.min - wake) / Math.max(60, end - wake)))) / 250) * 250
+      const L1 = (ml) => (ml / 1000).toLocaleString(L.locale, { maximumFractionDigits: 2 })
+      if (s.allDone) return { title: L.waterLast(L1(s.waterGoal - s.waterMl)), body: L.waterLastBody, key: `water:${slot.m}` }
+      if (s.waterMl < expected - 250) return { title: L.waterBehind(L1(s.waterMl), L1(s.waterGoal)), body: L.waterBehindBody(L1(expected)), key: `water:${slot.m}` }
       return null
     }
     case 'wake': {
+      if (s.trainDone) return null // já treinou cedo: o "vencedor" e a água/dieta assumem
       if ((s.wk || !s.hasPlan) && !s.trainAt && !s.trainDone) return { title: L.ask, body: L.askBody(s.streak), key: 'ask' }
       if (s.everReported && !s.yesterdayReported && s.streak === 0) return { title: L.wakeRestart, body: L.wakeBody(0, nextItem?.t, nextItem && hhmm(nextItem.m)), key: 'wake' }
       const title = s.wk ? L.wakeTrain(s.dayX, s.cycle, cut(s.wk.title, 24), p.trainTime) : L.wakeRest(s.dayX, s.cycle)
@@ -373,8 +495,8 @@ function status(s, now, L, used) {
   if (s.mealsMissed.length) opts.push({ key: 'st:missed', title: L.missed(cut(s.mealsMissed.map((m) => m.name).slice(0, 2).join(', '), 40)), body: L.missedBody(s.mealsDone, s.meals.length) })
   if (s.openPromise) opts.push({ key: 'st:promise', title: L.promise(cut(s.openPromise.text, 50)), body: L.promiseBody })
   const daysLeftWeek = 7 - ((now.dow + 6) % 7)
-  if (s.cardioGoal && s.cardioWeek < s.cardioGoal && now.dow !== 1) opts.push({ key: 'st:cardio', title: L.cardio(s.cardioGoal - s.cardioWeek), body: L.cardioBody(s.cardioWeek, s.cardioGoal, daysLeftWeek) })
-  if (s.planned > 0 && s.trainedWeek < s.planned) opts.push({ key: 'st:trainweek', title: L.trainWeek(s.trainedWeek, s.planned), body: L.trainWeekBody(s.wk && !s.trainDone ? cut(s.wk.title, 24) : '', p.trainTime) })
+  if (s.cardioGoal && s.cardioWeek < s.cardioGoal && now.dow !== 1 && !s.cardioPending) opts.push({ key: 'st:cardio', title: L.cardio(s.cardioGoal - s.cardioWeek), body: L.cardioBody(s.cardioWeek, s.cardioGoal, daysLeftWeek) })
+  if (s.planned > 0 && s.trainedWeek < s.planned && !s.trainDone) opts.push({ key: 'st:trainweek', title: L.trainWeek(s.trainedWeek, s.planned), body: L.trainWeekBody(s.wk && !s.trainDone ? cut(s.wk.title, 24) : '', p.trainTime) })
   if (p.weightGoal && s.weight > p.weightGoal && s.target) {
     const days = Math.max(1, daysBetween(s.date, s.target))
     const kg = Math.round((s.weight - p.weightGoal) * 10) / 10
@@ -414,20 +536,25 @@ async function tick() {
     // o que já saiu hoje (para não repetir a mesma "situação")
     const sent = await q(`select dedupe from notif_log where user_id = $1 and dedupe like $2`, [r.id, `c:${now.date}:%`])
     const used = new Set(sent.rows.map((x) => x.dedupe.split(':').slice(2).join(':')))
+    const sentIn = (pi) => [...used].filter((k) => k.startsWith(`slot${pi}-`) && k.endsWith(':send')).length
     for (const sl of due) {
       const slotKey = `c:${now.date}:slot${sl.id}`
       if (used.has(`slot${sl.id}`)) continue
-      const msg = (sl.kind !== 'status' && compose(sl, s, now, L, used)) || status(s, now, L, used)
+      if (sl.kind !== 'checkin' && sentIn(sl.pi) >= 3) continue // no máximo 3 por período (manhã, tarde, noite); a prestação de contas sempre sai
+      let msg = sl.kind !== 'status' ? compose(sl, s, now, L, used) : null
+      if (msg && used.has(msg.key)) msg = null // a mesma mensagem não sai duas vezes no dia
+      msg = msg || status(s, now, L, used)
       // marca o horário como usado mesmo sem mensagem, para não tentar de novo
       await q(`insert into notif_log (user_id, kind, dedupe, title, body, ok) values ($1, 'coach', $2, $3, $4, false) on conflict do nothing`, [r.id, slotKey, msg?.title || '-', msg?.body || '-'])
       used.add(`slot${sl.id}`)
       if (!msg) continue
-      if (msg.key.startsWith('st:')) {
+      {
         await q(`insert into notif_log (user_id, kind, dedupe, title, body, ok) values ($1, 'coach-key', $2, '-', '-', true) on conflict do nothing`, [r.id, `c:${now.date}:${msg.key}`])
         used.add(msg.key)
       }
-      const open = msg.key === 'ask' || msg.key.startsWith('chase') ? 'coach' : { checkin: 'checkin', late: 'checkin', train: 'plano', weekly: 'semanal', wake: 'dia' }[msg.key] || (msg.key.startsWith('meal') || msg.key.startsWith('task') || msg.key === 'st:missed' ? 'dia' : msg.key === 'st:promise' ? 'promessas' : msg.key === 'st:cardio' || msg.key === 'st:trainweek' ? 'plano' : msg.key === 'st:pace' ? 'evolucao' : 'inicio')
+      const open = msg.key === 'ask' || msg.key === 'go' || msg.key.startsWith('chase') ? 'coach' : msg.key.startsWith('water') ? 'agua' : msg.key === 'lunch' || msg.key.startsWith('cardio') ? 'dia' : { checkin: 'checkin', late: 'checkin', train: 'plano', weekly: 'semanal', wake: 'dia' }[msg.key] || (msg.key.startsWith('meal') || msg.key.startsWith('task') || msg.key === 'st:missed' ? 'dia' : msg.key === 'st:promise' ? 'promessas' : msg.key === 'st:cardio' || msg.key === 'st:trainweek' ? 'plano' : msg.key === 'st:pace' ? 'evolucao' : 'inicio')
       await sendToUser(r.id, { title: msg.title, body: msg.body, kind: 'rotina', dedupe: `${slotKey}:send`, url: `/?abrir=${open}` })
+      used.add(`slot${sl.id}:send`)
     }
   }
 }

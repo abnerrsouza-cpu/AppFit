@@ -523,7 +523,8 @@ export function weekStats(s: AppState, ref = new Date()) {
   const done = logs.filter(Boolean) as DailyLog[]
   const planned = days.filter((d) => workoutFor(s.profile, d) && d <= new Date()).length
   const trained = days.reduce((a, d) => a + trainedOn(s, ymd(d)), 0)
-  const cardio = done.reduce((a, l) => a + (l.cardioMin || 0), 0)
+  const dailyCardio = Math.max(10, Math.round(s.profile.cardioGoalMin / 5))
+  const cardio = days.reduce((a, d) => a + (s.daily[ymd(d)]?.cardioMin || (s.checks[ymd(d)]?.cardio ? dailyCardio : 0)), 0)
   const diet = done.length ? done.reduce((a, l) => a + l.dietScore, 0) / done.length : 0
   const focus = done.length ? done.reduce((a, l) => a + l.focus, 0) / done.length : 0
   return { days, logs, planned, trained, cardio, diet, focus, checkins: done.length }
