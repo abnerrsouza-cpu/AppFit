@@ -174,7 +174,7 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openC
             </button>
           </section>
           <PlanCard s={s} go={go} />
-          <WaterCard s={s} />
+          <WaterCard s={s} onOpen={() => go('agua')} />
           <p className="ttl hint">
             <Icon name="lock" size={14} /> {t('Libera depois do treino')}
           </p>
@@ -312,7 +312,7 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openC
 
 
           <PlanCard s={s} go={go} />
-          <WaterCard s={s} />
+          <WaterCard s={s} onOpen={() => go('agua')} />
           <RankCard online={!!user} go={go} />
 
           <button type="button" className="level-card" onClick={() => go('conquistas')}>

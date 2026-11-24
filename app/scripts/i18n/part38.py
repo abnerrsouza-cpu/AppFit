@@ -1,0 +1,21 @@
+# Traduções (parte 38): aba de água.
+D = {
+ "+{n} ml registrados": ("+{n} ml logged", "+{n} ml registrados"),
+ "Caneca": ("Mug", "Taza"),
+ "Controle de água": ("Water tracker", "Control de agua"),
+ "Copo": ("Glass", "Vaso"),
+ "Garrafa": ("Bottle", "Botella"),
+ "Garrafinha": ("Small bottle", "Botellita"),
+ "Hoje você bebeu": ("Today you drank", "Hoy bebiste"),
+ "Nada ainda. Comece com um copo agora.": ("Nothing yet. Start with a glass now.", "Nada aún. Empieza con un vaso ahora."),
+ "O que você bebeu agora?": ("What did you just drink?", "¿Qué acabas de beber?"),
+ "Outro valor em ml": ("Other amount in ml", "Otra cantidad en ml"),
+ "Quanto você bebeu hoje e na semana": ("How much you drank today and this week", "Cuánto bebiste hoy y en la semana"),
+ "Toque no recipiente toda vez que beber. A meta é calculada pelo seu peso: 35 ml por quilo.": ("Tap the container every time you drink. Your goal is based on your weight: 35 ml per kilo.", "Toca el recipiente cada vez que bebas. La meta se calcula por tu peso: 35 ml por kilo."),
+ "Ver controle de água": ("Open water tracker", "Ver control de agua"),
+ "de {g} L": ("of {g} L", "de {g} L"),
+ "{a} L de {b} L hoje": ("{a} L of {b} L today", "{a} L de {b} L hoy"),
+ "{n} de 7 dias na meta": ("{n} of 7 days on target", "{n} de 7 días en la meta"),
+ "Água": ("Water", "Agua"),
+ "Últimos 7 dias": ("Last 7 days", "Últimos 7 días"),
+}
