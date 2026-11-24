@@ -167,6 +167,10 @@ export interface Projeto {
   startedAt?: string
   /** quando fez o juramento de sinceridade */
   oathAt?: string
+  /** reajustes feitos no meio do caminho (mais prazo, meta nova) */
+  adjusts?: { date: string; days: number; reason: string }[]
+  /** lição do projetinho anterior que falhou: aparece no painel para não repetir */
+  lesson?: { why: string[]; text: string; attempt: number }
 }
 
 export interface ProjetoArchive {
@@ -177,6 +181,9 @@ export interface ProjetoArchive {
   kept: number
   goalsDone: number
   goals: number
+  failed?: boolean
+  why?: string[]
+  lesson?: string
 }
 
 export function blankProjeto(startDate: string, cycleDays: number): Projeto {

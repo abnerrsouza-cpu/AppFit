@@ -9334,3 +9334,106 @@ html:has(.app) #root {
   padding: 12px;
   margin-bottom: 10px;
 }
+
+/* ---------- reajustar / assumir a falha ---------- */
+.pj-fork,
+.pj-adj,
+.pj-failbox {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+.pj-fork-t {
+  font-size: 1.1rem;
+}
+.pj-fork p,
+.pj-adj p,
+.pj-failbox p {
+  margin: 0;
+  color: var(--fg-2);
+  line-height: 1.45;
+}
+.pj-fork .ghost-btn,
+.pj-fork .cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.pj-fail-btn {
+  width: 100%;
+  padding: 16px 14px;
+  border-radius: 16px;
+  border: 0;
+  background: var(--bad, #dc2626);
+  color: #fff;
+  font-weight: 900;
+  font-size: 0.92rem;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+}
+.pj-fail-btn:disabled {
+  opacity: 0.35;
+}
+.pj-failbox {
+  border: 2px solid color-mix(in srgb, var(--bad, #dc2626) 35%, transparent);
+}
+.pj-adj-l {
+  margin-top: 6px;
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+.pj-adj input,
+.pj-adj textarea,
+.pj-failbox input,
+.pj-failbox textarea {
+  width: 100%;
+}
+.pj-warn {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, #f59e0b 14%, transparent);
+  color: #92400e !important;
+  font-weight: 600;
+}
+.pj-lesson {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+  border-left: 4px solid var(--bad, #dc2626);
+}
+.pj-lesson small {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--bad, #dc2626);
+}
+.pj-lesson p {
+  margin: 4px 0 0;
+  color: var(--fg-2);
+}
+.pj-hist-fail {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-style: normal;
+  font-size: 0.7rem;
+  font-weight: 800;
+  background: color-mix(in srgb, var(--bad, #dc2626) 14%, transparent);
+  color: var(--bad, #dc2626);
+  vertical-align: middle;
+}
+.pj-hist-why {
+  color: var(--bad, #dc2626) !important;
+}
+.pj-fork,
+.pj-adj,
+.pj-failbox,
+.pj-lesson {
+  padding: 18px;
+  border-radius: 24px;
+}

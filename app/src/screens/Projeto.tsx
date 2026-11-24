@@ -13,6 +13,8 @@ import {
   type AppState,
   type Goal,
   type Promise_,
+  type ProjetoArchive,
+  addDays,
   daysBetween,
   fmtDayMonth,
   getProjeto,
@@ -22,6 +24,7 @@ import {
   setProjeto,
   setState,
   today,
+  ymd,
 } from '../store'
 
 export type Sec = 'expectativa' | 'promessas' | 'metas' | 'desabafo' | 'fotos'
@@ -291,8 +294,18 @@ function Andamento({ s, onSec }: { s: AppState; onSec: (x: Sec) => void }) {
     const diff = st.weightPct - st.timePct
     pace = diff >= 0.05 ? t('Você está à frente do ritmo. Continue.') : diff <= -0.1 ? t('Você está atrás do ritmo. Precisa apertar para chegar a tempo.') : t('Você está no ritmo certo para chegar lá.')
   }
+  const lesson = getProjeto(s).lesson
   return (
     <>
+      {lesson && (
+        <section className="card pj-lesson">
+          <small>{t('Tentativa {n}', { n: lesson.attempt })}</small>
+          <b>{t('Da última vez você falhou por: {w}', { w: lesson.why.join(', ').toLowerCase() })}</b>
+          <p>
+            {t('Você prometeu:')} <em>“{lesson.text}”</em>
+          </p>
+        </section>
+      )}
       <section className="card pj-time">
         <div className="pj-time-h">
           <span>
@@ -756,47 +769,166 @@ function Thumb({ photoId, date, onOpen }: { photoId: string; date: string; onOpe
   )
 }
 
-/** Encerrar o projetinho atual (vai para o histórico) e começar outro. */
+const WHY = ['Preguiça', 'Falta de tempo', 'Trabalho', 'Perdi a motivação', 'Comi errado', 'Fiquei doente ou com lesão', 'Bebida e festas', 'Outro']
+const ADD_DAYS = [7, 15, 30]
+
+/** Quando não está dando certo: reajustar o plano ou recomeçar assumindo a falha. Quando acaba o prazo: começar outro. */
 function NewProject({ s, onStart }: { s: AppState; onStart: () => void }) {
-  const [ask, setAsk] = useState(false)
+  const [mode, setMode] = useState<'' | 'adjust' | 'fail' | 'new'>('')
   const hist = s.projetoHistory ?? []
-  const restart = () => {
-    const pj = getProjeto(s)
-    const st = projetoStats(s)
+  const pj = getProjeto(s)
+  const st = projetoStats(s)
+  const fails = hist.filter((h) => h.failed).length
+  const ended = st.left <= 0
+  // reajuste
+  const [plus, setPlus] = useState(0)
+  const [goalW, setGoalW] = useState(String(s.profile.weightGoal))
+  const [reason, setReason] = useState('')
+  // falha
+  const [why, setWhy] = useState<string[]>([])
+  const [lesson, setLesson] = useState('')
+  const [confirmTxt, setConfirmTxt] = useState('')
+  const word = t('EU FALHEI')
+  const canFail = why.length > 0 && lesson.trim().length >= 5 && confirmTxt.trim().toUpperCase() === word.toUpperCase()
+  const adjusts = pj.adjusts ?? []
+
+  const archive = (extra: Partial<ProjetoArchive>) => ({
+    result: pj.vision.result,
+    startedAt: pj.startedAt ?? new Date().toISOString(),
+    endedAt: new Date().toISOString(),
+    efficacy: st.efficacy,
+    kept: st.kept,
+    goalsDone: pj.goals.filter((g) => g.done).length,
+    goals: pj.goals.length,
+    ...extra,
+  })
+  const restart = (failed: boolean) => {
     setState((x) => ({
       ...x,
-      projetoHistory: [
-        {
-          result: pj.vision.result,
-          startedAt: pj.startedAt ?? new Date().toISOString(),
-          endedAt: new Date().toISOString(),
-          efficacy: st.efficacy,
-          kept: st.kept,
-          goalsDone: pj.goals.filter((g) => g.done).length,
-          goals: pj.goals.length,
-        },
-        ...(x.projetoHistory ?? []),
-      ],
+      projetoHistory: [archive(failed ? { failed: true, why: why.map((w) => t(w)), lesson: lesson.trim() } : {}), ...(x.projetoHistory ?? [])],
       // zera objetivo, promessas e metas; desabafos e fotos continuam
-      projeto: { ...blankProjeto(today(), x.profile.cycleDays), vents: pj.vents, photos: pj.photos },
+      projeto: {
+        ...blankProjeto(today(), x.profile.cycleDays),
+        vents: pj.vents,
+        photos: pj.photos,
+        ...(failed ? { lesson: { why: why.map((w) => t(w)), text: lesson.trim(), attempt: fails + 2 } } : {}),
+      },
     }))
-    setAsk(false)
+    setMode('')
     onStart()
   }
+  const saveAdjust = () => {
+    const w = Number(goalW.replace(',', '.'))
+    setState((x) => {
+      const cur = getProjeto(x)
+      return {
+        ...x,
+        profile: w > 30 && w < 300 ? { ...x.profile, weightGoal: w } : x.profile,
+        projeto: {
+          ...cur,
+          vision: { ...cur.vision, targetDate: plus ? ymd(addDays(parseYmd(cur.vision.targetDate), plus)) : cur.vision.targetDate },
+          adjusts: [...(cur.adjusts ?? []), { date: today(), days: plus, reason: reason.trim() }],
+        },
+      }
+    })
+    toast(t('Projetinho reajustado'), t('Plano novo, mesma regra: sem desculpa.'))
+    setMode('')
+    setPlus(0)
+    setReason('')
+  }
+
   return (
     <>
-      {!ask ? (
-        <button type="button" className="ghost-btn pj-new" onClick={() => setAsk(true)}>
-          <Icon name="plus" size={18} /> {t('Novo projetinho')}
-        </button>
-      ) : (
+      {mode === '' && (
+        <section className={`card pj-fork ${ended ? 'ended' : ''}`}>
+          <b className="pj-fork-t">{ended ? t('O prazo do seu projetinho acabou') : t('Não está saindo como planejado?')}</b>
+          <p>{ended ? t('Feche este ciclo e comece o próximo. Seja honesto sobre como foi.') : t('Seja honesto com você. Ajuste o plano ou recomece do zero assumindo que falhou.')}</p>
+          {ended && (
+            <button type="button" className="cta" onClick={() => setMode('new')}>
+              <Icon name="plus" size={18} /> {t('Novo projetinho')}
+            </button>
+          )}
+          <button type="button" className="ghost-btn" onClick={() => setMode('adjust')}>
+            <Icon name="target" size={18} /> {t('Reajustar o projetinho')}
+          </button>
+          <button type="button" className="pj-fail-btn" onClick={() => setMode('fail')}>
+            {fails > 0 ? t('RECOMEÇAR E ASSUMIR QUE EU FALHEI DE NOVO') : t('RECOMEÇAR E ASSUMIR QUE EU FALHEI')}
+          </button>
+        </section>
+      )}
+
+      {mode === 'new' && (
         <section className="card pj-new-ask">
           <b>{t('Começar um novo projetinho?')}</b>
           <p>{t('O atual vai para o histórico com o resultado e a eficácia. Objetivo, promessas e metas começam do zero. Seus desabafos e fotos continuam guardados.')}</p>
-          <button type="button" className="cta" onClick={restart}>
+          <button type="button" className="cta" onClick={() => restart(false)}>
             {t('Sim, começar outro')}
           </button>
-          <button type="button" className="link" onClick={() => setAsk(false)}>
+          <button type="button" className="link" onClick={() => setMode('')}>
+            {t('Cancelar')}
+          </button>
+        </section>
+      )}
+
+      {mode === 'adjust' && (
+        <section className="card pj-adj">
+          <b className="pj-fork-t">{t('Reajustar o projetinho')}</b>
+          <p>{t('Você continua de onde está. Nada é apagado. Só o plano fica mais realista.')}</p>
+          {adjusts.length >= 2 && <p className="pj-warn">{t('Você já reajustou {n} vezes. Cuidado: reajustar demais também é desculpa.', { n: adjusts.length })}</p>}
+          <span className="pj-adj-l">{t('Mais tempo para chegar lá')}</span>
+          <div className="chips">
+            <button type="button" className={`chip ${plus === 0 ? 'on' : ''}`} onClick={() => setPlus(0)}>
+              {t('Manter prazo')}
+            </button>
+            {ADD_DAYS.map((d) => (
+              <button key={d} type="button" className={`chip ${plus === d ? 'on' : ''}`} onClick={() => setPlus(d)}>
+                +{d} {t('dias')}
+              </button>
+            ))}
+          </div>
+          <small className="muted">{t('Novo prazo: {d}', { d: fmtDayMonth(addDays(parseYmd(pj.vision.targetDate), plus)) })}</small>
+          <label className="pj-adj-l" htmlFor="pj-adj-w">
+            {t('Meta de peso (kg)')}
+          </label>
+          <input id="pj-adj-w" inputMode="decimal" value={goalW} onChange={(e) => setGoalW(e.target.value)} />
+          <label className="pj-adj-l" htmlFor="pj-adj-r">
+            {t('O que precisa mudar?')}
+          </label>
+          <textarea id="pj-adj-r" rows={2} value={reason} onChange={(e) => setReason(e.target.value)} placeholder={t('Ex.: vou treinar de manhã, antes do trabalho.')} />
+          <button type="button" className="cta" onClick={saveAdjust}>
+            {t('Salvar reajuste')}
+          </button>
+          <button type="button" className="link" onClick={() => setMode('')}>
+            {t('Cancelar')}
+          </button>
+        </section>
+      )}
+
+      {mode === 'fail' && (
+        <section className="card pj-failbox">
+          <b className="pj-fork-t">{fails > 0 ? t('Você falhou de novo. Assuma.') : t('Assuma que falhou')}</b>
+          <p>{t('Falhar não te define. Fingir que não falhou, sim. Responda com sinceridade.')}</p>
+          <span className="pj-adj-l">{t('Por que você falhou?')}</span>
+          <div className="chips">
+            {WHY.map((w) => (
+              <button key={w} type="button" className={`chip ${why.includes(w) ? 'on' : ''}`} onClick={() => setWhy((x) => (x.includes(w) ? x.filter((y) => y !== w) : [...x, w]))}>
+                {t(w)}
+              </button>
+            ))}
+          </div>
+          <label className="pj-adj-l" htmlFor="pj-fail-l">
+            {t('O que vai ser diferente desta vez?')}
+          </label>
+          <textarea id="pj-fail-l" rows={3} value={lesson} onChange={(e) => setLesson(e.target.value)} placeholder={t('Ex.: deixar a roupa de treino separada na noite anterior.')} />
+          <label className="pj-adj-l" htmlFor="pj-fail-c">
+            {t('Digite {w} para confirmar', { w: word })}
+          </label>
+          <input id="pj-fail-c" value={confirmTxt} onChange={(e) => setConfirmTxt(e.target.value)} placeholder={word} autoCapitalize="characters" />
+          <small className="muted">{t('Objetivo, promessas e metas começam do zero. Desabafos e fotos ficam. O motivo da falha fica no histórico e aparece no painel do próximo projetinho.')}</small>
+          <button type="button" className="pj-fail-btn" disabled={!canFail} onClick={() => restart(true)}>
+            {t('RECOMEÇAR DO ZERO')}
+          </button>
+          <button type="button" className="link" onClick={() => setMode('')}>
             {t('Cancelar')}
           </button>
         </section>
@@ -808,7 +940,11 @@ function NewProject({ s, onStart }: { s: AppState; onStart: () => void }) {
             {hist.map((h, i) => (
               <li key={i}>
                 <span>
-                  <b>{h.result || t('Sem título')}</b>
+                  <b>
+                    {h.failed && <i className="pj-hist-fail">{t('Falhei')}</i>}
+                    {h.result || t('Sem título')}
+                  </b>
+                  {h.failed && !!h.why?.length && <small className="pj-hist-why">{h.why.join(' · ')}</small>}
                   <small>
                     {fmtDayMonth(new Date(h.startedAt))} → {fmtDayMonth(new Date(h.endedAt))} · {t('{a} promessas cumpridas', { a: h.kept })} · {t('{a} de {b} metas', { a: h.goalsDone, b: h.goals })}
                   </small>
