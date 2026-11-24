@@ -198,7 +198,7 @@ function snapshot(d, now) {
   const tasks = (p.tasks || []).filter((x) => x.title?.trim())
   const tasksDone = tasks.filter((x) => checks[x.id]).length
   const hasPlan = trainDays(p).length > 0
-  const wk = (p.workouts || []).find((w) => w.weekday === now.dow && String(w.items || '').trim())
+  const wk = trainDays(p).includes(now.dow) ? (p.workouts || []).find((w) => w.weekday === now.dow) : undefined
   const trainDone = !!checks.train || !!checks.gym || log?.trained === 'sim'
   const trainAt = d.trainAt?.[date] || ''
   // sequência: noites seguidas com prestação de contas, terminando hoje ou ontem
@@ -217,7 +217,7 @@ function snapshot(d, now) {
   const weekDays = []
   for (let k = ws; k <= date; k = addDays(k, 1)) weekDays.push(k)
   const planned = hasPlan ? weekDays.filter((k) => trainDays(p).includes(dowOf(k))).length : 0
-  const trainedWeek = weekDays.filter((k) => daily[k]?.trained === 'sim' || (k === date && checks.train)).length
+  const trainedWeek = weekDays.filter((k) => daily[k]?.trained === 'sim' || d.checks?.[k]?.train || d.checks?.[k]?.gym).length
   const cardioWeek = weekDays.reduce((a, k) => a + (Number(daily[k]?.cardioMin) || 0), 0)
   const cardioGoal = Number(p.cardioGoalMin) || 0
   // peso

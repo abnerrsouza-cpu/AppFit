@@ -69,7 +69,10 @@ export function score(data, tz, weekOffset = 0, period = 'week') {
     if (inWeek(k)) week += v
   }
   const d = data || {}
-  for (const [k, l] of Object.entries(d.daily || {})) add(XP.checkin + (l?.trained === 'sim' ? XP.trained : 0), k)
+  for (const [k, l] of Object.entries(d.daily || {})) add(XP.checkin, k)
+  // treino feito: conta pela prestação de contas ou pelo "treinei hoje" marcado no dia
+  const trainedDays = new Set([...Object.entries(d.daily || {}).filter(([, l]) => l?.trained === 'sim').map(([k]) => k), ...Object.entries(d.checks || {}).filter(([, c]) => c?.train || c?.gym).map(([k]) => k)])
+  for (const k of trainedDays) add(XP.trained, k)
   for (const [k, day] of Object.entries(d.checks || {})) add(Math.min(100, Object.values(day || {}).filter(Boolean).length * XP.task), k)
   for (const [k, w] of Object.entries(d.weekly || {})) {
     const v = XP.weekly + (w?.photoId ? XP.photo : 0)

@@ -13,7 +13,7 @@ import { Rings } from '../components/Rings'
 import type { Tab } from '../components/BottomNav'
 import { headline } from '../psych'
 import { t, weekdayShort } from '../i18n'
-import { type AppState, addDays, dietSimple, hasTrainPlan, planMeals, currentWeight, cycleInfo, getProjeto, weekStats, setState, streak, today, weekDays, workoutFor, ymd } from '../store'
+import { type AppState, addDays, dietSimple, trainedOn, hasTrainPlan, planMeals, currentWeight, cycleInfo, getProjeto, weekStats, setState, streak, today, weekDays, workoutFor, ymd } from '../store'
 
 type Kind = 'wake' | 'meal' | 'train' | 'checkin' | 'event' | 'task'
 interface Task {
@@ -43,7 +43,7 @@ export function todayProgress(s: AppState) {
   const meals = planMeals(p).length || 1
   if (log) {
     return {
-      train: log.trained === 'sim' || log.trained === 'descanso' ? 1 : log.trained === 'parcial' ? 0.5 : 0,
+      train: log.trained === 'descanso' ? 1 : trainedOn(s, key),
       diet: dietSimple(p) || !planMeals(p).length ? log.dietScore / 10 : Object.values(log.mealsOk || {}).filter(Boolean).length / meals,
       cardio: log.cardioMin / dailyCardio,
       rest: !wk,
@@ -247,7 +247,7 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openC
               </span>
               <b className="tile-n">
                 {ws.trained}
-                <small>/{ws.planned}</small>
+                {ws.planned > 0 && <small>/{ws.planned}</small>}
               </b>
               <span className="tile-s">{t('nesta semana')}</span>
             </div>
@@ -421,7 +421,8 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openC
           {weekDays().map((d) => {
             const k = ymd(d)
             const l = s.daily[k]
-            const cls = k > key ? 'fut' : l ? (l.dietScore >= 8 && l.trained !== 'nao' ? 'lit' : 'half') : k === key ? 'now' : 'off'
+            const tr = trainedOn(s, k) >= 1
+            const cls = k > key ? 'fut' : l ? (l.dietScore >= 8 && (l.trained !== 'nao' || tr) ? 'lit' : 'half') : tr ? 'half' : k === key ? 'now' : 'off'
             return (
               <span key={k} className={`fl fl-${cls}`}>
                 <i>{cls === 'off' ? <Icon name="x" size={14} stroke={3} /> : <Icon name="flame" size={18} />}</i>

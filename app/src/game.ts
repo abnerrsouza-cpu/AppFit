@@ -1,14 +1,15 @@
 // Pontos, níveis, medalhas e missões do dia. Tudo é calculado a partir dos dados da pessoa,
 // então não há o que sincronizar à parte e o valor nunca "desanda".
 import { t } from './i18n'
-import { type AppState, addDays, dietSimple, getProjeto, parseYmd, streak, today, weekStartOf, ymd } from './store'
+import { type AppState, addDays, dietSimple, getProjeto, trainedOn, workoutFor, parseYmd, streak, today, weekStartOf, ymd } from './store'
 
 // ---------- pontos ----------
 export const XP = { task: 10, checkin: 50, trained: 20, weekly: 100, photo: 30, promise: 20, goal: 50 }
 
 export function totalXP(s: AppState) {
   let xp = 0
-  for (const l of Object.values(s.daily)) xp += XP.checkin + (l.trained === 'sim' ? XP.trained : 0)
+  xp += Object.keys(s.daily).length * XP.checkin
+  for (const k of new Set([...Object.keys(s.daily), ...Object.keys(s.checks)])) if (trainedOn(s, k) >= 1) xp += XP.trained
   for (const day of Object.values(s.checks)) xp += Math.min(100, Object.values(day).filter(Boolean).length * XP.task)
   for (const w of Object.values(s.weekly)) xp += XP.weekly + (w.photoId ? XP.photo : 0)
   const pj = getProjeto(s)
@@ -206,11 +207,10 @@ export function projetoStats(s: AppState) {
   const logs = days.map((d) => s.daily[d]).filter(Boolean)
 
   const constancy = days.length ? logs.length / days.length : null
-  const planned = days.filter((d) => p.workouts.some((w) => w.weekday === parseYmd(d).getDay()))
+  const planned = days.filter((d) => workoutFor(p, parseYmd(d)))
   const trainScore = planned.length
     ? planned.reduce((acc, d) => {
-        const l = s.daily[d]
-        return acc + (!l ? 0 : l.trained === 'sim' ? 1 : l.trained === 'parcial' ? 0.5 : 0)
+        return acc + trainedOn(s, d)
       }, 0) / planned.length
     : null
   const diet = logs.length ? logs.reduce((a, l) => a + (l.dietScore || 0), 0) / logs.length / 10 : null

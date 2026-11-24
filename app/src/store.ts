@@ -508,12 +508,20 @@ export function weekDays(ref = new Date()) {
   return Array.from({ length: 7 }, (_, i) => addDays(ws, i))
 }
 
+/** Quanto treinou no dia: prestação de contas OU "treinei hoje" marcado (o que for maior). 1, 0,5 ou 0. */
+export function trainedOn(s: AppState, k: string) {
+  const l = s.daily[k]
+  const c = s.checks[k] || {}
+  const fromLog = !l ? 0 : l.trained === 'sim' ? 1 : l.trained === 'parcial' ? 0.5 : 0
+  return Math.max(fromLog, c.train || c.gym ? 1 : 0)
+}
+
 export function weekStats(s: AppState, ref = new Date()) {
   const days = weekDays(ref)
   const logs = days.map((d) => s.daily[ymd(d)])
   const done = logs.filter(Boolean) as DailyLog[]
-  const planned = days.filter((d) => s.profile.workouts.some((w) => w.weekday === d.getDay()) && d <= new Date()).length
-  const trained = done.filter((l) => l.trained === 'sim').length + done.filter((l) => l.trained === 'parcial').length * 0.5
+  const planned = days.filter((d) => workoutFor(s.profile, d) && d <= new Date()).length
+  const trained = days.reduce((a, d) => a + trainedOn(s, ymd(d)), 0)
   const cardio = done.reduce((a, l) => a + (l.cardioMin || 0), 0)
   const diet = done.length ? done.reduce((a, l) => a + l.dietScore, 0) / done.length : 0
   const focus = done.length ? done.reduce((a, l) => a + l.focus, 0) / done.length : 0
