@@ -8,6 +8,7 @@ lines = ['// Gerado por scripts/i18n/build.py — edite as partes em scripts/i18
          'export const DICT: Record<string, [string, string]> = {']
 for k in sorted(D):
     en, es = D[k]
+    en = en.replace('Sem Desculpa', 'No Excuses')  # nome do produto em inglês
     lines.append(f'  {json.dumps(k, ensure_ascii=False)}: [{json.dumps(en, ensure_ascii=False)}, {json.dumps(es, ensure_ascii=False)}],')
 lines.append('}')
 open(os.path.join(here, '..', '..', 'src', 'i18n-dict.ts'), 'w').write('\n'.join(lines) + '\n')

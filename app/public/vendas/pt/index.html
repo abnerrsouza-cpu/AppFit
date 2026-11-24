@@ -1,0 +1,980 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#070b14" />
+<title>Sem Desculpa · a IA que te cobra o dia inteiro</title>
+<meta name="description" content="Treino, dieta e prestação de contas com uma IA que te cobra no celular, o dia inteiro, por 90 dias." />
+<link rel="icon" href="../../favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<!-- Pixel/Analytics: cole aqui o código do Meta Pixel ou GA4. A página chama fbq('trackCustom', etapa) em cada etapa. -->
+<style>
+/* Funil em telas cheias. Fora do celular: escuro. Dentro do celular: o app de verdade (tema claro). */
+:root {
+  --bg: #070b14;
+  --ink: #f3f6ff;
+  --ink-2: #a5afc4;
+  --ink-3: #6c768c;
+  --gray-bg: #111318;
+  --gray-card: #1c1f26;
+  --blue: #2f7bff;
+  --blue-2: #1557d6;
+  --blue-soft: rgba(47, 123, 255, 0.14);
+  --good: #16a34a;
+  --bad: #ef4444;
+  --gold: #ffcf4a;
+  /* app (claro) */
+  --a-bg: #f3f6fb;
+  --a-surface: #ffffff;
+  --a-fg: #0f1420;
+  --a-fg2: #5b6475;
+  --a-line: #e6eaf2;
+  --font: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); -webkit-font-smoothing: antialiased; }
+body { min-height: 100dvh; overflow-x: hidden; }
+button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; padding: 0; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.step { display: none; min-height: 100dvh; padding: max(24px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(28px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left)); }
+.step.on { display: flex; flex-direction: column; align-items: center; animation: fadeIn .5s ease; }
+.wrap { width: 100%; max-width: 460px; display: flex; flex-direction: column; gap: 18px; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
+h1, h2 { margin: 0; letter-spacing: -0.035em; line-height: 1.08; text-wrap: balance; }
+h1 { font-size: clamp(2rem, 9vw, 2.7rem); font-weight: 800; }
+h2 { font-size: clamp(1.6rem, 7vw, 2.1rem); font-weight: 800; }
+p { margin: 0; line-height: 1.55; }
+.eyebrow { font-size: .72rem; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-3); }
+.muted { color: var(--ink-2); }
+.cta { width: 100%; padding: 18px 22px; border-radius: 999px; background: linear-gradient(135deg, var(--blue), var(--blue-2)); color: #fff; font-weight: 800; font-size: 1.05rem; box-shadow: 0 16px 40px -14px rgba(47,123,255,.75); transition: transform .12s; text-align: center; text-decoration: none; display: block; }
+.cta:active { transform: scale(.97); }
+.brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1rem; }
+.logo { width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(140deg, #3b82f6, #1d4ed8); display: grid; place-items: center; color: #fff; }
+.input { width: 100%; padding: 16px 18px; border-radius: 18px; border: 1px solid #262c3a; background: #10141d; color: var(--ink); font: inherit; font-size: 1.05rem; outline: none; }
+.input:focus { border-color: var(--blue); }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.lbl { font-size: .8rem; color: var(--ink-2); font-weight: 600; display: flex; flex-direction: column; gap: 6px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { padding: 12px 16px; border-radius: 999px; background: #141822; border: 1px solid #262c3a; font-weight: 600; font-size: .92rem; }
+.chip.on { background: linear-gradient(135deg, var(--blue), var(--blue-2)); border-color: transparent; }
+svg.i { width: 1em; height: 1em; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: -0.125em; }
+
+/* ---------- 0. abertura ---------- */
+#s-intro { justify-content: center; background: radial-gradient(120% 70% at 50% 0%, #142449 0%, var(--bg) 60%); }
+
+/* ---------- 1. vida sem a IA ---------- */
+#s-sem { background: var(--gray-bg); }
+.sem-head { display: flex; justify-content: space-between; color: var(--ink-3); font-size: .8rem; }
+.clock { font-variant-numeric: tabular-nums; font-weight: 800; font-size: 2.6rem; letter-spacing: -0.04em; color: #c9ced9; }
+.thoughts { display: flex; flex-direction: column; gap: 10px; min-height: 52vh; filter: saturate(.3); }
+.th { align-self: flex-start; max-width: 88%; padding: 12px 15px; border-radius: 6px 20px 20px 20px; background: var(--gray-card); color: #cfd3dc; font-size: .98rem; line-height: 1.45; animation: pop .35s ease; }
+.th small { display: block; color: var(--ink-3); font-size: .7rem; margin-top: 4px; }
+.th.me { align-self: flex-end; border-radius: 20px 6px 20px 20px; background: #282b34; }
+.th.typing { color: var(--ink-3); letter-spacing: .3em; }
+@keyframes pop { from { opacity: 0; transform: translateY(8px) scale(.97) } to { opacity: 1; transform: none } }
+.sem-end { display: none; flex-direction: column; gap: 14px; }
+.sem-end.on { display: flex; animation: fadeIn .6s ease; }
+.activate { animation: glow 1.6s ease-in-out infinite; }
+@keyframes glow { 50% { box-shadow: 0 0 0 10px rgba(47,123,255,.15), 0 16px 50px -10px rgba(47,123,255,.9) } }
+
+/* ---------- 2. ativação ---------- */
+#s-ativa { justify-content: center; text-align: center; background: radial-gradient(80% 50% at 50% 45%, #0f2150 0%, var(--bg) 70%); }
+.orb { width: 150px; height: 150px; margin: 0 auto 26px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #6aa8ff, #1557d6 60%, #0a2a6e); box-shadow: 0 0 80px rgba(47,123,255,.6); display: grid; place-items: center; animation: breathe 1.4s ease-in-out infinite; color: #fff; font-size: 54px; }
+@keyframes breathe { 50% { transform: scale(1.07); box-shadow: 0 0 120px rgba(47,123,255,.85) } }
+.boot { font-family: ui-monospace, Menlo, monospace; font-size: .85rem; color: #9fc2ff; text-align: left; display: inline-block; min-height: 9em; white-space: pre; }
+
+/* ---------- 3. o app de verdade ---------- */
+#s-app { background: radial-gradient(90% 40% at 50% 0%, #11204a 0%, var(--bg) 60%); }
+.hud { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.hud-pill { padding: 7px 12px; border-radius: 999px; background: rgba(255,255,255,.07); font-size: .8rem; font-weight: 700; display: inline-flex; gap: 6px; align-items: center; }
+.mission { text-align: center; font-size: .95rem; color: var(--ink-2); min-height: 2.8em; display: grid; place-items: center; }
+.mission b { color: #fff; }
+.phone { position: relative; width: min(100%, 340px); aspect-ratio: 9 / 19.2; margin: 0 auto; border-radius: 48px; padding: 11px; background: linear-gradient(145deg, #2b2f38, #0c0e12); box-shadow: 0 30px 80px -20px rgba(0,0,0,.8), inset 0 0 0 2px #3a3f4a; }
+.scr { position: relative; width: 100%; height: 100%; border-radius: 38px; overflow: hidden; background: var(--a-bg); color: var(--a-fg); }
+.island { position: absolute; top: 9px; left: 50%; transform: translateX(-50%); width: 90px; height: 26px; border-radius: 20px; background: #000; z-index: 30; }
+.sbar { position: absolute; top: 0; left: 0; right: 0; height: 44px; display: flex; justify-content: space-between; align-items: center; padding: 6px 24px 0; font-size: .74rem; font-weight: 800; z-index: 25; }
+.sbar.light { color: #fff; }
+.view { position: absolute; inset: 0; padding: 50px 14px 16px; display: none; flex-direction: column; gap: 10px; overflow: hidden; animation: vIn .35s ease; }
+.view.on { display: flex; }
+@keyframes vIn { from { opacity: 0; transform: scale(.985) } to { opacity: 1; transform: none } }
+/* tela de início do celular */
+#v-home { background: radial-gradient(120% 80% at 30% 10%, #3157c9, #0d1a45 70%); padding-top: 70px; }
+.apps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px 10px; padding: 0 6px; }
+.appi { display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: .58rem; color: #fff; font-weight: 600; }
+.appi span { width: 52px; height: 52px; border-radius: 14px; background: rgba(255,255,255,.18); }
+.appi.sd span { background: linear-gradient(140deg, #3b82f6, #1d4ed8); display: grid; place-items: center; color: #fff; font-size: 26px; box-shadow: 0 0 0 0 rgba(255,255,255,.6); animation: tapme 1.4s ease-out infinite; }
+@keyframes tapme { 0% { box-shadow: 0 0 0 0 rgba(255,255,255,.65) } 100% { box-shadow: 0 0 0 16px rgba(255,255,255,0) } }
+.hint { position: absolute; left: 50%; transform: translateX(-50%); padding: 7px 12px; border-radius: 999px; background: rgba(0,0,0,.6); color: #fff; font-size: .72rem; font-weight: 700; white-space: nowrap; z-index: 20; }
+/* abertura */
+#v-intro { background: radial-gradient(90% 60% at 50% 30%, #13306f, #050a18 75%); color: #fff; align-items: center; text-align: center; padding-top: 58px; }
+.in-pill { padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,.12); font-size: .62rem; font-weight: 800; letter-spacing: .14em; }
+.in-h { font-size: 1.55rem; font-weight: 800; letter-spacing: -.03em; line-height: 1.05; }
+.in-ph { position: relative; width: 78%; aspect-ratio: 3 / 4; border-radius: 22px; overflow: hidden; border: 2px solid rgba(255,255,255,.25); box-shadow: 0 0 40px rgba(47,123,255,.35); animation: zoom 5s ease forwards; }
+.in-ph canvas { width: 100%; height: 100%; display: block; }
+.in-ph i { position: absolute; top: 8px; right: 8px; font-style: normal; font-size: .52rem; font-weight: 800; letter-spacing: .1em; padding: 3px 7px; border-radius: 999px; background: rgba(0,0,0,.5); }
+@keyframes zoom { from { transform: scale(.94) } to { transform: scale(1) } }
+.in-q { margin: auto 0; font-size: 1.45rem; font-weight: 800; letter-spacing: -.02em; line-height: 1.15; padding: 0 8px; animation: fadeIn .6s ease; }
+.in-foot { margin-top: auto; font-size: .7rem; color: rgba(255,255,255,.75); }
+.in-bar { width: 86%; height: 4px; border-radius: 4px; background: rgba(255,255,255,.18); overflow: hidden; margin-bottom: 4px; }
+.in-bar span { display: block; height: 100%; width: 0; background: var(--blue); }
+/* tela Hoje */
+.top { display: flex; align-items: center; gap: 8px; }
+.av { width: 34px; height: 34px; border-radius: 50%; overflow: hidden; background: #dbe6ff; border: 2px solid var(--blue); }
+.av canvas { width: 100%; height: 100%; }
+.top small { display: block; font-size: .6rem; color: var(--a-fg2); }
+.top b { font-size: .8rem; }
+.bell { margin-left: auto; width: 32px; height: 32px; border-radius: 50%; background: #fff; display: grid; place-items: center; box-shadow: 0 4px 12px rgba(15,20,32,.08); position: relative; }
+.bell::after { content: ''; position: absolute; top: 5px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--bad); }
+.bh { font-size: 1.12rem; font-weight: 500; letter-spacing: -.02em; line-height: 1.15; }
+.bh b { display: block; font-weight: 800; font-size: 1.22rem; }
+.card { background: var(--a-surface); border-radius: 18px; padding: 12px; box-shadow: 0 6px 18px -10px rgba(15,20,32,.18); }
+.prog { background: linear-gradient(160deg, #10162a, #1b2440); color: #fff; display: flex; gap: 12px; align-items: center; }
+.ring { position: relative; width: 70px; height: 70px; flex: none; }
+.ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring circle { fill: none; stroke-width: 8; }
+.ring .bgc { stroke: rgba(255,255,255,.12); }
+.ring .fgc { stroke: var(--blue); stroke-linecap: round; transition: stroke-dashoffset .8s ease; }
+.ring b { position: absolute; inset: 0; display: grid; place-items: center; font-size: 1.1rem; font-weight: 800; }
+.leg { display: flex; flex-direction: column; gap: 4px; font-size: .64rem; flex: 1; }
+.leg span { display: flex; justify-content: space-between; color: rgba(255,255,255,.75); }
+.leg span b { color: #fff; }
+.now { border: 2px solid var(--blue); display: flex; align-items: center; gap: 10px; }
+.now .ic { width: 34px; height: 34px; border-radius: 10px; background: var(--blue-soft); color: var(--blue); display: grid; place-items: center; flex: none; }
+.now small { display: block; font-size: .56rem; font-weight: 800; letter-spacing: .12em; color: var(--blue); }
+.now b { font-size: .8rem; }
+.now p { font-size: .62rem; color: var(--a-fg2); line-height: 1.3; }
+.now .go { margin-left: auto; padding: 7px 11px; border-radius: 999px; background: var(--blue); color: #fff; font-size: .66rem; font-weight: 800; white-space: nowrap; transition: transform .15s; }
+.now .go.press { transform: scale(.9); }
+.now.done { border-color: var(--good); }
+.now.done .go { background: var(--good); }
+.mis { display: flex; flex-direction: column; gap: 6px; }
+.mis-h { display: flex; justify-content: space-between; font-size: .7rem; font-weight: 800; }
+.mis-h small { color: var(--a-fg2); font-weight: 600; }
+.mi { display: flex; align-items: center; gap: 8px; font-size: .68rem; padding: 7px 8px; border-radius: 12px; border: 1px solid var(--a-line); }
+.mi i { margin-left: auto; font-style: normal; font-size: .58rem; font-weight: 800; color: #7c3aed; background: rgba(124,58,237,.1); padding: 2px 7px; border-radius: 999px; }
+.mi.ok { border-color: rgba(22,163,74,.4); background: rgba(22,163,74,.06); }
+.nav { margin-top: auto; display: grid; grid-template-columns: repeat(6, 1fr); background: #111318; border-radius: 999px; padding: 5px; color: #8a909e; }
+.nav span { display: flex; flex-direction: column; align-items: center; font-size: .44rem; gap: 2px; padding: 5px 0; border-radius: 999px; }
+.nav span svg { font-size: 13px; }
+.nav span.on { background: var(--blue); color: #fff; }
+/* tela de bloqueio */
+#v-lock { background: linear-gradient(180deg, #1b2a55, #0b1022); color: #fff; align-items: center; padding-top: 64px; }
+.lk-d { font-size: .78rem; font-weight: 600; opacity: .85; text-transform: capitalize; }
+.lk-t { font-size: 3.6rem; font-weight: 700; letter-spacing: -.03em; line-height: 1; margin-bottom: 14px; }
+.nts { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+.nt { width: 100%; text-align: left; display: flex; gap: 10px; padding: 10px 11px; border-radius: 18px; background: rgba(40,44,56,.86); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); animation: drop .45s ease; color: #fff; }
+.nt.old { opacity: .55; transform: scale(.97); }
+@keyframes drop { from { opacity: 0; transform: translateY(-16px) } to { opacity: 1; transform: none } }
+.nt-ic { width: 32px; height: 32px; flex: none; border-radius: 8px; background: linear-gradient(140deg, #3b82f6, #1d4ed8); display: grid; place-items: center; font-size: 17px; }
+.nt div { flex: 1; min-width: 0; }
+.nt b { display: block; font-size: .74rem; line-height: 1.25; }
+.nt em { display: block; font-style: normal; font-size: .64rem; font-weight: 700; color: #d6dae3; }
+.nt p { font-size: .7rem; line-height: 1.3; color: #e7e9ee; }
+.nt time { font-size: .58rem; color: #b6bcc8; flex: none; }
+.lk-tap { margin-top: 14px; font-size: .68rem; opacity: .75; animation: blink 1.4s ease-in-out infinite; }
+@keyframes blink { 50% { opacity: .3 } }
+/* seu dia */
+.list .li { display: flex; align-items: center; gap: 8px; padding: 8px 2px; font-size: .7rem; border-top: 1px solid var(--a-line); }
+.list .li:first-of-type { border-top: 0; }
+.li time { width: 34px; color: var(--a-fg2); font-weight: 700; font-variant-numeric: tabular-nums; }
+.li .tk { margin-left: auto; width: 20px; height: 20px; border-radius: 50%; border: 2px solid #cfd6e3; display: grid; place-items: center; color: #fff; font-size: 11px; transition: all .25s; }
+.li.ok .tk { background: var(--blue); border-color: var(--blue); }
+.li.ok .nm { text-decoration: line-through; color: var(--a-fg2); }
+.li.cur { background: var(--blue-soft); border-radius: 10px; }
+/* treino */
+.ph { font-size: 1.15rem; font-weight: 800; letter-spacing: -.02em; }
+.ex .ei { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-top: 1px solid var(--a-line); font-size: .72rem; }
+.ex .ei:first-of-type { border-top: 0; }
+.ei .n { width: 20px; height: 20px; border-radius: 50%; background: #eef1f7; display: grid; place-items: center; font-weight: 800; font-size: .6rem; color: var(--a-fg2); }
+.ei .s { margin-left: auto; padding: 3px 7px; border-radius: 8px; background: var(--blue-soft); color: var(--blue); font-weight: 800; font-size: .66rem; }
+.ei.ok .n { background: var(--good); color: #fff; }
+.ei.ok .nm { text-decoration: line-through; color: var(--a-fg2); }
+.rest { display: flex; align-items: center; gap: 8px; padding: 9px 11px; border-radius: 14px; background: var(--blue); color: #fff; font-weight: 800; font-size: .8rem; }
+.rest b { font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+/* prestação de contas */
+.ci-bars { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+.ci-bars i { height: 4px; border-radius: 4px; background: #dfe4ee; }
+.ci-bars i.on { background: var(--blue); }
+.ci-q { font-size: 1.22rem; font-weight: 800; letter-spacing: -.02em; line-height: 1.15; margin-top: 8px; }
+.opt { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 14px; background: #fff; border: 2px solid var(--a-line); font-size: .78rem; font-weight: 700; transition: all .2s; }
+.opt i { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #cfd6e3; }
+.opt.pick { border-color: var(--blue); background: var(--blue-soft); }
+.opt.pick i { border: 5px solid var(--blue); }
+.pledge { margin-top: 8px; padding: 18px; border-radius: 18px; border: 2px dashed #cfd6e3; text-align: center; font-weight: 800; font-size: .85rem; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: all .3s; }
+.pledge span { width: 46px; height: 46px; border-radius: 50%; background: #eef1f7; display: grid; place-items: center; color: var(--a-fg2); font-size: 20px; }
+.pledge.pick { border-style: solid; border-color: var(--good); background: rgba(22,163,74,.08); }
+.pledge.pick span { background: var(--good); color: #fff; }
+.res { align-items: flex-start; justify-content: center; }
+.res-ic { width: 54px; height: 54px; border-radius: 16px; background: var(--good); color: #fff; display: grid; place-items: center; font-size: 28px; }
+.res h3 { margin: 6px 0 0; font-size: 1.35rem; letter-spacing: -.02em; line-height: 1.1; }
+.res p { font-size: .76rem; color: var(--a-fg2); }
+.xp { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 14px; background: rgba(124,58,237,.08); font-size: .7rem; }
+.xp b { font-size: 1.4rem; color: #7c3aed; }
+/* juramento */
+#v-oath { background: var(--a-bg); }
+.oath { padding: 14px; border-radius: 16px; border-left: 4px solid var(--blue); background: rgba(47,123,255,.07); font-size: .8rem; font-weight: 700; font-style: italic; line-height: 1.45; }
+.hold { position: relative; overflow: hidden; height: 50px; border-radius: 999px; border: 2px solid var(--blue); background: #fff; color: var(--blue); font-weight: 800; font-size: .85rem; user-select: none; -webkit-user-select: none; touch-action: none; -webkit-touch-callout: none; }
+.hold span { position: absolute; inset: 0; background: rgba(47,123,255,.25); transform-origin: left; transform: scaleX(var(--p, 0)); }
+.hold b { position: relative; }
+.hold.done { border-color: var(--good); color: #fff; }
+.hold.done span { background: var(--good); transform: scaleX(1); }
+.party { position: absolute; inset: 0; z-index: 40; display: none; align-content: center; justify-items: center; background: rgba(8,12,24,.55); padding: 18px; }
+.party.on { display: grid; animation: fadeIn .3s ease; }
+.pcard { width: 100%; background: #fff; border-radius: 24px; padding: 18px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.pk { padding: 3px 10px; border-radius: 999px; background: #fdf3d3; color: #a16207; font-size: .58rem; font-weight: 800; letter-spacing: .12em; }
+.pm { width: 64px; height: 64px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #8ab4ff, #1d4ed8); color: #fff; display: grid; place-items: center; font-size: 30px; }
+.pcard h3 { margin: 0; font-size: 1.2rem; letter-spacing: -.02em; }
+.pcard p { font-size: .72rem; color: var(--a-fg2); }
+.conf i { position: absolute; top: -10px; width: 7px; height: 11px; border-radius: 2px; animation: fall linear forwards; }
+@keyframes fall { to { transform: translateY(105vh) rotate(720deg) } }
+/* ranking */
+.rk .ri { display: flex; align-items: center; gap: 8px; padding: 8px 4px; font-size: .72rem; border-top: 1px solid var(--a-line); }
+.rk .ri:first-of-type { border-top: 0; }
+.ri .p { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: .6rem; color: #fff; background: #9aa5b8; }
+.ri .p.g { background: linear-gradient(135deg, #ffd65a, #f0a500); }
+.ri .a { width: 26px; height: 26px; border-radius: 50%; background: #dbe6ff; color: var(--blue); display: grid; place-items: center; font-weight: 800; font-size: .66rem; overflow: hidden; }
+.ri .pts { margin-left: auto; font-weight: 800; }
+.ri.me { background: var(--blue-soft); border-radius: 12px; border-top-color: transparent; }
+.tabs { display: grid; grid-template-columns: repeat(3, 1fr); background: #fff; border-radius: 999px; padding: 4px; font-size: .66rem; font-weight: 700; text-align: center; }
+.tabs span { padding: 7px 0; border-radius: 999px; color: var(--a-fg2); }
+.tabs span.on { background: #111318; color: #fff; }
+.xp-float { position: fixed; left: 50%; top: 42%; transform: translateX(-50%); font-weight: 800; font-size: 1.5rem; color: #c4b5fd; text-shadow: 0 4px 20px rgba(124,58,237,.6); pointer-events: none; animation: rise 1.1s ease forwards; z-index: 99; }
+@keyframes rise { to { transform: translate(-50%, -60px); opacity: 0 } }
+.skip { align-self: center; color: var(--ink-3); font-size: .8rem; padding: 8px; }
+
+/* ---------- 4. 90 dias ---------- */
+.counter { display: flex; justify-content: space-around; text-align: center; }
+.counter div { display: flex; flex-direction: column; }
+.counter b { font-size: 2.3rem; font-weight: 800; letter-spacing: -.04em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.counter small { color: var(--ink-2); font-size: .78rem; }
+.cal { display: grid; grid-template-columns: repeat(15, 1fr); gap: 4px; }
+.cal i { aspect-ratio: 1; border-radius: 4px; background: rgba(255,255,255,.07); transition: background .2s; }
+.cal i.lit { background: linear-gradient(135deg, #3b82f6, #60a5fa); box-shadow: 0 0 8px rgba(59,130,246,.5); }
+.ba { position: relative; width: 100%; aspect-ratio: 4 / 5; border-radius: 24px; overflow: hidden; background: #111; touch-action: pan-y; user-select: none; }
+.ba canvas, .ba img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ba-top { position: absolute; inset: 0; }
+.ba-line { position: absolute; top: 0; bottom: 0; width: 3px; margin-left: -1.5px; background: #fff; pointer-events: none; }
+.ba-line::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 40px; height: 40px; border-radius: 50%; background: var(--blue); border: 3px solid #fff; }
+.ba-tag { position: absolute; bottom: 12px; padding: 6px 12px; border-radius: 99px; background: rgba(0,0,0,.6); font-size: .78rem; font-weight: 700; }
+.ba-tag.l { left: 12px } .ba-tag.r { right: 12px }
+.story { display: flex; gap: 12px; align-items: flex-start; padding: 16px; border-radius: 20px; background: rgba(255,255,255,.06); }
+.story-av { width: 46px; height: 46px; flex: none; border-radius: 50%; background: linear-gradient(140deg, var(--blue), var(--blue-2)); display: grid; place-items: center; font-weight: 800; }
+.story p { font-style: italic; }
+.story small { color: var(--ink-3); display: block; margin-top: 6px; }
+.disclaimer { font-size: .7rem; color: var(--ink-3); text-align: center; line-height: 1.5; }
+
+/* ---------- 5. quiz ---------- */
+.qbar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.qbar i { height: 5px; border-radius: 5px; background: rgba(255,255,255,.1); }
+.qbar i.on { background: linear-gradient(90deg, var(--blue), var(--blue-2)); }
+.qopts { display: flex; flex-direction: column; gap: 10px; }
+.qopt { display: flex; align-items: center; gap: 14px; padding: 18px; border-radius: 20px; background: #10141d; border: 2px solid #212736; text-align: left; font-weight: 700; font-size: 1rem; transition: all .2s; }
+.qopt small { display: block; font-weight: 500; color: var(--ink-2); font-size: .8rem; }
+.qopt .qn { width: 34px; height: 34px; flex: none; border-radius: 50%; background: rgba(255,255,255,.07); display: grid; place-items: center; font-weight: 800; }
+.qopt.on { border-color: var(--blue); background: var(--blue-soft); }
+.months { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.month { padding: 14px 6px; border-radius: 16px; background: #10141d; border: 2px solid #212736; font-weight: 700; text-transform: capitalize; font-size: .9rem; position: relative; }
+.month small { display: block; font-size: .65rem; font-weight: 500; color: var(--ink-3); }
+.month.ia { border-color: rgba(47,123,255,.5); }
+.month.ia::after { content: 'com a IA'; position: absolute; top: -9px; left: 50%; transform: translateX(-50%); padding: 1px 7px; border-radius: 99px; background: var(--blue-2); font-size: .58rem; font-weight: 800; white-space: nowrap; }
+.month.on { background: var(--blue-soft); border-color: var(--blue); }
+.diag { padding: 20px; border-radius: 24px; background: linear-gradient(160deg, #13244d, #0c1430); border: 1px solid rgba(47,123,255,.35); display: flex; flex-direction: column; gap: 12px; }
+.diag-row { display: flex; justify-content: space-between; gap: 10px; font-size: .9rem; padding: 8px 0; border-top: 1px solid rgba(255,255,255,.08); }
+.diag-row b { text-align: right; }
+
+/* ---------- 6. VSL + compra ---------- */
+.vsl-box { width: 100%; border-radius: 20px; overflow: hidden; background: #000; }
+.vsl-empty { aspect-ratio: 9 / 16; max-height: 70vh; display: grid; place-items: center; text-align: center; padding: 24px; color: var(--ink-3); font-size: .85rem; border: 2px dashed #262c3a; border-radius: 20px; }
+.wait { text-align: center; color: var(--ink-3); font-size: .85rem; }
+.buy { display: none; flex-direction: column; gap: 12px; padding: 20px; border-radius: 24px; background: #fff; color: #0e1a33; }
+.buy.on { display: flex; animation: fadeIn .5s ease; }
+.price { display: flex; align-items: baseline; gap: 10px; }
+.price b { font-size: 2rem; letter-spacing: -.03em; }
+.price s { color: #8a94a8; }
+.buy ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: .92rem; }
+.buy li { display: flex; gap: 8px; align-items: flex-start; }
+.buy li svg { color: var(--good); flex: none; margin-top: 3px; }
+.secure { font-size: .75rem; color: #5b6475; text-align: center; }
+</style>
+</head>
+<body>
+
+<!-- 0. Abertura: personaliza o resto do funil -->
+<section class="step on" id="s-intro">
+  <div class="wrap">
+    <span class="brand"><span class="logo" data-ic="flame"></span> Sem Desculpa</span>
+    <h1>Quantas segundas-feiras você já prometeu começar?</h1>
+    <p class="muted">Antes, um teste rápido. Leva 2 minutos e é sobre você.</p>
+    <input class="input" id="nome" placeholder="Seu primeiro nome" autocomplete="given-name" maxlength="20" />
+    <div class="row2">
+      <label class="lbl">Peso hoje (kg)<input class="input" id="peso" inputmode="decimal" placeholder="88" maxlength="5" /></label>
+      <label class="lbl">Meta (kg)<input class="input" id="meta" inputmode="decimal" placeholder="80" maxlength="5" /></label>
+    </div>
+    <div class="chips" id="goal">
+      <button class="chip on" data-v="perder gordura">Perder gordura</button>
+      <button class="chip" data-v="definir">Definir</button>
+      <button class="chip" data-v="ganhar massa">Ganhar massa</button>
+    </div>
+    <button class="cta" id="go-sem">Começar</button>
+  </div>
+</section>
+
+<!-- 1. Um dia sem a IA -->
+<section class="step" id="s-sem">
+  <div class="wrap">
+    <div class="sem-head"><span>Um dia normal seu</span><span id="sem-day">segunda-feira</span></div>
+    <div class="clock" id="sem-clock">06:30</div>
+    <div class="thoughts" id="thoughts"></div>
+    <div class="sem-end" id="sem-end">
+      <h2>Sozinho, você vira juiz e réu ao mesmo tempo. E sempre se absolve.</h2>
+      <button class="cta activate" id="ativar">Ativar a IA Sem Desculpa</button>
+    </div>
+  </div>
+</section>
+
+<!-- 2. Ativação -->
+<section class="step" id="s-ativa">
+  <div class="wrap">
+    <div class="orb" data-ic="flame"></div>
+    <div><div class="boot" id="boot"></div></div>
+  </div>
+</section>
+
+<!-- 3. O app de verdade, dentro do celular -->
+<section class="step" id="s-app">
+  <div class="wrap" style="gap:12px">
+    <div class="hud">
+      <span class="hud-pill"><span data-ic="calendar"></span> Dia <b id="hud-day">1</b> de 90</span>
+      <span class="hud-pill"><span data-ic="star"></span> <b id="hud-xp">0</b> pontos</span>
+      <span class="hud-pill"><span data-ic="flame"></span> <b id="hud-streak">0</b></span>
+    </div>
+    <div class="mission" id="mission">Este é o seu celular. <b>Toque no app Sem Desculpa.</b></div>
+    <div class="phone">
+      <div class="scr" id="scr">
+        <div class="island"></div>
+        <div class="sbar" id="sbar"><span id="sb-time">06:30</span><span>●●● ▮</span></div>
+
+        <!-- tela de início do celular -->
+        <div class="view on" id="v-home">
+          <div class="apps" id="apps"></div>
+          <div class="hint" style="bottom:26%">toque no app para abrir</div>
+        </div>
+
+        <!-- abertura -->
+        <div class="view" id="v-intro">
+          <span class="in-pill" id="in-pill">DIA 1 DE 90</span>
+          <div class="in-h" id="in-h">Esse é você</div>
+          <div class="in-ph" id="in-ph"><canvas id="in-cv" width="600" height="800"></canvas><i>ILUSTRAÇÃO</i></div>
+          <div class="in-q" id="in-q" style="display:none"></div>
+          <div class="in-foot">Lembre por que você começou.</div>
+          <div class="in-bar"><span id="in-bar"></span></div>
+        </div>
+
+        <!-- Hoje -->
+        <div class="view" id="v-hoje">
+          <div class="top"><span class="av"><canvas id="av-cv" width="80" height="80"></canvas></span><span><small id="hi">Bom dia,</small><b id="hi-n">você</b></span><span class="bell" data-ic="bell"></span></div>
+          <div class="bh"><span id="bh-d">Dia 1 de 90.</span><b>Sem desculpa hoje.</b></div>
+          <div class="card prog">
+            <div class="ring"><svg viewBox="0 0 80 80"><circle class="bgc" cx="40" cy="40" r="32" /><circle class="fgc" id="ring" cx="40" cy="40" r="32" stroke-dasharray="201" stroke-dashoffset="201" /></svg><b id="ring-n">0%</b></div>
+            <div class="leg"><span>Treino <b id="lg-t">Falta</b></span><span>Dieta <b id="lg-d">0%</b></span><span>Sequência <b id="lg-s">0 dias</b></span></div>
+          </div>
+          <div class="card now" id="now"><span class="ic" id="now-ic" data-ic="food"></span><span><small id="now-l">AGORA</small><b id="now-t">Café da manhã</b><p id="now-d">3 ovos mexidos, 1 pão integral</p></span><span class="go" id="now-go">Feito</span></div>
+          <div class="card mis">
+            <div class="mis-h">Missões de hoje <small id="mis-c">0 de 3</small></div>
+            <div class="mi" id="mi1"><span data-ic="check"></span> Marque 3 tarefas do seu dia <i>+30</i></div>
+            <div class="mi" id="mi2"><span data-ic="list"></span> Preste contas hoje à noite <i>+50</i></div>
+            <div class="mi" id="mi3"><span data-ic="star"></span> Faça o juramento do Projetinho <i>+20</i></div>
+          </div>
+          <div class="nav" id="nav"></div>
+        </div>
+
+        <!-- tela de bloqueio com as notificações -->
+        <div class="view" id="v-lock">
+          <div class="lk-d" id="lk-d">segunda-feira</div>
+          <div class="lk-t" id="lk-t">06:35</div>
+          <div class="nts" id="nts"></div>
+          <div class="lk-tap">toque na notificação</div>
+        </div>
+
+        <!-- Seu dia -->
+        <div class="view" id="v-dia">
+          <div class="ph">Seu dia</div>
+          <div class="card list" id="dia-list"></div>
+          <div class="nav" data-nav="0"></div>
+        </div>
+
+        <!-- Treino -->
+        <div class="view" id="v-treino">
+          <div class="ph">Treino e dieta</div>
+          <div class="card ex">
+            <div style="display:flex;justify-content:space-between;align-items:center"><span><small style="font-size:.6rem;color:var(--a-fg2);font-weight:700">Hoje · 18:30</small><b style="display:block;font-size:.95rem">Treino A · Peito e tríceps</b></span><b id="ex-c" style="color:var(--blue)">0/5</b></div>
+            <div id="ex-list"></div>
+          </div>
+          <div class="rest" id="rest"><span data-ic="watch"></span> Descanso <b id="rest-t">1:00</b></div>
+          <div class="nav" data-nav="1"></div>
+        </div>
+
+        <!-- Prestação de contas -->
+        <div class="view" id="v-ci">
+          <div class="ci-bars" id="ci-bars"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div style="font-size:.6rem;font-weight:800;letter-spacing:.14em;color:var(--a-fg2);margin-top:6px">PRESTAÇÃO DE CONTAS</div>
+          <div class="ci-q" id="ci-q">Você fez o treino de hoje?</div>
+          <div id="ci-b" style="display:flex;flex-direction:column;gap:8px"></div>
+        </div>
+
+        <!-- Resultado -->
+        <div class="view res" id="v-res">
+          <span class="res-ic" data-ic="check"></span>
+          <h3>Dia 1 pago. Isso é disciplina.</h3>
+          <p id="res-p">Sequência: 1 dia. Faltam 89.</p>
+          <div class="xp"><b>+130</b><span>pontos hoje<br /><span style="color:var(--a-fg2)">faltam 2 dias para a medalha de 3 dias</span></span></div>
+        </div>
+
+        <!-- Juramento do Projetinho -->
+        <div class="view" id="v-oath">
+          <div style="font-size:.6rem;font-weight:800;letter-spacing:.14em;color:var(--a-fg2)">PROJETINHO · PASSO 1 DE 11</div>
+          <div class="ci-q">Antes de tudo, um juramento.</div>
+          <p style="font-size:.72rem;color:var(--a-fg2)">Aqui é só entre você e você.</p>
+          <div class="oath" id="oath-t"></div>
+          <button class="hold" id="hold"><span></span><b id="hold-b">Segure para jurar</b></button>
+          <div class="party" id="party"><div class="conf" id="conf"></div><div class="pcard"><span class="pk">PROJETINHO COMEÇOU</span><span class="pm" data-ic="flame"></span><h3>Dia 1. Sem desculpa.</h3><p id="party-p">Faltam 90 dias. Volte amanhã para dizer se cumpriu sua promessa.</p></div></div>
+        </div>
+
+        <!-- Ranking -->
+        <div class="view" id="v-rank">
+          <div class="ph">Ranking da semana</div>
+          <div class="tabs"><span class="on">Geral</span><span>Grupos</span><span>Amigos</span></div>
+          <div class="card rk" id="rk"></div>
+          <div class="nav" data-nav="4"></div>
+        </div>
+      </div>
+    </div>
+    <button class="skip" id="skip">Pular a demonstração</button>
+  </div>
+</section>
+
+<!-- 4. 90 dias depois -->
+<section class="step" id="s-90">
+  <div class="wrap">
+    <span class="eyebrow">Agora imagine 90 dias assim</span>
+    <h2 id="t90">Isso foi 1 dia. Olha o que 90 fazem.</h2>
+    <div class="counter">
+      <div><b id="c-dias">0</b><small>dias cumpridos</small></div>
+      <div><b id="c-peso">0</b><small>kg</small></div>
+      <div><b id="c-cob">0</b><small>cobranças</small></div>
+    </div>
+    <div class="cal" id="cal"></div>
+    <div id="story-wrap" style="display:none;flex-direction:column;gap:14px">
+      <div class="ba" id="ba">
+        <div id="ba-after"></div>
+        <div class="ba-top" id="ba-top"><div id="ba-before"></div></div>
+        <div class="ba-line" id="ba-line" style="left:50%"></div>
+        <span class="ba-tag l" id="ba-l">Dia 1</span><span class="ba-tag r" id="ba-r">Dia 90</span>
+      </div>
+      <div class="story"><span class="story-av" id="story-av">R</span><div><p id="story-q"></p><small id="story-n"></small></div></div>
+      <p class="disclaimer" id="story-disc"></p>
+      <button class="cta" id="go-quiz">Quero a minha versão</button>
+    </div>
+  </div>
+</section>
+
+<!-- 5. Quiz -->
+<section class="step" id="s-quiz">
+  <div class="wrap">
+    <div class="qbar" id="qbar"><i></i><i></i><i></i></div>
+    <div id="quiz"></div>
+  </div>
+</section>
+
+<!-- 6. VSL obrigatória + compra -->
+<section class="step" id="s-vsl">
+  <div class="wrap">
+    <span class="eyebrow">Último passo</span>
+    <h2 id="vsl-title">Assista antes de continuar</h2>
+    <div class="vsl-box" id="vsl">
+      <!-- ============ COLE AQUI O EMBED DA VTURB (div + script) ============ -->
+
+      <!-- ===================================================================== -->
+      <div class="vsl-empty" id="vsl-empty">Espaço da VSL.<br />Cole o código de incorporação da VTurb no arquivo vendas/index.html, no local marcado.</div>
+    </div>
+    <p class="wait" id="wait">O botão de acesso aparece no fim do vídeo.</p>
+    <div class="buy" id="buy">
+      <b>Sem Desculpa · ciclo de 90 dias</b>
+      <div class="price"><s id="price-old"></s><b id="price">R$ 49,90</b></div>
+      <ul>
+        <li><span data-ic="check"></span> Notificações o dia inteiro, montadas com os seus dados</li>
+        <li><span data-ic="check"></span> Prestação de contas toda noite, com a sua carta</li>
+        <li><span data-ic="check"></span> Treino e dieta por dia, inclusive a partir do PDF do seu profissional</li>
+        <li><span data-ic="check"></span> Antes e depois semanal e abertura com as suas fotos</li>
+        <li><span data-ic="check"></span> Projetinho com juramento, metas, promessas e eficácia</li>
+        <li><span data-ic="check"></span> Ranking com amigos, grupos e geral</li>
+      </ul>
+      <a class="cta" id="buy-btn" href="#">Quero começar meu dia 1</a>
+      <p class="secure">Pagamento seguro pela Stripe. Garantia de 7 dias.</p>
+    </div>
+  </div>
+</section>
+
+<script>
+// ======================= CONFIGURAÇÃO (edite aqui) =======================
+const CONFIG = {
+  stripeLink: 'https://buy.stripe.com/SEU_LINK_AQUI', // link de pagamento da Stripe
+  price: 'R$ 49,90',
+  priceOld: '', // preço antigo riscado: só preencha se o produto já foi vendido por esse valor
+  ctaDelaySeconds: 90, // botão de compra aparece depois desse tempo na VSL (use o mesmo tempo do pitch)
+  // Cliente real (com autorização por escrito). Enquanto realCustomer for false,
+  // a página mostra uma ilustração e avisa que é simulação.
+  story: {
+    realCustomer: false,
+    name: 'Rafael',
+    age: 34,
+    city: 'Campinas, SP',
+    from: 98, // kg no dia 1
+    to: 81, // kg no dia 90
+    beforeImg: '', // ex.: '../img/rafael-antes.jpg'
+    afterImg: '', // ex.: '../img/rafael-depois.jpg'
+    quote: 'Eu sempre soube o que fazer. O que eu nunca tive foi alguém me cobrando às 21h30 quando eu queria pedir lanche.',
+  },
+}
+// ==========================================================================
+
+const $ = (id) => document.getElementById(id)
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+const track = (ev) => { try { window.fbq && fbq('trackCustom', ev); window.gtag && gtag('event', ev) } catch (e) {} }
+const state = { nome: 'você', goal: 'perder gordura', peso: 88, meta: 80, xp: 0, quiz: {}, skip: false }
+const WD = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado']
+const today = WD[new Date().getDay()]
+
+// ícones de traço (os mesmos do app)
+const P = {
+  flame: 'M12 22c4 0 7-3 7-7 0-4-3-6-4-9-1 2-2 3-4 3 0-2 0-4-1-6-3 3-5 7-5 12 0 4 3 7 7 7z',
+  check: 'M5 12l5 5L20 7', bell: 'M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0',
+  food: 'M7 3v8M5 3v4a2 2 0 0 0 4 0V3M7 11v10M17 3c-2 0-3 2-3 5s1 4 3 4v9', list: 'M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01',
+  star: 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z', calendar: 'M4 5h16v16H4zM4 9h16M9 3v4M15 3v4',
+  watch: 'M12 8v4l2 2M9 3h6M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16z', dumbbell: 'M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12',
+  sun: 'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2', photo: 'M4 5h16v14H4zM12 5v14',
+  trophy: 'M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3', user: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0',
+  lock: 'M6 11h12v10H6zM8 11V7a4 4 0 0 1 8 0v4',
+}
+const ic = (n) => `<svg class="i" viewBox="0 0 24 24"><path d="${P[n] || ''}"/></svg>`
+document.querySelectorAll('[data-ic]').forEach((el) => (el.innerHTML = ic(el.dataset.ic) + el.innerHTML))
+const NAV = [['sun', 'Hoje'], ['dumbbell', 'Treino e dieta'], ['photo', 'Evolução'], ['star', 'Projetinho'], ['trophy', 'Ranking'], ['user', 'Perfil']]
+const navHTML = (on) => NAV.map(([i, l], k) => `<span class="${k === on ? 'on' : ''}">${ic(i)}${l}</span>`).join('')
+$('nav').innerHTML = navHTML(0)
+document.querySelectorAll('[data-nav]').forEach((el) => (el.innerHTML = navHTML(+el.dataset.nav)))
+
+function show(id) {
+  document.querySelectorAll('.step').forEach((s) => s.classList.remove('on'))
+  $(id).classList.add('on')
+  window.scrollTo(0, 0)
+  track('funil_' + id.replace('s-', ''))
+}
+
+// som de notificação (liberado depois do primeiro toque) + vibração
+let actx
+function ding(strong) {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)()
+    const t = actx.currentTime
+    ;[880, 1320].forEach((f, i) => {
+      const o = actx.createOscillator(), g = actx.createGain()
+      o.type = 'sine'; o.frequency.value = f
+      g.gain.setValueAtTime(0, t + i * 0.12)
+      g.gain.linearRampToValueAtTime(strong ? 0.16 : 0.09, t + i * 0.12 + 0.01)
+      g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.12 + 0.35)
+      o.connect(g).connect(actx.destination); o.start(t + i * 0.12); o.stop(t + i * 0.12 + 0.4)
+    })
+  } catch (e) {}
+  try { navigator.vibrate && navigator.vibrate(strong ? [120, 60, 120] : 70) } catch (e) {}
+}
+
+// ---------- foto fictícia (ilustração desenhada, sem imagem de ninguém) ----------
+function drawFigure(c, fat) {
+  const W = c.width, H = c.height, g = c.getContext('2d'), k = W / 600
+  const bg = g.createLinearGradient(0, 0, 0, H)
+  bg.addColorStop(0, fat ? '#4a505c' : '#28407a'); bg.addColorStop(1, fat ? '#1d2027' : '#0b1430')
+  g.fillStyle = bg; g.fillRect(0, 0, W, H)
+  // "espelho de academia"
+  g.fillStyle = 'rgba(255,255,255,.05)'; g.fillRect(40 * k, 40 * k, W - 80 * k, H - 80 * k)
+  g.save(); g.translate(-30 * k, 10 * k); g.scale(k * 1.1, k * (H / W) * 0.8)
+  const cx = 300, skin = fat ? '#cfa58a' : '#c99877', waist = fat ? 128 : 84, sh = fat ? 146 : 160
+  const body = g.createLinearGradient(cx - sh, 0, cx + sh, 0)
+  body.addColorStop(0, '#a77a5f'); body.addColorStop(.5, skin); body.addColorStop(1, '#a77a5f')
+  g.fillStyle = skin
+  g.beginPath(); g.arc(cx, 160, 52, 0, 7); g.fill()
+  g.fillStyle = '#2b1d16'; g.beginPath(); g.arc(cx, 140, 54, Math.PI, 0); g.fill()
+  g.fillStyle = skin; g.fillRect(cx - 22, 200, 44, 40)
+  g.fillStyle = body
+  g.beginPath(); g.moveTo(cx - sh, 258); g.quadraticCurveTo(cx, 222, cx + sh, 258)
+  g.lineTo(cx + waist + (fat ? 28 : 0), 455); g.lineTo(cx + waist - 6, 528); g.lineTo(cx - waist + 6, 528); g.lineTo(cx - waist - (fat ? 28 : 0), 455); g.closePath(); g.fill()
+  g.strokeStyle = skin; g.lineCap = 'round'; g.lineWidth = fat ? 50 : 56
+  g.beginPath(); g.moveTo(cx - sh + 10, 280); g.lineTo(cx - sh - 26, 488); g.moveTo(cx + sh - 10, 280); g.lineTo(cx + sh + 26, 488); g.stroke()
+  g.fillStyle = '#1e3a8a'; g.fillRect(cx - waist + 2, 518, waist * 2 - 4, 120)
+  g.fillStyle = skin; g.fillRect(cx - waist + 12, 638, waist - 24, 120); g.fillRect(cx + 12, 638, waist - 24, 120)
+  g.strokeStyle = 'rgba(70,35,20,.35)'; g.lineWidth = 3
+  if (!fat) {
+    g.beginPath(); g.moveTo(cx, 300); g.lineTo(cx, 505)
+    ;[370, 415, 458].forEach((y) => { g.moveTo(cx - 40, y); g.lineTo(cx + 40, y) })
+    g.moveTo(cx - 95, 318); g.quadraticCurveTo(cx - 48, 350, cx - 4, 318); g.moveTo(cx + 95, 318); g.quadraticCurveTo(cx + 48, 350, cx + 4, 318); g.stroke()
+  } else {
+    g.beginPath(); g.moveTo(cx - 80, 450); g.quadraticCurveTo(cx, 500, cx + 80, 450); g.stroke()
+  }
+  g.restore()
+}
+
+// ---------- 0. abertura ----------
+$('goal').addEventListener('click', (e) => {
+  const b = e.target.closest('.chip'); if (!b) return
+  document.querySelectorAll('#goal .chip').forEach((c) => c.classList.remove('on'))
+  b.classList.add('on'); state.goal = b.dataset.v
+})
+const num = (v, d) => { const n = parseFloat(String(v).replace(',', '.')); return n > 30 && n < 300 ? n : d }
+$('go-sem').addEventListener('click', () => {
+  const n = ($('nome').value.trim().split(' ')[0] || 'você')
+  state.nome = n.charAt(0).toUpperCase() + n.slice(1)
+  state.peso = num($('peso').value, 88)
+  state.meta = num($('meta').value, state.goal === 'ganhar massa' ? state.peso + 5 : state.peso - 8)
+  ding(false)
+  show('s-sem'); runSem()
+})
+
+// ---------- 1. vida sem a IA ----------
+const SEM = [
+  ['06:30', 'Despertador. Soneca. Só mais 10 minutos.', 'me'],
+  ['06:50', 'Hoje eu vou acordar e treinar cedo... amanhã. Amanhã com certeza.'],
+  ['07:40', 'Café? Um pão com manteiga. Ninguém vai saber.', 'me'],
+  ['12:30', 'Será que um refrigerante estraga tanto assim? Só hoje.'],
+  ['15:10', 'Sobremesa da firma. Seria falta de educação recusar.', 'me'],
+  ['18:30', 'Tô cansado. Treino amanhã rende mais.'],
+  ['21:40', 'Pedir um lanche? Semana que vem eu começo de verdade.', 'me'],
+  ['23:50', 'Rolando o feed vendo shape dos outros. Por que eu não consigo?'],
+  ['00:30', 'Segunda que vem eu começo. Dessa vez é sério.', 'me'],
+]
+async function runSem() {
+  $('sem-day').textContent = today
+  const box = $('thoughts'); box.innerHTML = ''
+  for (const [h, txt, me] of SEM) {
+    $('sem-clock').textContent = h
+    const el = document.createElement('div')
+    el.className = 'th typing' + (me ? ' me' : ''); el.textContent = '•••'
+    box.appendChild(el)
+    await sleep(600)
+    el.className = 'th' + (me ? ' me' : '')
+    el.innerHTML = txt.replace('Por que eu', `${state.nome}, por que você`) + `<small>${h} · você pra você</small>`
+    el.scrollIntoView({ block: 'end', behavior: 'smooth' })
+    await sleep(850)
+  }
+  await sleep(300)
+  $('sem-end').classList.add('on')
+  $('sem-end').scrollIntoView({ block: 'end', behavior: 'smooth' })
+}
+$('ativar').addEventListener('click', () => { ding(true); show('s-ativa'); runBoot() })
+
+// ---------- 2. ativação ----------
+async function runBoot() {
+  const kg = Math.abs(state.peso - state.meta).toFixed(1).replace('.0', '').replace('.', ',')
+  const lines = [`> perfil: ${state.nome}`, `> objetivo: ${state.goal} · ${kg} kg`, '> montando sua rotina... ok', '> cobranças: 3 por período', '> ciclo: 90 dias', '> IA Sem Desculpa ativada']
+  const el = $('boot'); el.textContent = ''
+  for (const l of lines) { el.textContent += l + '\n'; await sleep(380) }
+  await sleep(500)
+  show('s-app'); runApp()
+}
+
+// ---------- 3. o app de verdade ----------
+const view = (id) => { document.querySelectorAll('#scr .view').forEach((v) => v.classList.remove('on')); $(id).classList.add('on'); $('sbar').classList.toggle('light', ['v-home', 'v-intro', 'v-lock'].includes(id)) }
+const mission = (html) => ($('mission').innerHTML = html)
+function addXP(n) {
+  state.xp += n; $('hud-xp').textContent = state.xp
+  const f = document.createElement('div'); f.className = 'xp-float'; f.textContent = `+${n}`
+  document.body.appendChild(f); setTimeout(() => f.remove(), 1100)
+}
+// espera um toque no alvo (ou segue sozinho depois de um tempo)
+const tapOr = (el, ms = 6500) => new Promise((res) => { const go = () => { clearTimeout(t); res() }; const t = setTimeout(go, ms); el.addEventListener('click', go, { once: true }) })
+const KG = () => Math.abs(state.peso - state.meta).toFixed(1).replace('.0', '').replace('.', ',')
+
+const DAY = [
+  { id: 'wake', t: '06:30', nm: 'Acordar e beber água', ic: 'sun' },
+  { id: 'cafe', t: '07:00', nm: 'Café da manhã', ic: 'food', d: '3 ovos mexidos, 1 pão integral' },
+  { id: 'crea', t: '08:00', nm: 'Tomar creatina', ic: 'check' },
+  { id: 'almoco', t: '12:30', nm: 'Almoço', ic: 'food', d: '150g frango, 120g arroz, salada' },
+  { id: 'lanche', t: '16:00', nm: 'Lanche', ic: 'food', d: 'Iogurte + aveia' },
+  { id: 'treino', t: '18:30', nm: 'Treino A · Peito e tríceps', ic: 'dumbbell' },
+  { id: 'jantar', t: '20:00', nm: 'Jantar', ic: 'food', d: '150g peixe, legumes' },
+  { id: 'ci', t: '21:30', nm: 'Prestar contas do dia', ic: 'list' },
+]
+const done = new Set()
+function updRing() {
+  const meals = ['cafe', 'almoco', 'lanche', 'jantar']
+  const dpct = meals.filter((m) => done.has(m)).length / meals.length
+  const tpct = done.has('treino') ? 1 : 0
+  const all = Math.round(((dpct + tpct + (done.has('ci') ? 1 : 0)) / 3) * 100)
+  $('ring').style.strokeDashoffset = 201 * (1 - all / 100)
+  $('ring-n').textContent = all + '%'
+  $('lg-t').textContent = tpct ? 'Feito' : 'Falta'; $('lg-d').textContent = Math.round(dpct * 100) + '%'
+  const tasks = DAY.filter((x) => x.id !== 'ci' && done.has(x.id)).length
+  $('mi1').classList.toggle('ok', tasks >= 3); $('mi2').classList.toggle('ok', done.has('ci'))
+  $('mis-c').textContent = `${[tasks >= 3, done.has('ci'), state.oath].filter(Boolean).length} de 3`
+}
+function renderDia(cur) {
+  $('dia-list').innerHTML = DAY.map((x) => `<div class="li ${done.has(x.id) ? 'ok' : ''} ${x.id === cur ? 'cur' : ''}"><time>${x.t}</time>${ic(x.ic)}<span class="nm">${x.nm}</span><span class="tk">${done.has(x.id) ? '✓' : ''}</span></div>`).join('')
+}
+async function lock(time, title, body, hot) {
+  view('v-lock'); $('sb-time').textContent = time; $('lk-t').textContent = time; $('lk-d').textContent = today
+  document.querySelectorAll('#nts .nt').forEach((n) => n.classList.add('old'))
+  const n = document.createElement('button'); n.className = 'nt'
+  n.innerHTML = `<span class="nt-ic">${ic('flame')}</span><div><b>${title}</b><em>Sem Desculpa</em><p>${body}</p></div><time>agora</time>`
+  $('nts').prepend(n); while ($('nts').children.length > 2) $('nts').lastChild.remove()
+  ding(hot)
+  await tapOr(n)
+}
+async function pressNow() { $('now-go').classList.add('press'); await sleep(160); $('now-go').classList.remove('press') }
+
+async function runApp() {
+  done.clear(); state.xp = 0; state.oath = false
+  // tela de início
+  $('apps').innerHTML = Array.from({ length: 15 }, (_, i) => (i === 9 ? `<div class="appi sd" id="sd-icon"><span>${ic('flame')}</span>Sem Desculpa</div>` : '<div class="appi"><span></span>&nbsp;</div>')).join('')
+  view('v-home'); mission('Este é o seu celular. <b>Toque no app Sem Desculpa.</b>')
+  await tapOr($('sd-icon'), 7000)
+  if (state.skip) return
+
+  // abertura: Esse é você (foto atual) -> referência -> frase ácida
+  view('v-intro'); mission('Toda vez que você abre o app, <b>ele te mostra isso.</b>')
+  drawFigure($('in-cv'), state.goal !== 'ganhar massa')
+  $('in-pill').textContent = 'DIA 1 DE 90'; $('in-h').textContent = 'Esse é você'; $('in-ph').style.display = ''; $('in-q').style.display = 'none'
+  const bar = $('in-bar'); bar.style.transition = 'none'; bar.style.width = '0'; void bar.offsetWidth
+  bar.style.transition = 'width 12s linear'; bar.style.width = '100%'
+  await sleep(4500)
+  drawFigure($('in-cv'), false)
+  $('in-pill').textContent = 'FALTAM 90 DIAS'; $('in-h').textContent = 'Essa é sua referência'
+  $('in-ph').style.animation = 'none'; void $('in-ph').offsetWidth; $('in-ph').style.animation = ''
+  await sleep(4000)
+  $('in-ph').style.display = 'none'; $('in-pill').textContent = ''; $('in-h').textContent = ''
+  $('in-q').style.display = ''; $('in-q').textContent = 'Você não está cansado. Você está acostumado a desistir.'
+  await sleep(3500)
+  if (state.skip) return
+
+  // Hoje
+  drawFigure($('av-cv'), state.goal !== 'ganhar massa')
+  $('hi').textContent = 'Bom dia,'; $('hi-n').textContent = state.nome; updRing()
+  view('v-hoje'); $('sb-time').textContent = '06:31'
+  mission('Sua tela principal: <b>o dia inteiro em um lugar.</b>')
+  await sleep(2600)
+
+  // 06:35 · bom dia com os dados do dia
+  mission('<b>O celular vibrou.</b> Toque na notificação.')
+  await lock('06:35', 'Dia 1 de 90: Treino A · Peito às 18:30', 'Primeiro passo: Café da manhã às 07:00.')
+  view('v-hoje'); $('now-t').textContent = 'Café da manhã'; $('now-d').textContent = '3 ovos mexidos, 1 pão integral'; $('now').classList.remove('done'); $('now-l').textContent = 'AGORA · 07:00'
+  mission('A tarefa do momento aparece no topo. <b>Toque em Feito.</b>')
+  await tapOr($('now-go'), 3500); await pressNow()
+  done.add('wake'); done.add('cafe'); $('now').classList.add('done'); $('now-l').textContent = 'FEITO'; updRing(); addXP(20)
+  await sleep(1100)
+  if (state.skip) return
+
+  // 12:30 · almoço (com o que comer e o placar do dia)
+  mission('Cada refeição chega <b>no horário, com o que comer.</b>')
+  await lock('12:30', '12:30 · Almoço', '150g frango, 120g arroz. 1 de 4 refeições feitas hoje.')
+  view('v-dia'); done.add('crea'); renderDia('almoco'); $('sb-time').textContent = '12:31'
+  await sleep(1200); done.add('almoco'); renderDia(); addXP(10); updRing()
+  await sleep(1300)
+  if (state.skip) return
+
+  // 17:30 · treino em 1h
+  mission('<b>1 hora antes do treino</b>, ele te chama.')
+  await lock('17:30', 'Treino em 1h: Treino A · Peito às 18:30', '5 exercícios. Semana: 0 de 1 treinos feitos.', true)
+  view('v-treino'); $('sb-time').textContent = '18:31'
+  const EX = [['Supino reto', '4x10'], ['Supino inclinado', '3x12'], ['Crucifixo', '3x12'], ['Tríceps corda', '4x12'], ['Tríceps francês', '3x10']]
+  const drawEx = (n) => { $('ex-list').innerHTML = EX.map(([a, s], i) => `<div class="ei ${i < n ? 'ok' : ''}"><span class="n">${i < n ? '✓' : i + 1}</span><span class="nm">${a}</span><span class="s">${s}</span></div>`).join(''); $('ex-c').textContent = `${n}/5` }
+  drawEx(0); mission('Os exercícios do dia, <b>com cronômetro de descanso.</b>')
+  for (let i = 1; i <= 5; i++) {
+    let s = 60
+    const tm = setInterval(() => { s = Math.max(0, s - 7); $('rest-t').textContent = `0:${String(s).padStart(2, '0')}` }, 60)
+    await sleep(650); clearInterval(tm); $('rest-t').textContent = '1:00'; drawEx(i); ding(false)
+  }
+  done.add('lanche'); done.add('treino'); updRing(); addXP(30)
+  await sleep(900)
+  if (state.skip) return
+
+  // 21:30 · prestação de contas
+  mission('À noite, <b>a hora da verdade.</b>')
+  await lock('21:30', 'Preste contas: leva 1 minuto', 'Hoje: 4 de 4 refeições, treino feito. Faça o dia contar.', true)
+  done.add('jantar'); view('v-ci'); $('sb-time').textContent = '21:31'
+  const STEPS = [
+    ['Você fez o treino de hoje?', ['Fiz tudo', 'Fiz uma parte', 'Não fiz']],
+    ['Quantos minutos de cardio?', ['Não fiz', '20 min', '30 min']],
+    ['Você seguiu as refeições do plano?', ['Segui todas', 'Furei alguma']],
+    ['Que nota você dá para a sua dieta?', ['Péssimo', 'Ok', 'Bom', 'Perfeito']],
+    ['Água, sono e foco de hoje', ['2 litros · 7h · foco bom']],
+  ]
+  const bars = $('ci-bars').children
+  for (let i = 0; i < STEPS.length; i++) {
+    ;[...bars].forEach((b, j) => b.classList.toggle('on', j <= i))
+    $('ci-q').textContent = STEPS[i][0]
+    $('ci-b').innerHTML = STEPS[i][1].map((o) => `<div class="opt"><i></i>${o}</div>`).join('')
+    await sleep(750)
+    const pick = i === 1 ? 1 : i === 3 ? 2 : 0
+    $('ci-b').children[pick].classList.add('pick'); ding(false)
+    await sleep(600)
+  }
+  ;[...bars].forEach((b) => b.classList.add('on'))
+  $('ci-q').textContent = 'Última coisa.'
+  $('ci-b').innerHTML = `<p style="font-size:.72rem;color:var(--a-fg2)">Ninguém vê isso além de você. Mentir aqui é mentir para você mesmo.</p><div class="pledge" id="pledge"><span>${ic('lock')}</span>Fui 100% honesto comigo</div>`
+  mission('<b>Toque para confirmar</b> que foi honesto.')
+  await tapOr($('pledge'), 3500)
+  $('pledge').classList.add('pick'); $('pledge').querySelector('span').innerHTML = ic('check'); ding(true)
+  await sleep(800)
+  done.add('ci'); updRing()
+  view('v-res'); $('res-p').textContent = `Sequência: 1 dia. Faltam 89. ${state.nome}, faltam ${KG()} kg e agora você tem alguém te cobrando todo dia.`
+  $('hud-streak').textContent = '1'; addXP(130)
+  mission('<b>Dia 1 contado.</b> Pontos, sequência e medalhas.')
+  await sleep(2800)
+  if (state.skip) return
+
+  // juramento do Projetinho (interativo: segurar)
+  view('v-oath')
+  $('oath-t').textContent = `Eu, ${state.nome}, juro ser sincero comigo mesmo. Não vou esconder nada, não vou aumentar nada e não vou mentir para mim. Se eu falhar, vou admitir e recomeçar.`
+  mission('No Projetinho você faz um juramento. <b>Segure o botão para jurar.</b>')
+  await holdToSwear()
+  state.oath = true; addXP(20)
+  $('party-p').textContent = `Faltam 90 dias para ${state.goal === 'ganhar massa' ? 'ganhar' : 'perder'} ${KG()} kg. Volte amanhã para dizer se cumpriu sua promessa.`
+  confetti(); $('party').classList.add('on'); ding(true)
+  mission('<b>Dia 1. Sem desculpa.</b>')
+  await sleep(3200)
+  $('party').classList.remove('on')
+  if (state.skip) return
+
+  // ranking
+  view('v-rank'); mission('E toda semana você disputa com os seus amigos.')
+  const R = [['Você', state.xp + 60, true], ['Ana C.', state.xp + 20], ['Bruno M.', state.xp - 40], ['Carla S.', state.xp - 90], ['Diego R.', state.xp - 150]]
+  R.sort((a, b) => b[1] - a[1])
+  $('rk').innerHTML = R.map(([n, p, me], i) => `<div class="ri ${me ? 'me' : ''}"><span class="p ${i === 0 ? 'g' : ''}">${i + 1}</span><span class="a">${n[0]}</span><b>${me ? state.nome : n}</b><span class="pts">${Math.max(0, p)} pts</span></div>`).join('')
+  await sleep(3200)
+  finishApp()
+}
+function holdToSwear() {
+  return new Promise((res) => {
+    const b = $('hold'); let t0 = 0, raf = 0, done = false
+    const stop = () => { cancelAnimationFrame(raf); if (!done) b.style.setProperty('--p', 0) }
+    const tick = () => { const p = Math.min(1, (Date.now() - t0) / 1400); b.style.setProperty('--p', p); $('hold-b').textContent = p > 0 ? 'Continue segurando...' : 'Segure para jurar'; if (p >= 1) { done = true; b.classList.add('done'); $('hold-b').textContent = 'Juramento feito'; ding(true); try { navigator.vibrate && navigator.vibrate(60) } catch (e) {} ; setTimeout(res, 700) } else raf = requestAnimationFrame(tick) }
+    b.onpointerdown = (e) => { e.preventDefault(); if (done) return; t0 = Date.now(); tick() }
+    b.onpointerup = b.onpointerleave = b.onpointercancel = stop
+    b.oncontextmenu = (e) => e.preventDefault()
+    // segue sozinho se a pessoa não segurar
+    setTimeout(() => { if (!done) { t0 = Date.now(); tick() } }, 8000)
+  })
+}
+function confetti() {
+  const c = $('conf'); c.innerHTML = ''
+  const cols = ['#2f7bff', '#ffb020', '#22c55e', '#ef4444', '#a78bfa', '#38bdf8']
+  for (let i = 0; i < 34; i++) { const e = document.createElement('i'); e.style.left = (i * 37) % 100 + '%'; e.style.background = cols[i % 6]; e.style.animationDuration = 1.8 + (i % 5) * 0.3 + 's'; e.style.animationDelay = (i % 10) * 0.06 + 's'; c.appendChild(e) }
+}
+function finishApp() { mission('<b>Isso foi 1 dia.</b> Agora acelera…'); setTimeout(() => { show('s-90'); run90() }, 1200) }
+$('skip').addEventListener('click', () => { state.skip = true; show('s-90'); run90() })
+
+// ---------- 4. 90 dias ----------
+function mountBA() {
+  const S = CONFIG.story
+  const make = (src, fat) => {
+    if (src) { const i = new Image(); i.src = src; i.alt = ''; return i }
+    const c = document.createElement('canvas'); c.width = 600; c.height = 750; drawFigure(c, fat); return c
+  }
+  $('ba-before').replaceChildren(make(S.beforeImg, true))
+  $('ba-after').replaceChildren(make(S.afterImg, false))
+  const box = $('ba'), top = $('ba-top'), line = $('ba-line')
+  const set = (x) => { const r = box.getBoundingClientRect(); const p = Math.max(0, Math.min(100, ((x - r.left) / r.width) * 100)); top.style.clipPath = `inset(0 ${100 - p}% 0 0)`; line.style.left = p + '%' }
+  let drag = false
+  box.addEventListener('pointerdown', (e) => { drag = true; box.setPointerCapture(e.pointerId); set(e.clientX) })
+  box.addEventListener('pointermove', (e) => drag && set(e.clientX))
+  box.addEventListener('pointerup', () => (drag = false))
+  top.style.clipPath = 'inset(0 50% 0 0)'
+  $('ba-l').textContent = `Dia 1 · ${S.from} kg`; $('ba-r').textContent = `Dia 90 · ${S.to} kg`
+  $('story-av').textContent = S.name.charAt(0)
+  $('story-q').textContent = '"' + S.quote + '"'
+  $('story-n').textContent = `${S.name}, ${S.age} anos · ${S.city}`
+  $('story-disc').textContent = S.realCustomer
+    ? 'Resultado real de cliente, divulgado com autorização. Resultados variam de pessoa para pessoa e dependem de dieta, treino e constância.'
+    : 'Simulação ilustrativa. Não representa um cliente real. Resultados variam de pessoa para pessoa e dependem de dieta, treino e constância.'
+}
+let ran90 = false
+async function run90() {
+  if (ran90) return; ran90 = true
+  const S = CONFIG.story
+  $('t90').textContent = `${state.nome}, isso foi 1 dia. Olha o que 90 fazem.`
+  const cal = $('cal'); cal.innerHTML = Array.from({ length: 90 }, () => '<i></i>').join('')
+  const cells = cal.children
+  for (let d = 1; d <= 90; d++) {
+    cells[d - 1].classList.add('lit')
+    $('c-dias').textContent = d
+    $('c-peso').textContent = (S.from - ((S.from - S.to) * d) / 90).toFixed(1).replace('.', ',')
+    $('c-cob').textContent = d * 9
+    if (d % 10 === 0) ding(false)
+    await sleep(d < 10 ? 110 : 30)
+  }
+  $('c-peso').textContent = `−${S.from - S.to}`
+  mountBA()
+  $('story-wrap').style.display = 'flex'
+  $('story-wrap').scrollIntoView({ behavior: 'smooth' })
+}
+$('go-quiz').addEventListener('click', () => { show('s-quiz'); quiz(0) })
+
+// ---------- 5. quiz ----------
+const MONTHS = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro']
+function quiz(i) {
+  document.querySelectorAll('#qbar i').forEach((b, j) => b.classList.toggle('on', j <= i))
+  const q = $('quiz')
+  const next = (k, v) => { state.quiz[k] = v; ding(false); setTimeout(() => (i < 2 ? quiz(i + 1) : diag()), 280) }
+  const opts = (list) => list.map(([t, s], k) => `<button class="qopt" data-v="${t}"><span class="qn">${k + 1}</span><div>${t}<small>${s}</small></div></button>`).join('')
+  if (i === 0) {
+    q.innerHTML = `<div class="wrap" style="gap:16px"><span class="eyebrow">Pergunta 1 de 3</span><h2>Quantas vezes você já tentou ser fitness?</h2><div class="qopts">${opts([['1 ou 2 vezes', 'Ainda acredito em mim'], ['3 a 5 vezes', 'Começo bem e paro'], ['6 a 10 vezes', 'Já perdi a fé no "segunda eu começo"'], ['Perdi a conta', 'Sempre volto pro zero']])}</div></div>`
+    q.querySelectorAll('.qopt').forEach((b) => (b.onclick = () => { b.classList.add('on'); next('tentativas', b.dataset.v) }))
+  }
+  if (i === 1) {
+    const now = new Date()
+    const ia = new Date(now.getFullYear(), now.getMonth() + 3, 1)
+    const list = Array.from({ length: 9 }, (_, k) => new Date(now.getFullYear(), now.getMonth() + 1 + k, 1))
+    q.innerHTML = `<div class="wrap" style="gap:16px"><span class="eyebrow">Pergunta 2 de 3</span><h2>Em que mês você vai atingir o corpo que quer?</h2><p class="muted">Com 90 dias de cobrança, a IA projeta <b style="color:#fff">${MONTHS[ia.getMonth()]}</b>.</p><div class="months">
+      ${list.map((d) => `<button class="month ${d.getMonth() === ia.getMonth() && d.getFullYear() === ia.getFullYear() ? 'ia' : ''}" data-v="${MONTHS[d.getMonth()]} de ${d.getFullYear()}">${MONTHS[d.getMonth()].slice(0, 3)}<small>${d.getFullYear()}</small></button>`).join('')}</div></div>`
+    q.querySelectorAll('.month').forEach((b) => (b.onclick = () => { b.classList.add('on'); next('mes', b.dataset.v) }))
+  }
+  if (i === 2) {
+    q.innerHTML = `<div class="wrap" style="gap:16px"><span class="eyebrow">Pergunta 3 de 3</span><h2>O quanto você quer investir no seu corpo?</h2><div class="qopts">${opts([['Até R$ 50', 'Quero algo acessível'], ['Até R$ 100', 'Um investimento razoável'], ['O que for preciso', 'Cansei de tentar sozinho'], ['Nada', 'Vou continuar tentando sozinho']])}</div></div>`
+    q.querySelectorAll('.qopt').forEach((b) => (b.onclick = () => { b.classList.add('on'); next('investir', b.dataset.v) }))
+  }
+}
+function diag() {
+  const Q = state.quiz
+  const nada = Q.investir === 'Nada'
+  $('quiz').innerHTML = `<div class="wrap" style="gap:16px">
+    <span class="eyebrow">Seu diagnóstico</span>
+    <h2>${state.nome}, o problema nunca foi saber o que fazer.</h2>
+    <p class="muted">Foi não ter ninguém te cobrando na hora que a vontade some. ${nada ? 'Sozinho e de graça, você já tentou ' + Q.tentativas.toLowerCase() + '. O resultado você conhece.' : ''}</p>
+    <div class="diag">
+      <div class="diag-row"><span>Tentativas sozinho</span><b>${Q.tentativas}</b></div>
+      <div class="diag-row"><span>Meta</span><b>${state.goal} · ${KG()} kg</b></div>
+      <div class="diag-row"><span>Mês do corpo novo</span><b>${Q.mes}</b></div>
+      <div class="diag-row"><span>Cobranças até lá</span><b>até 810</b></div>
+      <div class="diag-row"><span>Investimento por dia</span><b>R$ 0,55</b></div>
+    </div>
+    <button class="cta" id="go-vsl">Ver como funciona por dentro</button>
+  </div>`
+  $('go-vsl').onclick = () => { show('s-vsl'); vsl() }
+}
+
+// ---------- 6. VSL ----------
+function vsl() {
+  $('vsl-title').textContent = `${state.nome}, assista antes de continuar`
+  $('price').textContent = CONFIG.price; $('price-old').textContent = CONFIG.priceOld; $('price-old').hidden = !CONFIG.priceOld
+  const hasEmbed = !!document.querySelector('#vsl [id^="vid"], #vsl vturb-smartplayer, #vsl iframe')
+  $('vsl-empty').style.display = hasEmbed ? 'none' : 'grid'
+  const url = new URL(CONFIG.stripeLink)
+  if (window.location.search) new URLSearchParams(window.location.search).forEach((v, k) => url.searchParams.set(k, v)) // repassa UTMs
+  $('buy-btn').href = url.toString()
+  $('buy-btn').onclick = () => track('funil_checkout')
+  setTimeout(() => { $('buy').classList.add('on'); $('wait').style.display = 'none'; track('funil_oferta') }, CONFIG.ctaDelaySeconds * 1000)
+}
+</script>
+</body>
+</html>

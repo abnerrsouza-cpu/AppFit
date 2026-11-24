@@ -512,6 +512,13 @@ const server = createServer(async (req, res) => {
       }
       throw new HttpError(404, 'Rota não encontrada')
     }
+    // manifesto no idioma do celular: o nome embaixo do ícone vira "No Excuses" fora do português
+    if (url.pathname.endsWith('/manifest.webmanifest')) {
+      const m = JSON.parse(await readFile(join(DIST, 'manifest.webmanifest'), 'utf8'))
+      if (!/^pt/i.test(req.headers['accept-language'] || 'pt')) m.name = m.short_name = 'No Excuses'
+      res.writeHead(200, { 'Content-Type': 'application/manifest+json', 'Cache-Control': 'no-cache', Vary: 'Accept-Language' })
+      return res.end(JSON.stringify(m))
+    }
     await serveStatic(req, res, url.pathname)
   } catch (e) {
     if (!(e instanceof HttpError)) console.error(e)

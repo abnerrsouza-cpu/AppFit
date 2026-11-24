@@ -147,7 +147,7 @@ export function testMessages() {
   const s = getState()
   const mine = (s.custom ?? defaultCustom()).filter((c) => c.on && c.text.trim()).map((c) => ({ title: t('Recado seu'), body: c.text }))
   const app = (['treino', 'checkin', 'geral', 'checkin_atrasado', 'acordar'] as const).map((m, i) => ({
-    title: 'Sem Desculpa',
+    title: t('Sem Desculpa'),
     body: nudge(s, m, { treino: t('Seu treino de hoje'), hora: new Date().toTimeString().slice(0, 5) }, i * 7 + Date.now()),
   }))
   // intercala: frase sua, frase do app, frase sua...

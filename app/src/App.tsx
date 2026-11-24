@@ -191,6 +191,14 @@ export default function App() {
     document.documentElement.dataset.theme = s.theme
   }, [s.theme])
 
+  // nome do app no idioma: Sem Desculpa (pt) / No Excuses (en)
+  useEffect(() => {
+    const name = t('Sem Desculpa')
+    document.title = name
+    document.querySelector('meta[name="apple-mobile-web-app-title"]')?.setAttribute('content', name)
+    document.documentElement.lang = s.lang === 'en' ? 'en' : s.lang === 'es' ? 'es' : 'pt-BR'
+  }, [s.lang])
+
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [tab, checkin])
