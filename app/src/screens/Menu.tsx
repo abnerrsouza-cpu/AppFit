@@ -10,7 +10,7 @@ import { RoutineTasks } from '../components/RoutineTasks'
 import { IntroPhotos } from '../components/IntroPhotos'
 import { LoginCta } from '../components/LoginCta'
 import { toast } from '../components/Toast'
-import { type AppState, type Profile, bmi, currentWeight, newId, resetToBlank, resetToDemo, setLang, setState } from '../store'
+import { type AppState, type PlanMode, type Profile, bmi, currentWeight, newId, resetToBlank, resetToDemo, setLang, setState } from '../store'
 
 type Section = null | 'perfil' | 'fotos' | 'rotina' | 'treino' | 'dieta' | 'agenda' | 'relogio' | 'carta' | 'integracoes'
 
@@ -36,8 +36,8 @@ export function Menu({ s, user = null, onUser, onLogout, onHow, onConquistas, on
         {sec === 'perfil' && <Perfil p={p} upd={upd} weight={currentWeight(s)} />}
         {sec === 'fotos' && <IntroPhotos s={s} userId={user?.id} hasAvatar={user?.hasAvatar} onPreview={() => onPreviewIntro?.()} />}
         {sec === 'rotina' && <Rotina p={p} upd={upd} extra={<RoutineTasks tasks={p.tasks} upd={upd} online={!!user} lang={s.lang || 'pt'} />} />}
-        {sec === 'treino' && <Treino p={p} upd={upd} pdf={<PdfImport kind="workout" online={!!user} lang={s.lang || 'pt'} upd={upd} />} />}
-        {sec === 'dieta' && <Dieta p={p} upd={upd} pdf={<PdfImport kind="diet" online={!!user} lang={s.lang || 'pt'} upd={upd} />} />}
+        {sec === 'treino' && <Treino p={p} upd={upd} pdf={<PdfImport kind="workout" online={!!user} lang={s.lang || 'pt'} upd={upd} files={p.trainFiles} />} />}
+        {sec === 'dieta' && <Dieta p={p} upd={upd} pdf={<PdfImport kind="diet" online={!!user} lang={s.lang || 'pt'} upd={upd} files={p.dietFiles} />} />}
         {sec === 'agenda' && <Agenda p={p} upd={upd} />}
         {sec === 'relogio' && <Relogio />}
         {sec === 'carta' && <Carta p={p} upd={upd} />}
@@ -332,8 +332,20 @@ function Treino({ p, upd, pdf }: { p: Profile; upd: Upd; pdf: ReactNode }) {
         {t('Ficha de treino')}
         <Info text={t('Ligue os dias em que você treina e escreva os exercícios, um por linha. A ficha aparece na tela Hoje.')} />
       </h1>
-      <p className="lead">{t('Um exercício por linha. Dias desligados são descanso.')}</p>
-      {pdf}
+      <ModePick
+        mode={p.trainMode}
+        onChange={(m) => upd({ trainMode: m })}
+        ficha={[t('Cadastrar minha ficha'), t('Enviar PDF/foto ou escrever os exercícios')]}
+        check={[t('Não cadastrar'), t('Só marcar "treinei" quando fizer')]}
+      />
+      {p.trainMode === 'check' ? (
+        <p className="lead">{t('Ligue os dias em que você treina. Nesses dias aparece "Treinei hoje" para você marcar.')}</p>
+      ) : (
+        <>
+          {pdf}
+          <p className="lead">{t('Ou escreva aqui: um exercício por linha. Dias desligados são descanso.')}</p>
+        </>
+      )}
       {[1, 2, 3, 4, 5, 6, 0].map((wd) => {
         const w = p.workouts.find((x) => x.weekday === wd)
         return (
@@ -344,7 +356,7 @@ function Treino({ p, upd, pdf }: { p: Profile; upd: Upd; pdf: ReactNode }) {
                 <i />
               </button>
             </div>
-            {w && (
+            {w && p.trainMode !== 'check' && (
               <>
                 <input id={`tr-t-${wd}`} value={w.title} onChange={(e) => set(wd, { title: e.target.value })} placeholder={t('Nome do treino')} />
                 <textarea id={`tr-i-${wd}`} rows={4} value={w.items} onChange={(e) => set(wd, { items: e.target.value })} placeholder={'Supino reto 4x10\nCrucifixo 3x12'} />
@@ -357,6 +369,30 @@ function Treino({ p, upd, pdf }: { p: Profile; upd: Upd; pdf: ReactNode }) {
   )
 }
 
+/** Escolha: cadastrar a ficha/dieta ou só marcar quando fizer. */
+function ModePick({ mode, onChange, ficha, check }: { mode?: PlanMode; onChange: (m: PlanMode) => void; ficha: [string, string]; check: [string, string] }) {
+  const cur = mode ?? 'ficha'
+  return (
+    <div className="mode-pick" role="radiogroup">
+      {(
+        [
+          ['ficha', 'upload', ficha],
+          ['check', 'check', check],
+        ] as const
+      ).map(([m, ic, [b, sm]]) => (
+        <button key={m} type="button" role="radio" aria-checked={cur === m} className={`mode-opt ${cur === m ? 'on' : ''}`} onClick={() => onChange(m)}>
+          <span className="mode-ic">
+            <Icon name={ic} size={20} />
+          </span>
+          <b>{b}</b>
+          <small>{sm}</small>
+          <i className="mode-radio" />
+        </button>
+      ))}
+    </div>
+  )
+}
+
 function Dieta({ p, upd, pdf }: { p: Profile; upd: Upd; pdf: ReactNode }) {
   const set = (id: string, patch: Partial<Profile['meals'][number]>) => upd({ meals: p.meals.map((m) => (m.id === id ? { ...m, ...patch } : m)) })
   return (
@@ -365,9 +401,24 @@ function Dieta({ p, upd, pdf }: { p: Profile; upd: Upd; pdf: ReactNode }) {
         {t('Plano alimentar')}
         <Info text={t('Suas refeições do dia com horário e o que comer. Cada uma vira uma tarefa na tela Hoje e uma cobrança.')} />
       </h1>
-      <p className="lead">{t('Cada refeição vira uma notificação no horário.')}</p>
-      {pdf}
-      {p.meals
+      <ModePick
+        mode={p.dietMode}
+        onChange={(m) => upd({ dietMode: m })}
+        ficha={[t('Cadastrar minha dieta'), t('Enviar PDF/foto ou escrever as refeições')]}
+        check={[t('Não cadastrar'), t('Só marcar "segui a dieta" no fim do dia')]}
+      />
+      {p.dietMode === 'check' ? (
+        <div className="card mode-note">
+          <Icon name="check" size={20} stroke={2.6} />
+          <p>{t('Pronto. Todo dia aparece "Segui a dieta hoje" no Seu dia para você marcar. Quando quiser, cadastre a dieta para receber a cobrança de cada refeição.')}</p>
+        </div>
+      ) : (
+        <>
+          {pdf}
+          <p className="lead">{t('Ou escreva aqui. Cada refeição vira uma notificação no horário.')}</p>
+        </>
+      )}
+      {p.dietMode !== 'check' && p.meals
         .slice()
         .sort((a, b) => a.time.localeCompare(b.time))
         .map((m) => (
@@ -382,9 +433,11 @@ function Dieta({ p, upd, pdf }: { p: Profile; upd: Upd; pdf: ReactNode }) {
             </button>
           </div>
         ))}
-      <button type="button" className="ghost-btn" onClick={() => upd({ meals: [...p.meals, { id: newId(), time: '10:00', name: t('Nova refeição'), items: '' }] })}>
-        <Icon name="plus" size={18} /> {t('Adicionar refeição')}
-      </button>
+      {p.dietMode !== 'check' && (
+        <button type="button" className="ghost-btn" onClick={() => upd({ meals: [...p.meals, { id: newId(), time: '10:00', name: t('Nova refeição'), items: '' }] })}>
+          <Icon name="plus" size={18} /> {t('Adicionar refeição')}
+        </button>
+      )}
     </form>
   )
 }

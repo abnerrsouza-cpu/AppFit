@@ -1,7 +1,7 @@
 // Pontos, níveis, medalhas e missões do dia. Tudo é calculado a partir dos dados da pessoa,
 // então não há o que sincronizar à parte e o valor nunca "desanda".
 import { t } from './i18n'
-import { type AppState, addDays, getProjeto, parseYmd, streak, today, weekStartOf, ymd } from './store'
+import { type AppState, addDays, dietSimple, getProjeto, parseYmd, streak, today, weekStartOf, ymd } from './store'
 
 // ---------- pontos ----------
 export const XP = { task: 10, checkin: 50, trained: 20, weekly: 100, photo: 30, promise: 20, goal: 50 }
@@ -130,7 +130,7 @@ export function missions(s: AppState, day?: { done: number; total: number }): Mi
   if (!s.weekly[wk] && (dow === 0 || dow === 6 || dow === 1 || Object.keys(s.weekly).length === 0))
     list.push({ id: 'weekly', icon: 'camera', title: t('Faça o check-in semanal com foto'), xp: XP.weekly + XP.photo, done: false, action: 'semanal' })
   else if (!pj.vision.photoId) list.push({ id: 'ref', icon: 'target', title: t('Escolha sua foto de referência'), xp: 30, done: false, action: 'referencia' })
-  else if (!s.profile.meals.some((m) => m.items.trim())) list.push({ id: 'diet', icon: 'food', title: t('Cadastre o que comer em cada refeição'), xp: 30, done: false, action: 'dieta' })
+  else if (!s.profile.meals.some((m) => m.items.trim()) && !dietSimple(s.profile)) list.push({ id: 'diet', icon: 'food', title: t('Cadastre o que comer em cada refeição'), xp: 30, done: false, action: 'dieta' })
   else if (!s.profile.icalUrl) list.push({ id: 'cal', icon: 'calendar', title: t('Conecte sua agenda'), xp: 30, done: false, action: 'integracoes' })
   else {
     const open = pj.promises.some((p) => p.status === 'aberta')

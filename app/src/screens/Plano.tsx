@@ -4,7 +4,8 @@ import { Icon } from '../components/Icon'
 import { Info } from '../components/Info'
 import { toast } from '../components/Toast'
 import { t, weekday } from '../i18n'
-import { type AppState, planMeals, setState, today } from '../store'
+import { PlanFiles } from '../components/PlanFiles'
+import { type AppState, type PlanMode, dietSimple, hasTrainPlan, planMeals, setState, today, trainSimple } from '../store'
 
 type View = 'treino' | 'dieta'
 
@@ -63,7 +64,10 @@ export function Plano({ s, goMenu }: { s: AppState; goMenu: (sec: string) => voi
   const p = s.profile
   const now = new Date()
   const [day, setDay] = useState(now.getDay())
-  const [view, setView] = useState<View>(() => (now.getHours() < 11 || !p.workouts.some((w) => w.weekday === now.getDay() && w.items.trim()) ? 'dieta' : 'treino'))
+  const simple = trainSimple(p)
+  const isTrainDay = (d: number) => p.workouts.some((w) => w.weekday === d && (simple || w.items.trim()))
+  const [view, setView] = useState<View>(() => (now.getHours() < 11 || !isTrainDay(now.getDay()) ? 'dieta' : 'treino'))
+  const setMode = (k: 'trainMode' | 'dietMode', m: PlanMode) => setState((x) => ({ ...x, profile: { ...x.profile, [k]: m } }))
   const isToday = day === now.getDay()
   const key = today()
   const checks = s.checks[key] || {}
@@ -71,8 +75,8 @@ export function Plano({ s, goMenu }: { s: AppState; goMenu: (sec: string) => voi
   const toggle = (id: string, extra?: Record<string, boolean>) =>
     setState((x) => ({ ...x, checks: { ...x.checks, [key]: { ...(x.checks[key] || {}), [id]: !x.checks[key]?.[id], ...(extra || {}) } } }))
 
-  const wk = p.workouts.find((w) => w.weekday === day && w.items.trim())
-  const exercises = wk ? lines(wk.items).map(parseExercise) : []
+  const wk = p.workouts.find((w) => w.weekday === day && (simple || w.items.trim()))
+  const exercises = wk && !simple ? lines(wk.items).map(parseExercise) : []
   const exDone = exercises.filter((_, i) => checks[`ex:${i}`]).length
   const meals = planMeals(p).sort((a, b) => a.time.localeCompare(b.time))
   const mealsDone = meals.filter((m) => checks[m.id]).length
@@ -92,7 +96,7 @@ export function Plano({ s, goMenu }: { s: AppState; goMenu: (sec: string) => voi
 
       <div className="pl-days" role="tablist">
         {order.map((d) => {
-          const has = p.workouts.some((w) => w.weekday === d && w.items.trim())
+          const has = isTrainDay(d)
           return (
             <button key={d} type="button" role="tab" aria-selected={day === d} className={`pl-day ${day === d ? 'on' : ''} ${d === now.getDay() ? 'today' : ''}`} onClick={() => setDay(d)}>
               <small>{weekday(d).slice(0, 3)}</small>
@@ -113,12 +117,22 @@ export function Plano({ s, goMenu }: { s: AppState; goMenu: (sec: string) => voi
 
       {view === 'treino' && (
         <>
-          {!p.workouts.some((w) => w.items.trim()) ? (
+          {!hasTrainPlan(p) ? (
             <section className="card pl-empty">
-              <b>{t('Você ainda não cadastrou sua ficha de treino')}</b>
-              <p>{t('Escreva os exercícios de cada dia ou envie o PDF do seu personal.')}</p>
+              <b>{t('Como você quer acompanhar seu treino?')}</b>
+              <p>{t('Cadastre a ficha (PDF, foto ou escrevendo) ou só marque quando treinar.')}</p>
               <button type="button" className="cta" onClick={() => goMenu('treino')}>
-                {t('Cadastrar ficha de treino')}
+                <Icon name="upload" size={18} /> {t('Cadastrar ficha de treino')}
+              </button>
+              <button
+                type="button"
+                className="ghost-btn"
+                onClick={() => {
+                  setMode('trainMode', 'check')
+                  toast(t('Combinado'), t('Nos dias de treino, é só marcar "Treinei hoje".'))
+                }}
+              >
+                <Icon name="check" size={18} /> {t('Não cadastrar, só marcar quando treinar')}
               </button>
             </section>
           ) : !wk ? (
@@ -129,8 +143,35 @@ export function Plano({ s, goMenu }: { s: AppState; goMenu: (sec: string) => voi
               <b>{isToday ? t('Hoje é dia de descanso') : t('{d} é dia de descanso', { d: weekday(day) })}</b>
               <p>{t('Descanso também é treino: é quando o músculo cresce. Mantenha a dieta e durma bem.')}</p>
             </section>
+          ) : simple ? (
+            <section className="card pl-train pl-simple">
+              <div className="pl-train-h">
+                <div>
+                  <small>
+                    {isToday ? t('Hoje') : weekday(day)} · {p.trainTime}
+                  </small>
+                  <b>{wk.title || t('Treino')}</b>
+                </div>
+              </div>
+              {!!p.trainFiles?.length && <PlanFiles files={p.trainFiles} />}
+              {isToday ? (
+                <button
+                  type="button"
+                  className={`pl-big-check ${checks.train ? 'on' : ''}`}
+                  onClick={() => {
+                    toggle('train')
+                    if (!checks.train) toast(t('Treino feito'), t('Mais um dia sem desculpa.'))
+                  }}
+                >
+                  <Icon name="check" size={22} stroke={3} /> {checks.train ? t('Treino feito hoje') : t('Treinei hoje')}
+                </button>
+              ) : (
+                <p className="muted">{t('Dia de treino. No dia, é só marcar que treinou.')}</p>
+              )}
+            </section>
           ) : (
             <section className="card pl-train">
+              {!!p.trainFiles?.length && <PlanFiles files={p.trainFiles} />}
               <div className="pl-train-h">
                 <div>
                   <small>
@@ -181,9 +222,9 @@ export function Plano({ s, goMenu }: { s: AppState; goMenu: (sec: string) => voi
               {isToday && <RestTimer />}
             </section>
           )}
-          {p.workouts.some((w) => w.items.trim()) && (
+          {hasTrainPlan(p) && (
             <button type="button" className="link pl-edit" onClick={() => goMenu('treino')}>
-              <Icon name="list" size={16} /> {t('Editar ficha de treino')}
+              <Icon name="list" size={16} /> {simple ? t('Mudar dias ou cadastrar ficha') : t('Editar ficha de treino')}
             </button>
           )}
         </>
@@ -191,12 +232,51 @@ export function Plano({ s, goMenu }: { s: AppState; goMenu: (sec: string) => voi
 
       {view === 'dieta' && (
         <>
-          {meals.length === 0 || !meals.some((m) => m.items.trim()) ? (
+          {dietSimple(p) ? (
+            <>
+              <section className="card pl-train pl-simple">
+                <div className="pl-train-h">
+                  <div>
+                    <small>{isToday ? t('Hoje') : weekday(day)}</small>
+                    <b>{t('Dieta do dia')}</b>
+                  </div>
+                </div>
+                {!!p.dietFiles?.length && <PlanFiles files={p.dietFiles} />}
+                {isToday ? (
+                  <button
+                    type="button"
+                    className={`pl-big-check ${checks.diet ? 'on' : ''}`}
+                    onClick={() => {
+                      toggle('diet')
+                      if (!checks.diet) toast(t('Dieta cumprida'), t('Disciplina também é no prato.'))
+                    }}
+                  >
+                    <Icon name="check" size={22} stroke={3} /> {checks.diet ? t('Dieta cumprida hoje') : t('Segui a dieta hoje')}
+                  </button>
+                ) : (
+                  <p className="muted">{t('No fim do dia, marque se seguiu a dieta.')}</p>
+                )}
+              </section>
+              <button type="button" className="link pl-edit" onClick={() => goMenu('dieta')}>
+                <Icon name="list" size={16} /> {t('Cadastrar refeições')}
+              </button>
+            </>
+          ) : meals.length === 0 ? (
             <section className="card pl-empty">
-              <b>{t('Você ainda não cadastrou o que comer em cada refeição')}</b>
-              <p>{t('Escreva os alimentos de cada refeição ou envie o PDF do seu nutricionista.')}</p>
+              <b>{t('Como você quer acompanhar sua dieta?')}</b>
+              <p>{t('Cadastre a dieta (PDF, foto ou escrevendo) ou só marque no fim do dia se seguiu.')}</p>
               <button type="button" className="cta" onClick={() => goMenu('dieta')}>
-                {t('Cadastrar plano alimentar')}
+                <Icon name="upload" size={18} /> {t('Cadastrar plano alimentar')}
+              </button>
+              <button
+                type="button"
+                className="ghost-btn"
+                onClick={() => {
+                  setMode('dietMode', 'check')
+                  toast(t('Combinado'), t('No fim do dia, é só marcar "Segui a dieta hoje".'))
+                }}
+              >
+                <Icon name="check" size={18} /> {t('Não cadastrar, só marcar se segui')}
               </button>
             </section>
           ) : (
@@ -211,6 +291,11 @@ export function Plano({ s, goMenu }: { s: AppState; goMenu: (sec: string) => voi
                     <span style={{ width: `${(mealsDone / meals.length) * 100}%` }} />
                   </div>
                 </div>
+              )}
+              {!!p.dietFiles?.length && (
+                <section className="card pl-files">
+                  <PlanFiles files={p.dietFiles} />
+                </section>
               )}
               <ol className="pl-meals">
                 {meals.map((m) => {

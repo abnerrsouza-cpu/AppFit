@@ -42,6 +42,18 @@ export interface Profile {
   meals: Meal[]
   workouts: WorkoutDay[]
   tasks?: RoutineTask[] // afazeres extras da rotina (água, creatina, caminhada...)
+  /** 'ficha': cadastra (escrevendo ou enviando arquivo). 'check': não cadastra, só marca quando fez. */
+  trainMode?: PlanMode
+  dietMode?: PlanMode
+  trainFiles?: PlanFile[] // PDFs/fotos da ficha, guardados no aparelho
+  dietFiles?: PlanFile[]
+}
+
+export type PlanMode = 'ficha' | 'check'
+export interface PlanFile {
+  id: string
+  name: string
+  type: string
 }
 
 export interface RoutineTask {
@@ -512,10 +524,17 @@ export function bmi(weight: number, heightCm: number) {
 }
 
 /** Treino do dia: só conta se a ficha daquele dia tiver exercícios (modelo vazio não é plano). */
+/** Treino "simples": a pessoa só marca "treinei" nos dias escolhidos (sem exercícios escritos). */
+export const trainSimple = (p: Profile) => p.trainMode === 'check' || (!!p.trainFiles?.length && !p.workouts.some((w) => w.items.trim()))
 export function workoutFor(p: Profile, d: Date) {
-  return p.workouts.find((w) => w.weekday === d.getDay() && w.items.trim())
+  const simple = trainSimple(p)
+  return p.workouts.find((w) => w.weekday === d.getDay() && (simple || w.items.trim()))
 }
+/** Tem dias de treino definidos (ficha escrita, arquivo ou modo só marcar). */
+export const hasTrainPlan = (p: Profile) => (trainSimple(p) ? p.workouts.length > 0 : p.workouts.some((w) => w.items.trim()))
 /** Refeições cadastradas de verdade (com o que comer). As do modelo vazio não viram tarefa nem cobrança. */
 export const planMeals = (p: Profile) => p.meals.filter((m) => m.items.trim())
+/** Dieta "simples": um check só por dia, "segui a dieta hoje". */
+export const dietSimple = (p: Profile) => p.dietMode === 'check' || (!!p.dietFiles?.length && !planMeals(p).length)
 
 export const newId = uid

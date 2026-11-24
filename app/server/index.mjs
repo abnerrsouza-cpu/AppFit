@@ -358,15 +358,17 @@ route('POST', '/api/plan/parse', async (req, res) => {
   if (!planReady()) throw new HttpError(503, 'Leitura de PDF ainda não configurada')
   const b = await readJson(req, 14_000_000)
   if (!['diet', 'workout', 'routine'].includes(b.kind)) throw new HttpError(400, 'Tipo inválido')
-  const pdf = typeof b.pdf === 'string' ? b.pdf.replace(/^data:application\/pdf;base64,/, '') : ''
-  if (!pdf || !Buffer.from(pdf.slice(0, 8), 'base64').toString('latin1').startsWith('%PDF')) throw new HttpError(400, 'Arquivo não é PDF')
+  const mime = ['image/jpeg', 'image/png', 'image/webp'].includes(b.mime) ? b.mime : 'application/pdf'
+  const pdf = typeof b.pdf === 'string' ? b.pdf.replace(/^data:[^;,]+;base64,/, '') : ''
+  if (!pdf) throw new HttpError(400, 'Arquivo vazio')
+  if (mime === 'application/pdf' && !Buffer.from(pdf.slice(0, 8), 'base64').toString('latin1').startsWith('%PDF')) throw new HttpError(400, 'Arquivo não é PDF')
   const day = new Date().toISOString().slice(0, 10)
   const key = `${u.id}:${day}`
   const used = planUses.get(key) || 0
   if (used >= 15) throw new HttpError(429, 'Limite de leituras de hoje atingido. Tente amanhã.')
   planUses.set(key, used + 1)
   try {
-    send(res, 200, await parsePlan(b.kind, pdf, ['pt', 'en', 'es'].includes(b.lang) ? b.lang : 'pt'))
+    send(res, 200, await parsePlan(b.kind, pdf, ['pt', 'en', 'es'].includes(b.lang) ? b.lang : 'pt', mime))
   } catch (e) {
     console.error('plan parse', e)
     throw new HttpError(502, 'Não consegui ler o PDF agora. Tente de novo.')

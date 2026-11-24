@@ -116,7 +116,7 @@ export const api = {
   coachReady: () => call<{ ready: boolean }>('GET', '/api/coach/ready'),
   coachChat: (context: Record<string, unknown>, messages: { role: 'user' | 'assistant'; text: string }[]) => call<{ text: string | null }>('POST', '/api/coach/chat', { context, messages }),
   planReady: () => call<{ ready: boolean }>('GET', '/api/plan/ready'),
-  planParse: <T,>(kind: 'diet' | 'workout' | 'routine', pdf: string, lang: string) => call<T>('POST', '/api/plan/parse', { kind, pdf, lang }),
+  planParse: <T,>(kind: 'diet' | 'workout' | 'routine', pdf: string, lang: string, mime = 'application/pdf') => call<T>('POST', '/api/plan/parse', { kind, pdf, lang, mime }),
   pushKey: () => call<{ key: string }>('GET', '/api/push/key'),
   pushSubscribe: (subscription: PushSubscriptionJSON) => call('POST', '/api/push/subscribe', { subscription }),
   pushTest: (title: string, body: string) => call<{ ok: boolean }>('POST', '/api/push/test', { title, body }),

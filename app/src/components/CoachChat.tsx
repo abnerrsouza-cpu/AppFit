@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { api } from '../api'
 import { t } from '../i18n'
-import { type AppState, addDays, cycleInfo, getProjeto, setState, streak, today, workoutFor, ymd } from '../store'
+import { type AppState, addDays, cycleInfo, getProjeto, hasTrainPlan, setState, streak, today, workoutFor, ymd } from '../store'
 import { useRefPhoto } from '../usePhotos'
 import { Icon } from './Icon'
 import { toast } from './Toast'
@@ -32,7 +32,7 @@ function nextTimes(n = 3) {
 export function coachShouldOpen(s: AppState) {
   if (!s.onboarded || s.demo) return false
   const p = s.profile
-  const hasPlan = p.workouts.some((w) => w.items.trim())
+  const hasPlan = hasTrainPlan(p)
   if (hasPlan && !workoutFor(p, new Date())) return false
   const c = s.checks[today()] || {}
   if (c.train || c.gym || s.daily[today()]) return false

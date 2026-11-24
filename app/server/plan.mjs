@@ -102,7 +102,7 @@ Distribua os treinos pelos dias da semana.
 Não invente exercícios que não estejam no PDF.`,
 }
 
-export async function parsePlan(kind, base64, lang = 'pt') {
+export async function parsePlan(kind, base64, lang = 'pt', mime = 'application/pdf') {
   const schema = kind === 'diet' ? DIET_SCHEMA : kind === 'routine' ? ROUTINE_SCHEMA : WORKOUT_SCHEMA
   const response = await getClient().beta.messages.create({
     model: MODEL,
@@ -115,7 +115,7 @@ export async function parsePlan(kind, base64, lang = 'pt') {
       {
         role: 'user',
         content: [
-          { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
+          mime === 'application/pdf' ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } } : { type: 'image', source: { type: 'base64', media_type: mime, data: base64 } },
           { type: 'text', text: `${PROMPTS[kind]}\nEscreva os nomes e textos em ${LANG_NAME[lang] || LANG_NAME.pt}, mantendo nomes de alimentos e exercícios reconhecíveis.` },
         ],
       },

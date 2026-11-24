@@ -9133,3 +9133,204 @@ html:has(.app) #root {
 .ag-bar span.hit {
   background: #0ea5e9;
 }
+
+/* ---------- arquivos da ficha/dieta ---------- */
+.pf-list {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pf-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pf-open {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--surface-2);
+  text-align: left;
+  color: var(--fg);
+}
+.pf-ic {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+}
+.pf-name {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.pf-name b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.92rem;
+}
+.pf-name small {
+  color: var(--fg-3);
+}
+.pf-del {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  color: var(--fg-3);
+  border: 1px solid var(--line);
+  background: transparent;
+}
+.pf-view {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(0, 0, 0, 0.92);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+.pf-view img {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 12px;
+}
+.pf-close {
+  position: absolute;
+  top: calc(16px + env(safe-area-inset-top, 0px));
+  right: 16px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+/* ---------- escolha: cadastrar ou só marcar ---------- */
+.mode-pick {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 4px 0 6px;
+}
+.mode-opt {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 14px 14px 16px;
+  border-radius: 20px;
+  background: var(--surface, #fff);
+  border: 2px solid var(--line);
+  text-align: left;
+  color: var(--fg);
+}
+.mode-opt.on {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface, #fff));
+}
+.mode-ic {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 4px;
+  background: var(--surface-2);
+  color: var(--fg-2);
+}
+.mode-opt.on .mode-ic {
+  background: var(--accent);
+  color: #fff;
+}
+.mode-opt b {
+  font-size: 0.95rem;
+  line-height: 1.25;
+}
+.mode-opt small {
+  font-size: 0.78rem;
+  line-height: 1.3;
+  color: var(--fg-3);
+}
+.mode-radio {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+}
+.mode-opt.on .mode-radio {
+  border: 6px solid var(--accent);
+}
+.mode-note {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 16px;
+}
+.mode-note svg {
+  flex: none;
+  color: var(--good, #16a34a);
+  margin-top: 2px;
+}
+.mode-note p {
+  margin: 0;
+  line-height: 1.45;
+}
+.pl-simple {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.pl-big-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 18px;
+  border-radius: 18px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  background: var(--accent);
+  color: #fff;
+  border: 0;
+}
+.pl-big-check.on {
+  background: color-mix(in srgb, var(--good, #16a34a) 14%, transparent);
+  color: var(--good, #16a34a);
+}
+.pl-empty .ghost-btn,
+.pl-empty .cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.pl-empty .ghost-btn {
+  margin-top: 8px;
+  width: 100%;
+}
+.pl-files {
+  padding: 12px;
+  margin-bottom: 10px;
+}

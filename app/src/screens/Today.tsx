@@ -13,7 +13,7 @@ import { Rings } from '../components/Rings'
 import type { Tab } from '../components/BottomNav'
 import { headline } from '../psych'
 import { t, weekdayShort } from '../i18n'
-import { type AppState, addDays, planMeals, currentWeight, cycleInfo, getProjeto, weekStats, setState, streak, today, weekDays, workoutFor, ymd } from '../store'
+import { type AppState, addDays, dietSimple, hasTrainPlan, planMeals, currentWeight, cycleInfo, getProjeto, weekStats, setState, streak, today, weekDays, workoutFor, ymd } from '../store'
 
 type Kind = 'wake' | 'meal' | 'train' | 'checkin' | 'event' | 'task'
 interface Task {
@@ -44,12 +44,12 @@ export function todayProgress(s: AppState) {
   if (log) {
     return {
       train: log.trained === 'sim' || log.trained === 'descanso' ? 1 : log.trained === 'parcial' ? 0.5 : 0,
-      diet: Object.values(log.mealsOk || {}).filter(Boolean).length / meals,
+      diet: dietSimple(p) || !planMeals(p).length ? log.dietScore / 10 : Object.values(log.mealsOk || {}).filter(Boolean).length / meals,
       cardio: log.cardioMin / dailyCardio,
       rest: !wk,
     }
   }
-  return { train: !wk ? 1 : checks.train ? 1 : 0, diet: planMeals(p).filter((m) => checks[m.id]).length / meals, cardio: 0, rest: !wk }
+  return { train: !wk ? 1 : checks.train ? 1 : 0, diet: dietSimple(p) ? (checks.diet ? 1 : 0) : planMeals(p).filter((m) => checks[m.id]).length / meals, cardio: 0, rest: !wk }
 }
 
 export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openCoach, onLocked }: { s: AppState; user?: User | null; go: (tab: Tab) => void; goMenu: (sec: string) => void; openCheckin: () => void; owes: boolean; onMission: (a: Mission['action']) => void; openCoach?: () => void; onLocked?: () => void }) {
@@ -102,6 +102,7 @@ export function Today({ s, user, go, goMenu, openCheckin, owes, onMission, openC
   const tasks: Task[] = [
     { id: 'wake', time: p.wake, title: t('Acordar e beber água'), kind: 'wake' as Kind, done: !!checks.wake },
     ...planMeals(p).map((m) => ({ id: m.id, time: m.time, title: m.name, detail: m.items, kind: 'meal' as Kind, done: !!checks[m.id] })),
+    ...(dietSimple(p) ? [{ id: 'diet', time: p.checkinTime, title: t('Segui a dieta hoje'), kind: 'meal' as Kind, done: !!checks.diet }] : []),
     ...(p.tasks ?? []).filter((x) => x.title.trim()).map((x) => ({ id: x.id, time: x.time, title: x.title, kind: 'task' as Kind, done: !!checks[x.id] })),
     ...(wk ? [{ id: 'train', time: p.trainTime, title: wk.title, detail: wk.items, kind: 'train' as Kind, done: !!checks.train }] : []),
     { id: 'checkin', time: p.checkinTime, title: t('Prestar contas do dia'), kind: 'checkin' as Kind, done: !!log },
@@ -565,25 +566,25 @@ function Setup({ s, go, goMenu }: { s: AppState; go: (tab: Tab) => void; goMenu:
       ),
     },
     {
-      done: p.meals.length > 0 && p.meals.some((m) => m.items.trim()),
+      done: planMeals(p).length > 0 || dietSimple(p),
       el: (
         <Locked
           key="dieta"
           icon="food"
           title={t('Cadastre sua dieta para receber as cobranças das refeições')}
-          text={t('Escreva o horário e o que comer em cada refeição.')}
+          text={t('Envie PDF ou foto, escreva, ou escolha só marcar quando seguir.')}
           onClick={() => goMenu('dieta')}
         />
       ),
     },
     {
-      done: p.workouts.length > 0 && p.workouts.some((w) => w.items.trim()),
+      done: hasTrainPlan(p),
       el: (
         <Locked
           key="treino"
           icon="dumbbell"
           title={t('Cadastre sua ficha de treino para ver os exercícios do dia')}
-          text={t('Escolha os dias de treino e escreva os exercícios.')}
+          text={t('Envie PDF ou foto, escreva, ou escolha só marcar quando treinar.')}
           onClick={() => goMenu('treino')}
         />
       ),

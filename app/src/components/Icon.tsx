@@ -31,6 +31,8 @@ const P: Record<string, string> = {
   lock: 'M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4',
   quote: 'M7 7h4v4c0 3-2 5-4 6M15 7h4v4c0 3-2 5-4 6',
   logout: 'M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10',
+  upload: 'M12 16V4M7 9l5-5 5 5M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4',
+  file: 'M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5',
   cup: 'M6 4h12l-1.5 16a2 2 0 0 1-2 2h-5a2 2 0 0 1-2-2zM6.6 10h10.8',
   mug: 'M5 6h11v11a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3zM16 9h2a3 3 0 0 1 0 6h-2M5 10h11',
   bottleS: 'M10 2h4v3l2 3v12a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V8l2-3zM8 12h8',

@@ -2,7 +2,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { api } from '../api'
 import { t, weekday } from '../i18n'
-import { type Profile, newId } from '../store'
+import { compress, putPhoto } from '../photos'
+import { type PlanFile, type Profile, newId } from '../store'
+import { PlanFiles } from './PlanFiles'
 import { Icon } from './Icon'
 import { LoginCta } from './LoginCta'
 
@@ -13,18 +15,20 @@ type WorkoutResult = { readable: boolean; days: { weekday: number; title: string
 
 const MAX_MB = 10
 
-function readBase64(file: File) {
-  return new Promise<string>((resolve, reject) => {
+const hhmm = (v: string) => (/^\d{1,2}:\d{2}$/.test(v) ? v.padStart(5, '0') : '12:00')
+
+const readDataUrl = (file: File) =>
+  new Promise<string>((resolve, reject) => {
     const r = new FileReader()
-    r.onload = () => resolve(String(r.result).replace(/^data:[^,]*,/, ''))
+    r.onload = () => resolve(String(r.result))
     r.onerror = () => reject(r.error)
     r.readAsDataURL(file)
   })
-}
 
-const hhmm = (v: string) => (/^\d{1,2}:\d{2}$/.test(v) ? v.padStart(5, '0') : '12:00')
-
-export function PdfImport({ kind, online, lang, upd }: { kind: Kind; online: boolean; lang: string; upd: (patch: Partial<Profile>) => void }) {
+export function PdfImport({ kind, online, lang, upd, files }: { kind: Kind; online: boolean; lang: string; upd: (patch: Partial<Profile>) => void; files?: PlanFile[] }) {
+  const keep = kind !== 'routine' // dieta e treino guardam o arquivo para consultar depois
+  const filesKey = kind === 'diet' ? 'dietFiles' : 'trainFiles'
+  const [saved, setSaved] = useState(false)
   const [ready, setReady] = useState<boolean | null>(null)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
@@ -43,21 +47,43 @@ export function PdfImport({ kind, online, lang, upd }: { kind: Kind; online: boo
     if (!file) return
     setErr('')
     setDone(false)
-    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) return setErr(t('Escolha um arquivo PDF.'))
-    if (file.size > MAX_MB * 1024 * 1024) return setErr(t('O PDF passa de {n} MB. Envie um arquivo menor.', { n: MAX_MB }))
+    setSaved(false)
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
+    const isImg = file.type.startsWith('image/')
+    if (!isPdf && !isImg) return setErr(t('Escolha um PDF ou uma foto.'))
+    if (file.size > MAX_MB * 1024 * 1024 && isPdf) return setErr(t('O PDF passa de {n} MB. Envie um arquivo menor.', { n: MAX_MB }))
     setBusy(true)
+    let dataUrl = ''
     try {
-      const pdf = await readBase64(file)
+      dataUrl = isImg ? await compress(file, 1600) : await readDataUrl(file)
+    } catch {
+      setBusy(false)
+      return setErr(t('Não consegui abrir esse arquivo. Tente outro.'))
+    }
+    if (keep) {
+      const id = `plan-${newId()}`
+      await putPhoto(id, dataUrl)
+      upd({ [filesKey]: [...(files || []), { id, name: file.name || t('Foto'), type: isImg ? 'image/jpeg' : 'application/pdf' }] } as Partial<Profile>)
+      setSaved(true)
+    }
+    if (!online || ready !== true) {
+      setBusy(false)
+      if (input.current) input.current.value = ''
+      return
+    }
+    try {
+      const pdf = dataUrl.replace(/^data:[^,]*,/, '')
+      const mime = isImg ? 'image/jpeg' : 'application/pdf'
       if (kind === 'routine') {
-        const r = await api.planParse<RoutineResult>('routine', pdf, lang)
+        const r = await api.planParse<RoutineResult>('routine', pdf, lang, mime)
         if (!r.readable || !r.tasks?.length) setErr(t('Não encontrei horários nesse PDF. Confira se é a sua rotina.'))
         else setRout(r)
       } else if (kind === 'diet') {
-        const r = await api.planParse<DietResult>('diet', pdf, lang)
+        const r = await api.planParse<DietResult>('diet', pdf, lang, mime)
         if (!r.readable || !r.meals?.length) setErr(t('Não encontrei refeições nesse PDF. Confira se é o plano alimentar.'))
         else setDiet(r)
       } else {
-        const r = await api.planParse<WorkoutResult>('workout', pdf, lang)
+        const r = await api.planParse<WorkoutResult>('workout', pdf, lang, mime)
         if (!r.readable || !r.days?.length) setErr(t('Não encontrei treinos nesse PDF. Confira se é a ficha de treino.'))
         else setWork(r)
       }
@@ -68,6 +94,7 @@ export function PdfImport({ kind, online, lang, upd }: { kind: Kind; online: boo
       if (input.current) input.current.value = ''
     }
   }
+  const removeFile = (id: string) => upd({ [filesKey]: (files || []).filter((f) => f.id !== id) } as Partial<Profile>)
 
   const apply = () => {
     if (diet) {
@@ -96,13 +123,18 @@ export function PdfImport({ kind, online, lang, upd }: { kind: Kind; online: boo
     setRout(null)
   }
 
-  const title = kind === 'diet' ? t('Tem o plano em PDF?') : kind === 'routine' ? t('Tem sua rotina em PDF?') : t('Tem a ficha em PDF?')
+  const ai = online && ready === true
+  const title = kind === 'diet' ? t('Envie sua dieta') : kind === 'routine' ? t('Tem sua rotina em PDF?') : t('Envie sua ficha de treino')
   const sub =
     kind === 'diet'
-      ? t('Envie o PDF do nutricionista. O app lê e preenche suas refeições e horários.')
+      ? ai
+        ? t('PDF ou foto do plano do nutricionista. O app lê e preenche suas refeições e horários.')
+        : t('PDF ou foto do plano do nutricionista. Fica salvo aqui para você abrir quando quiser.')
       : kind === 'routine'
         ? t('Envie um PDF com seus horários. O app lê e cria seus afazeres do dia.')
-        : t('Envie o PDF do personal. O app lê e distribui os treinos pelos dias da semana.')
+        : ai
+          ? t('PDF ou foto da ficha do personal. O app lê e distribui os treinos pelos dias da semana.')
+          : t('PDF ou foto da ficha do personal. Fica salva aqui para você abrir na academia.')
 
   // prévia: a pessoa confere antes de trocar o plano
   if (diet || work || rout) {
@@ -155,32 +187,38 @@ export function PdfImport({ kind, online, lang, upd }: { kind: Kind; online: boo
     )
   }
 
-  // leitura de PDF desligada no servidor: o cliente não precisa ver aviso técnico, só não vê o cartão
-  if (online && ready !== true) return null
-  const blocked = !online ? 'login' : ready === false ? (kind === 'routine' ? t('A leitura de PDF ainda não foi ativada. Por enquanto, adicione os afazeres acima.') : t('A leitura de PDF ainda não foi ativada. Por enquanto, preencha abaixo.')) : ''
+  // rotina: sem leitura automática, o cartão some (não há o que guardar)
+  if (!keep && online && ready !== true) return null
+  if (!keep && !online)
+    return (
+      <div className="card pdf-card off">
+        <LoginCta compact text={t('Enviar PDF funciona na versão com conta.')} />
+      </div>
+    )
   return (
-    <div className={`card pdf-card ${blocked ? 'off' : ''}`}>
+    <div className="card pdf-card">
       <div className="pdf-row">
         <span className="pdf-ic">
-          <Icon name="list" size={22} />
+          <Icon name="upload" size={22} />
         </span>
         <div>
           <b>{title}</b>
           <small>{sub}</small>
         </div>
       </div>
+      {keep && !!files?.length && <PlanFiles files={files} onRemove={removeFile} />}
       {busy ? (
         <div className="pdf-busy">
-          <span className="spin" /> {t('Lendo seu PDF. Isso pode levar até 1 minuto.')}
+          <span className="spin" /> {ai ? t('Lendo seu arquivo. Isso pode levar até 1 minuto.') : t('Salvando...')}
         </div>
       ) : (
-        <button type="button" className="ghost-btn" disabled={!!blocked || ready === null} onClick={() => input.current?.click()}>
-          <Icon name="plus" size={18} /> {t('Enviar PDF')}
+        <button type="button" className="ghost-btn" disabled={!keep && ready === null} onClick={() => input.current?.click()}>
+          <Icon name="plus" size={18} /> {keep ? (files?.length ? t('Enviar outro arquivo') : t('Enviar PDF ou foto')) : t('Enviar PDF')}
         </button>
       )}
-      <input ref={input} type="file" accept="application/pdf,.pdf" hidden onChange={(e) => pick(e.target.files?.[0])} />
-      {blocked === 'login' ? <LoginCta compact text={t('Enviar PDF funciona na versão com conta.')} /> : blocked && <small className="pdf-msg">{blocked}</small>}
+      <input ref={input} type="file" accept={keep ? 'application/pdf,.pdf,image/*' : 'application/pdf,.pdf'} hidden onChange={(e) => pick(e.target.files?.[0])} />
       {err && <small className="pdf-msg bad-msg">{err}</small>}
+      {saved && !ai && <small className="pdf-msg ok-msg">{t('Arquivo salvo. Ele aparece na aba Treino e dieta.')}</small>}
       {done && <small className="pdf-msg ok-msg">{t('Pronto. Plano atualizado. Confira e ajuste abaixo se precisar.')}</small>}
     </div>
   )

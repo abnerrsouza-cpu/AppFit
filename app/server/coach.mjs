@@ -4,6 +4,14 @@
 import { getSetting, q } from './db.mjs'
 import { sendToUser } from './push.mjs'
 
+/** Dias de treino: com exercícios escritos ou, no modo "só marcar" (ou ficha só em arquivo), os dias escolhidos. */
+function trainDays(p) {
+  const ws = p.workouts || []
+  const written = ws.some((w) => String(w.items || '').trim())
+  const simple = p.trainMode === 'check' || ((p.trainFiles || []).length > 0 && !written)
+  return ws.filter((w) => simple || String(w.items || '').trim()).map((w) => w.weekday)
+}
+
 // ---------- tempo ----------
 function localNow(tz) {
   const p = new Intl.DateTimeFormat('en-CA', { timeZone: tz || 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', weekday: 'short', hourCycle: 'h23' }).formatToParts(new Date())
@@ -189,7 +197,7 @@ function snapshot(d, now) {
   const mealsMissed = meals.filter((m) => !checks[m.id] && toMin(m.time) + 30 <= now.min)
   const tasks = (p.tasks || []).filter((x) => x.title?.trim())
   const tasksDone = tasks.filter((x) => checks[x.id]).length
-  const hasPlan = (p.workouts || []).some((w) => String(w.items || '').trim())
+  const hasPlan = trainDays(p).length > 0
   const wk = (p.workouts || []).find((w) => w.weekday === now.dow && String(w.items || '').trim())
   const trainDone = !!checks.train || !!checks.gym || log?.trained === 'sim'
   const trainAt = d.trainAt?.[date] || ''
@@ -208,7 +216,7 @@ function snapshot(d, now) {
   const ws = mondayOf(date)
   const weekDays = []
   for (let k = ws; k <= date; k = addDays(k, 1)) weekDays.push(k)
-  const planned = hasPlan ? weekDays.filter((k) => (p.workouts || []).some((w) => w.weekday === dowOf(k) && String(w.items || '').trim())).length : 0
+  const planned = hasPlan ? weekDays.filter((k) => trainDays(p).includes(dowOf(k))).length : 0
   const trainedWeek = weekDays.filter((k) => daily[k]?.trained === 'sim' || (k === date && checks.train)).length
   const cardioWeek = weekDays.reduce((a, k) => a + (Number(daily[k]?.cardioMin) || 0), 0)
   const cardioGoal = Number(p.cardioGoalMin) || 0
@@ -233,8 +241,8 @@ export function slotsFor(d, now) {
   for (const m of p.meals || []) if (String(m.items || '').trim()) ev.push({ m: toMin(m.time), kind: 'meal', ref: m.id })
   for (const x of p.tasks || []) if (x.title?.trim()) ev.push({ m: toMin(x.time), kind: 'task', ref: x.id })
   for (const c of d.custom || []) if (c.on && String(c.text || '').trim()) ev.push({ m: toMin(c.time), kind: 'custom', ref: c.id })
-  const hasPlan = (p.workouts || []).some((w) => String(w.items || '').trim())
-  const trainDay = (p.workouts || []).some((w) => w.weekday === now.dow && String(w.items || '').trim())
+  const hasPlan = trainDays(p).length > 0
+  const trainDay = trainDays(p).includes(now.dow)
   const at = d.trainAt?.[now.date]
   if (trainDay) ev.push({ m: Math.max(0, toMin(at || p.trainTime) - 60), kind: 'train' })
   // perseguir o treino ao longo do dia (dia de treino, ou sem ficha cadastrada)

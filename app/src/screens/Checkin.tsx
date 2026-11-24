@@ -4,7 +4,7 @@ import { Info, WithInfo } from '../components/Info'
 import { feedback, nudge } from '../psych'
 import { t } from '../i18n'
 import { XP, nextStreakMedal } from '../game'
-import { streak, planMeals } from '../store'
+import { streak, planMeals, dietSimple, hasTrainPlan } from '../store'
 import { type AppState, type DailyLog, type Trained, setState, today, workoutFor } from '../store'
 
 // Escalas de carinha: viram nota 0-10 por baixo, mas a pessoa só toca.
@@ -26,10 +26,10 @@ export function Checkin({ s, onClose }: { s: AppState; onClose: () => void }) {
   const [f, setF] = useState<DailyLog>(
     prev ?? {
       date: key,
-      trained: wk || !p.workouts.some((w) => w.items.trim()) ? (checks.train ? 'sim' : 'nao') : 'descanso',
+      trained: wk || !hasTrainPlan(p) ? (checks.train ? 'sim' : 'nao') : 'descanso',
       cardioMin: 0,
       cardioType: 'Esteira',
-      dietScore: 8,
+      dietScore: dietSimple(p) && checks.diet ? 9 : 8,
       mealsOk: Object.fromEntries(planMeals(p).map((m) => [m.id, checks[m.id] ?? true])),
       ate: '',
       focus: 8,
