@@ -10357,3 +10357,127 @@ html:has(.app) #root {
   width: calc(100% - 32px);
   margin: max(14px, calc(env(safe-area-inset-top, 0px) + 6px)) 16px 0;
 }
+
+/* ---------- projetinho: checklist de hoje ---------- */
+.dc {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 24px;
+  margin-bottom: 12px;
+}
+.dc-h {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.dc-h b {
+  font-size: 1.15rem;
+}
+.dc-count {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.82rem;
+  background: var(--surface-2);
+  color: var(--fg-2);
+}
+.dc-count.all {
+  background: color-mix(in srgb, #16a34a 15%, transparent);
+  color: #15803d;
+}
+.dc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.dc-it {
+  position: relative;
+  display: grid;
+  grid-template-columns: 40px 1fr 26px;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 18px;
+  border: 2px solid var(--line);
+  background: var(--surface, #fff);
+  text-align: left;
+  color: var(--fg);
+  overflow: hidden;
+  transition: transform 0.12s;
+}
+.dc-it:active {
+  transform: scale(0.97);
+}
+.dc-ic {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  color: var(--fg-2);
+}
+.dc-txt {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.dc-txt b {
+  font-size: 0.95rem;
+}
+.dc-txt small {
+  font-size: 0.74rem;
+  line-height: 1.25;
+  color: var(--fg-3);
+}
+.dc-tick {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--line);
+  color: var(--fg-3);
+}
+.dc-it.on {
+  border-color: #16a34a;
+  background: color-mix(in srgb, #16a34a 7%, var(--surface, #fff));
+}
+.dc-it.on .dc-ic {
+  background: #16a34a;
+  color: #fff;
+}
+.dc-it.on .dc-tick {
+  border-color: #16a34a;
+  background: #16a34a;
+  color: #fff;
+}
+.dc-it.locked {
+  opacity: 0.6;
+  border-style: dashed;
+}
+.dc-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4px;
+  background: var(--surface-2);
+}
+.dc-bar span {
+  display: block;
+  height: 100%;
+  background: #0ea5e9;
+}
+.dc-grid {
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+.dc-it {
+  padding: 10px 12px;
+}
+.dc-txt small {
+  font-size: 0.8rem;
+}

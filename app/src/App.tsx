@@ -393,6 +393,7 @@ export default function App() {
           s={s}
           initialSec={pjSec}
           autoFunnel={s.firstRun === 'projeto'}
+          onAgua={() => setTab('agua')}
           onFunnelDone={() => {
             if (s.firstRun !== 'projeto') return
             setState((st) => ({ ...st, firstRun: 'treino' }))
