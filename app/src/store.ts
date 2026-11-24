@@ -95,7 +95,9 @@ export interface AppState {
   seenHow?: boolean // já viu o "Como funciona"
   startPhotoId?: string // foto do antes (início do projeto)
   photosAsked?: boolean // já viu a tela "Suas duas fotos"
-  introMeId?: string // foto escolhida para o "Esse é você" da abertura
+  introMeId?: string
+  trainAt?: Record<string, string> // horário que a pessoa disse que vai treinar, por dia
+  coachAt?: number // última vez que a conversa abriu sozinha // foto escolhida para o "Esse é você" da abertura
   lastLevel?: number
   testEvery?: number // modo teste: dispara a cada N minutos (0 = desligado)
   projeto?: Projeto

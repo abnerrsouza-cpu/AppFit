@@ -25,6 +25,7 @@ import { Toaster, toast } from './components/Toast'
 import { applyImport, captureImport, isDemoHost } from './migrate'
 import { MoveToApp } from './components/MoveToApp'
 import { FirstPhotos } from './components/FirstPhotos'
+import { CoachChat, coachShouldOpen } from './components/CoachChat'
 import { getProjeto, resetToBlank, setState, today, useAppState } from './store'
 import { startSync } from './sync'
 import { refreshEvents } from './calendar'
@@ -46,6 +47,7 @@ export default function App() {
   const [howAgain, setHowAgain] = useState(false)
   const [rankNotice, setRankNotice] = useState<string | null>(null)
   const [fpOpen, setFpOpen] = useState(false)
+  const [coach, setCoach] = useState(false)
   const fpWanted = s.onboarded && !s.demo && !!s.seenHow && !s.photosAsked && !(s.startPhotoId && getProjeto(s).vision.photoId)
   useEffect(() => {
     if (fpWanted) setFpOpen(true)
@@ -118,6 +120,7 @@ export default function App() {
         u.searchParams.delete('abrir')
         history.replaceState(null, '', u.pathname + u.search)
         if (abrir === 'checkin') setCheckin(true)
+        else if (abrir === 'coach') setCoach(true)
         else if (abrir === 'plano') setTab('plano')
         else if (abrir === 'evolucao') setTab('evolucao')
         else if (abrir === 'semanal') {
@@ -244,6 +247,12 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [s.onboarded, s.demo])
 
+  // dia ruim: depois da abertura, o treinador puxa conversa (no máximo a cada 3 horas)
+  useEffect(() => {
+    if (!intro && phase === 'ready' && !fpOpen && coachShouldOpen(s)) setCoach(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [intro, phase, fpOpen])
+
   if (phase === 'loading' || phase === 'syncing')
     return (
       <div className="splash">
@@ -275,6 +284,7 @@ export default function App() {
           }}
         />
       )}
+      {coach && !intro && <CoachChat s={s} online={!!user} onClose={() => setCoach(false)} />}
       {needPhotos && (
         <FirstPhotos
           s={s}
@@ -308,7 +318,7 @@ export default function App() {
           </button>
         </div>
       )}
-      {tab === 'inicio' && <Today s={s} user={user} onMission={onMission} go={setTab} goMenu={goMenu} openCheckin={() => setCheckin(true)} owes={owes} />}
+      {tab === 'inicio' && <Today s={s} user={user} onMission={onMission} go={setTab} goMenu={goMenu} openCheckin={() => setCheckin(true)} owes={owes} openCoach={() => setCoach(true)} />}
       {tab === 'evolucao' && <Evolution key={openWeekly ? 'w' : 'n'} s={s} openWeekly={openWeekly} openCheckin={() => setCheckin(true)} />}
       {tab === 'cobrancas' && <Alerts s={s} onBack={() => setTab('inicio')} />}
       {tab === 'projeto' && <Projeto key={pjSec || 'x'} s={s} initialSec={pjSec} />}

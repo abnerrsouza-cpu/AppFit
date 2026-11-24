@@ -66,6 +66,18 @@ const T = {
     paceBody: (pw, r) => `Isso dá ${pw} kg por semana${r ? ` para "${r}"` : ''}.`,
     letter: (c) => `Você escreveu: "${c}"`,
     letterBody: (x, n) => `Dia ${x} de ${n}. Não deixe virar mais uma tentativa.`,
+    ask: 'Que horas você vai treinar hoje?',
+    askBody: (s) => (s >= 7 ? `Não achei no seu dia. São ${s} dias seguidos: não deixa o dia passar sem horário.` : 'Não achei no seu dia. Toque e me diga um horário.'),
+    chaseAsk: 'Ainda não sei que horas você vai treinar',
+    chaseAskBody: (s) => (s >= 7 ? `Você não chegou em ${s} dias seguidos deixando para depois. Escolhe um horário.` : 'Me diz um horário e eu te ajudo a chegar lá.'),
+    chaseLate: (s) => (s >= 7 ? `${s} dias seguidos. Vai entregar isso hoje?` : 'Já está ficando tarde... vai perder mais um dia?'),
+    chaseLateBody: (s) => (s >= 7 ? 'Quem chegou até aqui não para por preguiça. Abre e me diz o que está pegando.' : 'Abre o app e me conta o que está te travando. A gente resolve.'),
+    chase5: 'Pensa só nos próximos 5 minutos',
+    chase5Body: 'Pensa só nos próximos 5 minutos: se arruma e sai de casa. O resto vem depois.',
+    chaseMission: 'Missão de hoje: chegar na academia',
+    chaseMissionBody: (s) => (s >= 7 ? 'Só chegar. Não precisa ser o melhor treino. Precisa existir.' : 'Só chegar já conta. 20 minutos e o dia é seu.'),
+    chaseWas: (h) => `Era às ${h}. Já saiu de casa?`,
+    chaseWasBody: 'Ainda dá tempo. Abre e me diz se você está a caminho.',
   },
   en: {
     day: (x, n) => `Day ${x} of ${n}`,
@@ -102,6 +114,18 @@ const T = {
     paceBody: (pw, r) => `That is ${pw} kg per week${r ? ` for "${r}"` : ''}.`,
     letter: (c) => `You wrote: "${c}"`,
     letterBody: (x, n) => `Day ${x} of ${n}. Don't let it become another attempt.`,
+    ask: 'What time are you training today?',
+    askBody: (s) => (s >= 7 ? `I couldn't find it in your day. ${s} days in a row: don't let today pass without a time.` : "I couldn't find it in your day. Tap and tell me a time."),
+    chaseAsk: "I still don't know when you're training",
+    chaseAskBody: (s) => (s >= 7 ? `You didn't get to ${s} days in a row by leaving it for later. Pick a time.` : "Tell me a time and I'll help you get there."),
+    chaseLate: (s) => (s >= 7 ? `${s} days in a row. Throwing that away today?` : "It's getting late... losing another day?"),
+    chaseLateBody: (s) => (s >= 7 ? "People who got this far don't stop out of laziness. Open and tell me what's going on." : "Open the app and tell me what's holding you back. We'll fix it."),
+    chase5: 'Just think about the next 5 minutes',
+    chase5Body: 'Just think about the next 5 minutes: get dressed and leave the house. The rest comes after.',
+    chaseMission: "Today's mission: get to the gym",
+    chaseMissionBody: (s) => (s >= 7 ? "Just get there. It doesn't need to be your best workout. It needs to happen." : 'Just showing up counts. 20 minutes and the day is yours.'),
+    chaseWas: (h) => `It was supposed to be at ${h}. Have you left yet?`,
+    chaseWasBody: "There's still time. Open and tell me if you're on your way.",
   },
   es: {
     day: (x, n) => `Día ${x} de ${n}`,
@@ -138,6 +162,18 @@ const T = {
     paceBody: (pw, r) => `Eso es ${pw} kg por semana${r ? ` para "${r}"` : ''}.`,
     letter: (c) => `Escribiste: "${c}"`,
     letterBody: (x, n) => `Día ${x} de ${n}. Que no sea otro intento más.`,
+    ask: '¿A qué hora vas a entrenar hoy?',
+    askBody: (s) => (s >= 7 ? `No lo encontré en tu día. ${s} días seguidos: no dejes pasar el día sin horario.` : 'No lo encontré en tu día. Toca y dime un horario.'),
+    chaseAsk: 'Aún no sé a qué hora vas a entrenar',
+    chaseAskBody: (s) => (s >= 7 ? `No llegaste a ${s} días seguidos dejándolo para después. Elige un horario.` : 'Dime un horario y te ayudo a llegar.'),
+    chaseLate: (s) => (s >= 7 ? `${s} días seguidos. ¿Vas a tirarlos hoy?` : 'Ya se está haciendo tarde... ¿vas a perder otro día?'),
+    chaseLateBody: (s) => (s >= 7 ? 'Quien llegó hasta aquí no para por pereza. Abre y dime qué pasa.' : 'Abre la app y cuéntame qué te frena. Lo resolvemos.'),
+    chase5: 'Piensa solo en los próximos 5 minutos',
+    chase5Body: 'Piensa solo en los próximos 5 minutos: vístete y sal de casa. Lo demás viene después.',
+    chaseMission: 'Misión de hoy: llegar al gimnasio',
+    chaseMissionBody: (s) => (s >= 7 ? 'Solo llega. No tiene que ser tu mejor entreno. Tiene que existir.' : 'Solo llegar ya cuenta. 20 minutos y el día es tuyo.'),
+    chaseWas: (h) => `Era a las ${h}. ¿Ya saliste de casa?`,
+    chaseWasBody: 'Aún hay tiempo. Abre y dime si vas en camino.',
   },
 }
 
@@ -155,7 +191,8 @@ function snapshot(d, now) {
   const tasksDone = tasks.filter((x) => checks[x.id]).length
   const hasPlan = (p.workouts || []).some((w) => String(w.items || '').trim())
   const wk = (p.workouts || []).find((w) => w.weekday === now.dow && String(w.items || '').trim())
-  const trainDone = !!checks.train || log?.trained === 'sim'
+  const trainDone = !!checks.train || !!checks.gym || log?.trained === 'sim'
+  const trainAt = d.trainAt?.[date] || ''
   // sequência: noites seguidas com prestação de contas, terminando hoje ou ontem
   let streak = 0
   let day = log ? date : addDays(date, -1)
@@ -182,11 +219,11 @@ function snapshot(d, now) {
   const openPromise = (pj.promises || []).find((x) => x.status === 'aberta' && x.date < date)
   const target = pj.vision?.targetDate
   const letter = String(p.letter || '').trim().split(/(?<=[.!?])\s/)[0]
-  return { p, date, checks, log, meals, mealsDone, mealsMissed, tasks, tasksDone, hasPlan, wk, trainDone, streak, dayX, cycle, planned, trainedWeek, cardioWeek, cardioGoal, weight, pj, openPromise, target, letter, weeklyDone: !!d.weekly?.[ws], everReported: Object.keys(daily).length > 0, yesterdayReported: !!daily[addDays(date, -1)] }
+  return { trainAt, p, date, checks, log, meals, mealsDone, mealsMissed, tasks, tasksDone, hasPlan, wk, trainDone, streak, dayX, cycle, planned, trainedWeek, cardioWeek, cardioGoal, weight, pj, openPromise, target, letter, weeklyDone: !!d.weekly?.[ws], everReported: Object.keys(daily).length > 0, yesterdayReported: !!daily[addDays(date, -1)] }
 }
 
 // ---------- os 3 horários de cada período ----------
-const PRIO = { checkin: 1, late: 2, train: 3, wake: 4, weekly: 5, meal: 6, task: 7, custom: 8, status: 9 }
+const PRIO = { checkin: 1, chase: 1.5, late: 2, chaseask: 2.5, train: 3, wake: 4, weekly: 5, meal: 6, task: 7, custom: 8, status: 9 }
 export function slotsFor(d, now) {
   const p = d.profile || {}
   const wake = toMin(p.wake || '06:30')
@@ -196,7 +233,18 @@ export function slotsFor(d, now) {
   for (const m of p.meals || []) ev.push({ m: toMin(m.time), kind: 'meal', ref: m.id })
   for (const x of p.tasks || []) if (x.title?.trim()) ev.push({ m: toMin(x.time), kind: 'task', ref: x.id })
   for (const c of d.custom || []) if (c.on && String(c.text || '').trim()) ev.push({ m: toMin(c.time), kind: 'custom', ref: c.id })
-  if ((p.workouts || []).some((w) => w.weekday === now.dow && String(w.items || '').trim())) ev.push({ m: Math.max(0, toMin(p.trainTime) - 60), kind: 'train' })
+  const hasPlan = (p.workouts || []).some((w) => String(w.items || '').trim())
+  const trainDay = (p.workouts || []).some((w) => w.weekday === now.dow && String(w.items || '').trim())
+  const at = d.trainAt?.[now.date]
+  if (trainDay) ev.push({ m: Math.max(0, toMin(at || p.trainTime) - 60), kind: 'train' })
+  // perseguir o treino ao longo do dia (dia de treino, ou sem ficha cadastrada)
+  const c = d.checks?.[now.date] || {}
+  const trained = c.train || c.gym || d.daily?.[now.date]?.trained === 'sim'
+  if ((trainDay || !hasPlan) && !trained) {
+    if (!at) ev.push({ m: 14 * 60, kind: 'chaseask', stage: 'ask' })
+    ev.push({ m: 18 * 60 + 30, kind: 'chase', stage: 'late' }, { m: 19 * 60 + 45, kind: 'chase', stage: 'five' })
+    if (at) ev.push({ m: toMin(at) + 20, kind: 'chase', stage: 'was' })
+  }
   ev.push({ m: ci, kind: 'checkin' })
   ev.push({ m: Math.min(ci + 90, sleep - 20), kind: 'late' })
   if (now.dow === 0) ev.push({ m: Math.max(wake + 120, 10 * 60), kind: 'weekly' })
@@ -234,7 +282,20 @@ function compose(slot, s, now, L, usedStatus) {
     return items[0]
   })()
   switch (slot.kind) {
+    case 'chaseask':
+    case 'chase': {
+      const wantTrain = s.wk || !s.hasPlan
+      if (!wantTrain || s.trainDone) return null
+      const atMin = s.trainAt ? toMin(s.trainAt) : null
+      if (slot.stage === 'was') return atMin !== null && now.min >= atMin + 15 ? { title: L.chaseWas(s.trainAt), body: L.chaseWasBody, key: 'chase:was' } : null
+      if (atMin !== null && now.min < atMin + 15) return null // tem horário e ainda não chegou: deixa o lembrete do treino agir
+      if (slot.stage === 'ask') return s.trainAt ? null : { title: L.chaseAsk, body: L.chaseAskBody(s.streak), key: 'chase:ask' }
+      if (slot.stage === 'late') return { title: L.chaseLate(s.streak), body: L.chaseLateBody(s.streak), key: 'chase:late' }
+      if (slot.stage === 'five') return { title: L.chaseMission, body: L.chase5Body, key: 'chase:five' }
+      return null
+    }
     case 'wake': {
+      if ((s.wk || !s.hasPlan) && !s.trainAt && !s.trainDone) return { title: L.ask, body: L.askBody(s.streak), key: 'ask' }
       if (s.everReported && !s.yesterdayReported && s.streak === 0) return { title: L.wakeRestart, body: L.wakeBody(0, nextItem?.t, nextItem && hhmm(nextItem.m)), key: 'wake' }
       const title = s.wk ? L.wakeTrain(s.dayX, s.cycle, cut(s.wk.title, 24), p.trainTime) : L.wakeRest(s.dayX, s.cycle)
       return { title, body: L.wakeBody(s.streak, nextItem?.t, nextItem && hhmm(nextItem.m)), key: 'wake' }
@@ -256,6 +317,7 @@ function compose(slot, s, now, L, usedStatus) {
     }
     case 'train': {
       if (!s.wk || s.trainDone) return null
+      if (s.trainAt) p.trainTime = s.trainAt
       const n = String(s.wk.items || '').split('\n').filter((x) => x.trim()).length
       return { title: L.train(cut(s.wk.title, 26), p.trainTime), body: L.trainBody(n, s.trainedWeek, s.planned), key: 'train' }
     }
@@ -328,7 +390,7 @@ async function tick() {
         await q(`insert into notif_log (user_id, kind, dedupe, title, body, ok) values ($1, 'coach-key', $2, '-', '-', true) on conflict do nothing`, [r.id, `c:${now.date}:${msg.key}`])
         used.add(msg.key)
       }
-      const open = { checkin: 'checkin', late: 'checkin', train: 'plano', weekly: 'semanal', wake: 'dia' }[msg.key] || (msg.key.startsWith('meal') || msg.key.startsWith('task') || msg.key === 'st:missed' ? 'dia' : msg.key === 'st:promise' ? 'promessas' : msg.key === 'st:cardio' || msg.key === 'st:trainweek' ? 'plano' : msg.key === 'st:pace' ? 'evolucao' : 'inicio')
+      const open = msg.key === 'ask' || msg.key.startsWith('chase') ? 'coach' : { checkin: 'checkin', late: 'checkin', train: 'plano', weekly: 'semanal', wake: 'dia' }[msg.key] || (msg.key.startsWith('meal') || msg.key.startsWith('task') || msg.key === 'st:missed' ? 'dia' : msg.key === 'st:promise' ? 'promessas' : msg.key === 'st:cardio' || msg.key === 'st:trainweek' ? 'plano' : msg.key === 'st:pace' ? 'evolucao' : 'inicio')
       await sendToUser(r.id, { title: msg.title, body: msg.body, kind: 'rotina', dedupe: `${slotKey}:send`, url: `/?abrir=${open}` })
     }
   }

@@ -12,6 +12,7 @@ import { eventsFor, normalizeUrl } from './calendar.mjs'
 import { parsePlan, planReady } from './plan.mjs'
 import { canSeeAvatar, migrateSocial, registerSocial, startRankScheduler } from './social.mjs'
 import { startCoach } from './coach.mjs'
+import { coachReady, coachReply } from './coachai.mjs'
 
 const DIST = join(import.meta.dirname, '..', 'dist')
 const PORT = Number(process.env.PORT) || 3000
@@ -330,6 +331,27 @@ route('PUT', '/api/state', async (req, res) => {
 
 // leitura de PDF (dieta / treino): no máximo 15 por pessoa por dia
 const planUses = new Map()
+// conversa com o treinador (IA): até 60 mensagens por pessoa por dia
+const coachUses = new Map()
+route('GET', '/api/coach/ready', async (req, res) => send(res, 200, { ready: coachReady() }))
+route('POST', '/api/coach/chat', async (req, res) => {
+  const u = await requireUser(req)
+  if (!coachReady()) throw new HttpError(503, 'Conversa com IA ainda não configurada')
+  const b = await readJson(req, 200_000)
+  const key = `${u.id}:${new Date().toISOString().slice(0, 10)}`
+  const used = coachUses.get(key) || 0
+  if (used >= 60) throw new HttpError(429, 'Limite de mensagens de hoje atingido')
+  coachUses.set(key, used + 1)
+  const ctx = typeof b.context === 'object' && b.context ? b.context : {}
+  try {
+    const text = await coachReply(ctx, Array.isArray(b.messages) ? b.messages : [])
+    send(res, 200, { text })
+  } catch (e) {
+    console.error('coach chat', e)
+    throw new HttpError(502, 'Não consegui responder agora')
+  }
+})
+
 route('GET', '/api/plan/ready', async (req, res) => send(res, 200, { ready: planReady() }))
 route('POST', '/api/plan/parse', async (req, res) => {
   const u = await requireUser(req)
