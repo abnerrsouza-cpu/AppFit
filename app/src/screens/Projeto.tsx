@@ -8,7 +8,7 @@ import { toast } from '../components/Toast'
 import { ProjetoFunnel } from './ProjetoFunnel'
 import { Info, WithInfo } from '../components/Info'
 import { t } from '../i18n'
-import { type PjStep, efficacyLabel, projetoStats, projetoTodo } from '../game'
+import { type Factor, type PjStep, efficacyLabel, forecast, projetoStats, projetoTodo } from '../game'
 import { compress, getPhoto, putPhoto } from '../photos'
 import {
   type AppState,
@@ -275,6 +275,107 @@ export function Projeto({ s, initialSec }: { s: AppState; initialSec?: Sec }) {
 
 const pct = (v: number | null) => (v === null ? '—' : `${Math.round(v * 100)}%`)
 
+const F_LABEL: Record<Factor, string> = { treino: 'Treino', dieta: 'Dieta', cardio: 'Cardio' }
+const F_TIP: Record<Factor, string> = {
+  treino: 'Cumpra os dias de treino da semana. Treino perdido é o que mais empurra a data.',
+  dieta: 'A dieta pesa mais que tudo no resultado. Siga o plano e dê nota sincera à noite.',
+  cardio: 'Faça o cardio do dia e marque no app. São só alguns minutos que adiantam semanas.',
+}
+const wk = (n: number) => (n === 1 ? t('1 semana') : t('{n} semanas', { n: String(n).replace('.', ',') }))
+const dmy = (d: Date) => d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: d.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined }).replace('.', '')
+
+/** Previsão: quando você chega na meta fazendo o que está fazendo. */
+function Previsao({ s }: { s: AppState }) {
+  const f = forecast(s)
+  if (!f) return null
+  const goal = s.profile.weightGoal
+  const nowW = (f.target.getTime() - Date.now()) / (7 * 86400000)
+  const span = Math.max(nowW, f.weeks ?? 0, f.bestWeeks, 1) * 1.12
+  const pos = (w: number) => `${Math.min(100, (w / span) * 100)}%`
+  const tone = f.weeks === null ? 'bad' : (f.diffWeeks ?? 0) >= 1 ? 'good' : (f.diffWeeks ?? 0) > -1 ? 'ok' : 'bad'
+  const rows: [Factor, number][] = [
+    ['treino', f.train],
+    ['dieta', f.diet],
+    ['cardio', f.cardio],
+  ]
+  return (
+    <section className={`card pv pv-${tone}`}>
+      <div className="pv-h">
+        <span className="eyebrow">{t('Previsão')}</span>
+        <Info text={t('Calculada com o que você fez nos últimos 14 dias: treinos feitos, nota da dieta e cardio. Com pesagens semanais, a balança também entra na conta. Quanto mais você registra, mais certa fica.')} />
+      </div>
+      {f.weeks === null ? (
+        <>
+          <b className="pv-big">{t('Nesse ritmo, você não chega em {g} kg.', { g: goal })}</b>
+          <p className="pv-sub">{t('O que você está fazendo hoje ainda não mexe no ponteiro. Dá para virar isso já nesta semana.')}</p>
+        </>
+      ) : (
+        <>
+          <b className="pv-big">{t('Nesse ritmo, você chega em {g} kg em {d}.', { g: goal, d: dmy(f.eta!) })}</b>
+          <p className="pv-sub">
+            {t('Faltam {kg} kg. Daqui a cerca de {w}.', { kg: String(f.kgLeft).replace('.', ','), w: wk(f.weeks) })}
+          </p>
+        </>
+      )}
+      <span className={`pv-pill pv-${tone}`}>
+        {f.weeks === null
+          ? t('Fora do prazo')
+          : (f.diffWeeks ?? 0) >= 1
+            ? t('{w} antes do prazo', { w: wk(Math.floor(f.diffWeeks!)) })
+            : (f.diffWeeks ?? 0) > -1
+              ? t('Dentro do prazo')
+              : t('{w} depois do prazo', { w: wk(Math.ceil(-f.diffWeeks!)) })}
+      </span>
+
+      <div className="pv-line" aria-hidden="true">
+        <span className="pv-track" />
+        <i className="pv-dot pv-today" style={{ left: 0 }}>
+          <small>{t('Hoje')}</small>
+        </i>
+        <i className="pv-dot pv-best" style={{ left: pos(f.bestWeeks) }}>
+          <small>{t('Cumprindo tudo')}</small>
+        </i>
+        <i className="pv-dot pv-target" style={{ left: pos(nowW) }}>
+          <small>{t('Prazo')}</small>
+        </i>
+        {f.weeks !== null && (
+          <i className={`pv-dot pv-you pv-${tone}`} style={{ left: pos(f.weeks) }}>
+            <small>{t('Você')}</small>
+          </i>
+        )}
+      </div>
+
+      <div className="pv-rows">
+        {rows.map(([k, v]) => (
+          <div key={k} className={`pv-row ${k === f.weakest ? 'weak' : ''}`}>
+            <span>{t(F_LABEL[k])}</span>
+            <span className="pv-bar">
+              <span style={{ width: `${Math.round(v * 100)}%` }} />
+            </span>
+            <b>{Math.round(v * 100)}%</b>
+          </div>
+        ))}
+        <small className="muted">{t('Quanto você cumpriu nos últimos 14 dias')}</small>
+      </div>
+
+      <div className="pv-tip">
+        <b>{t('O que mais te atrasa: {f}', { f: t(F_LABEL[f.weakest]).toLowerCase() })}</b>
+        <p>{t(F_TIP[f.weakest])}</p>
+        {f.gainIfFix === -1 ? (
+          <p className="pv-gain">{t('Só corrigindo isso, você passa a chegar na meta.')}</p>
+        ) : f.gainIfFix && f.gainIfFix >= 0.5 ? (
+          <p className="pv-gain">{t('Corrigindo isso, você chega {w} antes.', { w: wk(Math.round(f.gainIfFix)) })}</p>
+        ) : null}
+      </div>
+
+      <p className="pv-best">
+        <Icon name="flame" size={16} /> {t('Cumprindo tudo, você chega em {d}.', { d: dmy(f.bestEta) })}
+      </p>
+      {f.days < 5 && <small className="muted">{t('Ainda com poucos dias de dados. A previsão fica mais certa a cada dia registrado.')}</small>}
+    </section>
+  )
+}
+
 /** Painel do andamento: tempo, eficácia, ritmo e o porquê. */
 function Andamento({ s, onSec }: { s: AppState; onSec: (x: Sec) => void }) {
   const st = projetoStats(s)
@@ -320,6 +421,8 @@ function Andamento({ s, onSec }: { s: AppState; onSec: (x: Sec) => void }) {
         </div>
         <small className="muted">{t('do tempo do seu projetinho já passou')}</small>
       </section>
+
+      <Previsao s={s} />
 
       <section className="card pj-eff">
         <div className="pj-eff-top">

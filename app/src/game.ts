@@ -242,3 +242,121 @@ export function efficacyLabel(v: number) {
   if (v >= 0.4) return t('Abaixo do necessário.')
   return t('Você está se sabotando.')
 }
+
+// ---------- previsão: quando a pessoa chega na meta fazendo o que está fazendo ----------
+export type Factor = 'treino' | 'dieta' | 'cardio'
+export interface Forecast {
+  kgLeft: number
+  lose: boolean
+  /** aderência dos últimos 14 dias (0 a 1) */
+  train: number
+  diet: number
+  cardio: number
+  adherence: number
+  /** kg por semana no ritmo atual (pelo comportamento e, se houver, pela balança) */
+  rate: number
+  measured: number | null
+  weeks: number | null // null = nesse ritmo não chega
+  eta: Date | null
+  target: Date
+  /** semanas de folga (+) ou de atraso (-) em relação ao prazo */
+  diffWeeks: number | null
+  bestWeeks: number
+  bestEta: Date
+  weakest: Factor
+  gainIfFix: number | null // semanas que ganha corrigindo o ponto fraco
+  days: number // quantos dias de dado foram usados
+}
+
+const W = { dieta: 0.5, treino: 0.3, cardio: 0.2 }
+
+export function forecast(s: AppState): Forecast | null {
+  const p = s.profile
+  const pj = getProjeto(s)
+  const ws = Object.values(s.weekly).sort((a, b) => a.weekStart.localeCompare(b.weekStart))
+  const cur = ws.length ? ws[ws.length - 1].weight : p.weightStart
+  const lose = p.weightGoal < p.weightStart
+  const kgLeft = Math.round(Math.abs(cur - p.weightGoal) * 10) / 10
+  if (!p.weightGoal || kgLeft < 0.3) return null
+
+  // janela: últimos 14 dias (ou desde o começo do projetinho), contando hoje
+  const key = today()
+  const start = pj.startedAt ? ymd(new Date(pj.startedAt)) : p.startDate
+  const days: string[] = []
+  for (let i = 13; i >= 0; i--) {
+    const k = ymd(addDays(new Date(), -i))
+    if (k >= start) days.push(k)
+  }
+  if (!days.length) days.push(key)
+  // fechado = dia que já passou ou hoje com algo registrado
+  const closed = days.filter((k) => k < key || s.daily[k] || trainedOn(s, k) > 0)
+  const n = Math.max(1, closed.length)
+
+  // treino: feitos / planejados (sem ficha: espera 3 por semana)
+  const planned = closed.filter((k) => workoutFor(p, parseYmd(k))).length || Math.max(1, Math.round((n * 3) / 7))
+  const train = Math.min(1, closed.reduce((a, k) => a + trainedOn(s, k), 0) / planned)
+  // dieta: nota da prestação de contas; sem nota, "segui a dieta"/refeições marcadas
+  const dietVals = closed.map((k) => {
+    const l = s.daily[k]
+    if (l) return (l.dietScore || 0) / 10
+    const c = s.checks[k] || {}
+    if (c.diet) return 0.9
+    const meals = p.meals.filter((m) => m.items.trim())
+    return meals.length ? meals.filter((m) => c[m.id]).length / meals.length : 0
+  })
+  const diet = dietVals.reduce((a, b) => a + b, 0) / n
+  // cardio: minutos feitos x meta proporcional aos dias
+  const dailyCardio = Math.max(10, Math.round(p.cardioGoalMin / 5))
+  const cardioMin = closed.reduce((a, k) => a + (s.daily[k]?.cardioMin || (s.checks[k]?.cardio ? dailyCardio : 0)), 0)
+  const cardio = p.cardioGoalMin > 0 ? Math.min(1, cardioMin / ((p.cardioGoalMin * n) / 7)) : train
+
+  const adh = (f: { treino: number; dieta: number; cardio: number }) => f.dieta * W.dieta + f.treino * W.treino + f.cardio * W.cardio
+  const adherence = adh({ treino: train, dieta: diet, cardio })
+  // ritmo máximo realista: ~0,85% do peso por semana perdendo (0,5 a 1 kg); ganhando, 0,25 kg
+  const maxRate = lose ? Math.min(1, Math.max(0.5, cur * 0.0085)) : 0.25
+  // abaixo de 35% de aderência, praticamente não sai do lugar
+  const rateOf = (a: number) => maxRate * Math.max(0, (a - 0.35) / 0.65)
+  let rate = rateOf(adherence)
+
+  // balança: com 2+ pesagens em 14+ dias, mistura o que a balança mostra
+  let measured: number | null = null
+  if (ws.length >= 2) {
+    const a = ws[Math.max(0, ws.length - 5)]
+    const b = ws[ws.length - 1]
+    const wk = Math.max(1, (parseYmd(b.weekStart).getTime() - parseYmd(a.weekStart).getTime()) / (7 * 86400000))
+    if (wk >= 2) {
+      measured = Math.round(((lose ? a.weight - b.weight : b.weight - a.weight) / wk) * 100) / 100
+      rate = Math.max(0, rate * 0.4 + Math.max(0, measured) * 0.6)
+    }
+  }
+  rate = Math.round(rate * 100) / 100
+
+  const target = parseYmd(pj.vision.targetDate)
+  const weeksTo = (r: number) => (r > 0.04 ? Math.ceil((kgLeft / r) * 10) / 10 : null)
+  const weeks = weeksTo(rate)
+  const eta = weeks === null ? null : addDays(new Date(), Math.round(weeks * 7))
+  const weeksToTarget = (target.getTime() - Date.now()) / (7 * 86400000)
+  const bestWeeks = Math.ceil((kgLeft / maxRate) * 10) / 10
+  const f = { treino: train, dieta: diet, cardio }
+  const weakest = (Object.keys(W) as Factor[]).sort((a, b) => (1 - f[b]) * W[b] - (1 - f[a]) * W[a])[0]
+  const fixed = weeksTo(rateOf(adh({ ...f, [weakest]: 1 })))
+  return {
+    kgLeft,
+    lose,
+    train,
+    diet,
+    cardio,
+    adherence,
+    rate,
+    measured,
+    weeks,
+    eta,
+    target,
+    diffWeeks: weeks === null ? null : Math.round((weeksToTarget - weeks) * 10) / 10,
+    bestWeeks,
+    bestEta: addDays(new Date(), Math.round(bestWeeks * 7)),
+    weakest,
+    gainIfFix: weeks === null ? (fixed === null ? null : -1) : fixed === null ? null : Math.max(0, Math.round((weeks - fixed) * 10) / 10),
+    days: closed.length,
+  }
+}
