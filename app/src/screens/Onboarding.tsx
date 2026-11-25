@@ -100,7 +100,7 @@ export function Onboarding({ p0, s, userId, hasServerAvatar }: { p0: Profile; s:
             <Icon name="flame" size={34} />
           </span>
           <h1 className="display">{t('Sem desculpa.')}</h1>
-          <p className="lead">{t('Este app não é para te motivar. É para te cobrar. Todo dia. Até o fim do ciclo de {n} dias.', { n: p.cycleDays })}</p>
+          <p className="lead">{t('Este app não é para te motivar. É para não te deixar desistir. Todo dia, até o fim do ciclo de {n} dias.', { n: p.cycleDays })}</p>
           <ol className="ob-path">
             <li>
               <b>1</b> {t('Você responde algumas perguntas (3 minutos)')}
@@ -382,7 +382,7 @@ export function Onboarding({ p0, s, userId, hasServerAvatar }: { p0: Profile; s:
       <div className="onb-foot">
         {step < total - 1 ? (
           <button type="button" className="cta" disabled={!canNext[id]} onClick={() => setStep(step + 1)}>
-            {id === 'welcome' ? t('Aceito ser cobrado') : id === 'photos' && !(s.startPhotoId && getProjeto(s).vision.photoId) ? t('Continuar sem as fotos') : t('Continuar')}
+            {id === 'welcome' ? t('Topo o desafio') : id === 'photos' && !(s.startPhotoId && getProjeto(s).vision.photoId) ? t('Continuar sem as fotos') : t('Continuar')}
           </button>
         ) : (
           <button type="button" className="cta" onClick={finish}>
