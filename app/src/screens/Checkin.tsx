@@ -121,7 +121,7 @@ export function Checkin({ s, onClose, day }: { s: AppState; onClose: () => void;
       <div className="story-body">
         {step === 0 && (
           <>
-            <h1>{wk ? t('Você fez o treino de hoje?') : noPlan ? t('Você treinou hoje?') : t('Hoje era dia de descanso. Você treinou?')}</h1>
+            <h1>{late ? (wk ? t('Você fez o treino de ontem?') : noPlan ? t('Você treinou ontem?') : t('Ontem era dia de descanso. Você treinou?')) : wk ? t('Você fez o treino de hoje?') : noPlan ? t('Você treinou hoje?') : t('Hoje era dia de descanso. Você treinou?')}</h1>
             {wk && <p className="lead">{wk.title}</p>}
             <div className="big-opts">
               {trainOpts.map((o) => (
@@ -136,7 +136,7 @@ export function Checkin({ s, onClose, day }: { s: AppState; onClose: () => void;
 
         {step === 1 && (
           <>
-            <h1>{t('Quantos minutos de cardio você fez?')}</h1>
+            <h1>{late ? t('Quantos minutos de cardio você fez ontem?') : t('Quantos minutos de cardio você fez?')}</h1>
             <div className="chip-grid">
               {[0, 15, 20, 30, 45, 60].map((m) => (
                 <button key={m} type="button" className={`tap ${f.cardioMin === m ? 'on' : ''}`} onClick={() => set('cardioMin', m)}>
@@ -165,7 +165,7 @@ export function Checkin({ s, onClose, day }: { s: AppState; onClose: () => void;
 
         {step === 2 && (
           <>
-            <h1>{meals.length ? t('Você seguiu as refeições do plano?') : t('O que você comeu hoje?')}</h1>
+            <h1>{meals.length ? (late ? t('Ontem, você seguiu as refeições do plano?') : t('Você seguiu as refeições do plano?')) : late ? t('O que você comeu ontem?') : t('O que você comeu hoje?')}</h1>
             <p className="lead">{meals.length ? t('Toque nas refeições que você não seguiu.') : t('Você ainda não cadastrou sua dieta. Escreva o que comeu, sem mentir para você.')}</p>
             {!meals.length && (
               <label className="soft-input">
@@ -195,14 +195,14 @@ export function Checkin({ s, onClose, day }: { s: AppState; onClose: () => void;
 
         {step === 3 && (
           <>
-            <h1>{t('Que nota você dá para a sua dieta hoje?')}</h1>
+            <h1>{late ? t('Que nota você dá para a sua dieta de ontem?') : t('Que nota você dá para a sua dieta hoje?')}</h1>
             <Faces value={nearest(f.dietScore)} onChange={(v) => set('dietScore', v)} />
           </>
         )}
 
         {step === 4 && (
           <>
-            <h1>{t('Água, sono e foco de hoje')}</h1>
+            <h1>{late ? t('Água, sono e foco de ontem') : t('Água, sono e foco de hoje')}</h1>
             <div className="mini-q">
               <span>{t('Quanta água você bebeu?')}</span>
               <div className="glasses">
@@ -230,7 +230,7 @@ export function Checkin({ s, onClose, day }: { s: AppState; onClose: () => void;
               </div>
             </div>
             <div className="mini-q">
-              <span>{t('Seu foco no objetivo hoje')}</span>
+              <span>{late ? t('Seu foco no objetivo ontem') : t('Seu foco no objetivo hoje')}</span>
               <Faces value={nearest(f.focus)} onChange={(v) => set('focus', v)} small />
             </div>
           </>
