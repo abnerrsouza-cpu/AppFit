@@ -33,7 +33,7 @@ export function Agua({ s, onBack }: { s: AppState; onBack: () => void }) {
       </div>
       <h1 className="ttl">
         {t('Controle de água')}
-        <Info text={t('Toque no recipiente toda vez que beber. A meta é calculada pelo seu peso: 35 ml por quilo.')} />
+        <Info text={s.profile.waterGoalMl ? t('Toque no recipiente toda vez que beber. A meta é a que você definiu no plano alimentar.') : t('Toque no recipiente toda vez que beber. A meta é calculada pelo seu peso: 35 ml por quilo.')} />
       </h1>
 
       <section className="card ag-hero">

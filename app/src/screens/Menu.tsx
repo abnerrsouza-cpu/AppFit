@@ -426,6 +426,20 @@ function Dieta({ p, upd, pdf }: { p: Profile; upd: Upd; pdf: ReactNode }) {
         ficha={[t('Cadastrar minha dieta'), t('Enviar PDF/foto ou escrever as refeições')]}
         check={[t('Não cadastrar'), t('Só marcar "segui a dieta" no fim do dia')]}
       />
+      <label className="card field">
+        {t('Meta de água por dia (litros)')}
+        <input
+          id="dt-water"
+          inputMode="decimal"
+          placeholder={t('Automática pelo peso')}
+          value={p.waterGoalMl ? String(p.waterGoalMl / 1000).replace('.', ',') : ''}
+          onChange={(e) => {
+            const v = Number(e.target.value.replace(',', '.'))
+            upd({ waterGoalMl: v > 0 && v <= 10 ? Math.round(v * 1000) : undefined })
+          }}
+        />
+        <small className="muted">{t('Deixe vazio para calcular pelo seu peso (35 ml por quilo).')}</small>
+      </label>
       {p.dietMode === 'check' ? (
         <div className="card mode-note">
           <Icon name="check" size={20} stroke={2.6} />

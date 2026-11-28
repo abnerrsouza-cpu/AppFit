@@ -348,7 +348,7 @@ function snapshot(d, now) {
   const letter = String(p.letter || '').trim().split(/(?<=[.!?])\s/)[0]
   // água e "dia completo"
   const waterMl = Number(d.water?.[date]) || 0
-  const waterGoal = Math.max(1500, Math.round(((Number(weight) || 70) * 35) / 500) * 500)
+  const waterGoal = Number(p.waterGoalMl) || Math.max(1500, Math.round(((Number(weight) || 70) * 35) / 500) * 500)
   const dietSimple = p.dietMode === 'check' || ((p.dietFiles || []).length > 0 && !meals.length)
   const ateOk = meals.length ? mealsMissed.length === 0 : dietSimple ? !!checks.diet || now.min < 20 * 60 : true
   const wantTrain = !!wk || !hasPlan

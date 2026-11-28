@@ -46,6 +46,8 @@ export interface Profile {
   trainMode?: PlanMode
   /** momento de vida: muda o jeito de cobrar */
   moment?: Moment
+  /** meta de água definida (ex.: pelo nutricionista); sem ela, 35 ml por kg */
+  waterGoalMl?: number
   dietMode?: PlanMode
   trainFiles?: PlanFile[] // PDFs/fotos da ficha, guardados no aparelho
   dietFiles?: PlanFile[]

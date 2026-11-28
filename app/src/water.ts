@@ -16,7 +16,7 @@ export const CONTAINERS = [
   { kind: 'garrafa', ml: 1000, label: 'Garrafa' },
 ] as const
 
-export const waterGoal = (s: AppState) => Math.max(1500, Math.round((currentWeight(s) * 35) / 500) * 500)
+export const waterGoal = (s: AppState) => s.profile.waterGoalMl || Math.max(1500, Math.round((currentWeight(s) * 35) / 500) * 500)
 export const fmtL = (ml: number) => (ml / 1000).toLocaleString(undefined, { maximumFractionDigits: 2 })
 
 /** Registros do dia; dias antigos que só têm total viram um registro único. */

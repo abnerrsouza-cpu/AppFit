@@ -321,12 +321,13 @@ route('PUT', '/api/state', async (req, res) => {
   const u = await requireUser(req)
   const b = await readJson(req)
   if (!b.data || typeof b.data !== 'object') throw new HttpError(400, 'Dados inválidos')
-  await q(
+  const r = await q(
     `insert into app_state (user_id, data, schedule, updated_at) values ($1, $2, $3, now())
-     on conflict (user_id) do update set data = excluded.data, schedule = excluded.schedule, updated_at = now()`,
+     on conflict (user_id) do update set data = excluded.data, schedule = excluded.schedule, updated_at = now()
+     returning updated_at`,
     [u.id, b.data, JSON.stringify(Array.isArray(b.schedule) ? b.schedule.slice(0, 600) : [])],
   )
-  send(res, 200, { ok: true })
+  send(res, 200, { ok: true, updatedAt: r.rows[0]?.updated_at })
 })
 
 // leitura de PDF (dieta / treino): no máximo 15 por pessoa por dia

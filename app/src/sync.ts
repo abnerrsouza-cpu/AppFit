@@ -37,13 +37,16 @@ function buildSchedule(s: AppState) {
 
 let timer = 0
 let lastJson = ''
+let serverAt = ''
+
 async function push() {
   const s = getState()
   const json = JSON.stringify(s)
   if (json === lastJson) return
   try {
-    await api.putState(s, buildSchedule(s))
+    const r = await api.putState(s, buildSchedule(s))
     lastJson = json
+    if (r?.updatedAt) serverAt = r.updatedAt
   } catch {
     /* tenta de novo na próxima mudança */
   }
@@ -53,7 +56,8 @@ async function push() {
 export async function startSync(userName: string) {
   const local = getState()
   try {
-    const { data } = await api.getState()
+    const { data, updatedAt } = await api.getState()
+    serverAt = updatedAt || ''
     if (data && typeof data === 'object') {
       setState(() => ({ ...localizeData(data as AppState, getLang()), lang: local.lang ?? (data as AppState).lang, demo: false }))
     } else {
@@ -87,10 +91,22 @@ export async function startSync(userName: string) {
     lastJson = ''
     void push()
   }, 6 * 3600_000)
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
-      lastJson = ''
-      void push()
+  // ao voltar para o app: se a conta mudou em outro lugar (outro celular, ajuda do suporte), puxa antes de enviar
+  document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState !== 'visible') return
+    try {
+      const { data, updatedAt } = await api.getState()
+      if (data && typeof data === 'object' && updatedAt && serverAt && updatedAt !== serverAt) {
+        const local = getState()
+        serverAt = updatedAt
+        setState(() => ({ ...localizeData(data as AppState, getLang()), lang: local.lang ?? (data as AppState).lang, demo: false }))
+        lastJson = JSON.stringify(getState())
+        return
+      }
+    } catch {
+      /* sem conexão: segue */
     }
+    lastJson = ''
+    void push()
   })
 }
