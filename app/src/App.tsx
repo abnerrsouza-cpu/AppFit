@@ -43,7 +43,7 @@ export default function App() {
   const [phase, setPhase] = useState<Phase>('loading')
   const [user, setUser] = useState<User | null>(null)
   const [tab, setTab] = useState<Tab>('inicio')
-  const [checkin, setCheckin] = useState(false)
+  const [checkin, setCheckin] = useState<boolean | string>(false)
   const [menuSec, setMenuSec] = useState<string | null>(null)
   const [pendingCount, setPendingCount] = useState(0)
   const [pendingNames, setPendingNames] = useState<string[]>([])
@@ -316,7 +316,7 @@ export default function App() {
   if (phase === 'pending' && user) return <Pending user={user} onUser={enter} onLogout={logout} />
 
   if (!s.onboarded) return <Onboarding p0={s.profile} s={s} userId={user?.id} hasServerAvatar={user?.hasAvatar} />
-  if (checkin) return <Checkin s={s} onClose={() => setCheckin(false)} />
+  if (checkin) return <Checkin s={s} day={typeof checkin === 'string' ? checkin : undefined} onClose={() => setCheckin(false)} />
 
   const hhmm = new Date().toTimeString().slice(0, 5)
   const owes = !s.daily[today()] && hhmm >= s.profile.checkinTime
@@ -412,6 +412,7 @@ export default function App() {
           initialSec={pjSec}
           autoFunnel={s.firstRun === 'projeto'}
           onAgua={() => setTab('agua')}
+          onCheckin={(d) => setCheckin(d)}
           onFunnelDone={() => {
             if (s.firstRun !== 'projeto') return
             setState((st) => ({ ...st, firstRun: 'treino' }))

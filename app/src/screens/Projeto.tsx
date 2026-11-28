@@ -7,7 +7,7 @@ import { Celebrate } from '../components/Celebrate'
 import { toast } from '../components/Toast'
 import { ProjetoFunnel } from './ProjetoFunnel'
 import { Info, WithInfo } from '../components/Info'
-import { t } from '../i18n'
+import { t, weekday } from '../i18n'
 import { type Factor, type PjStep, efficacyLabel, forecast, projetoStats, projetoTodo } from '../game'
 import { compress, getPhoto, putPhoto } from '../photos'
 import {
@@ -112,7 +112,7 @@ async function savePhoto(raw?: File, aspect = 3 / 4) {
   return id
 }
 
-export function Projeto({ s, initialSec, autoFunnel, onFunnelDone, onAgua }: { s: AppState; initialSec?: Sec; autoFunnel?: boolean; onFunnelDone?: () => void; onAgua?: () => void }) {
+export function Projeto({ s, initialSec, autoFunnel, onFunnelDone, onAgua, onCheckin }: { s: AppState; initialSec?: Sec; autoFunnel?: boolean; onFunnelDone?: () => void; onAgua?: () => void; onCheckin?: (day: string) => void }) {
   const pj = getProjeto(s)
   const todo = projetoTodo(s)
   const started = !!pj.startedAt
@@ -204,7 +204,7 @@ export function Projeto({ s, initialSec, autoFunnel, onFunnelDone, onAgua }: { s
         />
       )}
 
-      {started && <DayChecks s={s} onAgua={onAgua} />}
+      {started && <DayChecks s={s} onAgua={onAgua} onCheckin={onCheckin} />}
 
       {!started ? (
         <section className="card start-card">
@@ -316,62 +316,82 @@ function TimeCard({ s }: { s: AppState }) {
   )
 }
 
-/** Hoje: treino, cardio, água e dieta, um toque para marcar. */
-function DayChecks({ s, onAgua }: { s: AppState; onAgua?: () => void }) {
+/** Hoje (ou ontem/anteontem, para anotar depois): treino, cardio, água e dieta, um toque para marcar. */
+function DayChecks({ s, onAgua, onCheckin }: { s: AppState; onAgua?: () => void; onCheckin?: (day: string) => void }) {
   const p = s.profile
   const key = today()
   const yKey = ymd(addDays(new Date(), -1))
-  const c = s.checks[key] || {}
+  const days = [key, yKey, ymd(addDays(new Date(), -2))]
+  const [sel, setSel] = useState(key)
+  const isToday = sel === key
+  const c = s.checks[sel] || {}
   const hour = new Date().getHours()
-  const rest = hasTrainPlan(p) && !workoutFor(p, new Date())
-  const trained = trainedOn(s, key) >= 1
-  const ml = waterTotal(s)
+  const date = parseYmd(sel)
+  const rest = hasTrainPlan(p) && !workoutFor(p, date)
+  const trained = trainedOn(s, sel) >= 1
+  const ml = isToday ? waterTotal(s) : waterTotal(s, sel)
   const goal = waterGoal(s)
   const cardioMin = Math.max(10, Math.round(p.cardioGoalMin / 5))
-  // dieta: só no fim do dia (a partir das 20h) ou na manhã seguinte (até meio-dia, vale para ontem)
-  const dietYesterday = hour < 12 && !s.checks[yKey]?.diet && !s.daily[yKey]
-  const dietOpen = hour >= 20 || dietYesterday
-  const dietKey = hour >= 20 ? key : dietYesterday ? yKey : key
-  const dietDone = !!s.checks[dietKey]?.diet
-  const flip = (k: string, id: string) => setState((x) => ({ ...x, checks: { ...x.checks, [k]: { ...(x.checks[k] || {}), [id]: !x.checks[k]?.[id] } } }))
+  // dieta de hoje: só no fim do dia (a partir das 20h); dias anteriores: sempre
+  const dietOpen = !isToday || hour >= 20
+  const dietDone = !!c.diet
+  const flip = (id: string) => setState((x) => ({ ...x, checks: { ...x.checks, [sel]: { ...(x.checks[sel] || {}), [id]: !x.checks[sel]?.[id] } } }))
+  const setWaterGoal = () =>
+    setState((x) => {
+      const hit = (x.water?.[sel] || 0) >= goal
+      return {
+        ...x,
+        water: { ...(x.water || {}), [sel]: hit ? 0 : goal },
+        waterLog: { ...(x.waterLog || {}), [sel]: hit ? [] : [{ at: '23:59', ml: goal, kind: 'outro' }] },
+        checks: { ...x.checks, [sel]: { ...(x.checks[sel] || {}), water: !hit } },
+      }
+    })
+  const label = (d: string) => (d === key ? t('Hoje') : d === yKey ? t('Ontem') : weekday(parseYmd(d).getDay()))
   const items = [
     {
       id: 'train',
       icon: 'dumbbell',
       label: t('Treino'),
-      sub: rest && !trained ? t('Hoje é descanso') : trained ? t('Feito') : t('Toque quando treinar'),
+      sub: rest && !trained ? (isToday ? t('Hoje é descanso') : t('Era descanso')) : trained ? t('Feito') : isToday ? t('Toque quando treinar') : t('Treinou? Toque para marcar'),
       done: trained || rest,
-      onClick: () => flip(key, 'train'),
+      onClick: () => flip('train'),
     },
     ...(p.cardioGoalMin > 0
-      ? [{ id: 'cardio', icon: 'run', label: t('Cardio'), sub: c.cardio ? t('Feito') : t('{n} min', { n: cardioMin }), done: !!c.cardio, onClick: () => flip(key, 'cardio') }]
+      ? [{ id: 'cardio', icon: 'run', label: t('Cardio'), sub: c.cardio ? t('Feito') : t('{n} min', { n: cardioMin }), done: !!c.cardio, onClick: () => flip('cardio') }]
       : []),
     {
       id: 'water',
       icon: 'droplet',
       label: t('Água'),
-      sub: ml >= goal ? t('{a} L · meta batida', { a: fmtL(ml) }) : t('{a} de {b} L', { a: fmtL(ml), b: fmtL(goal) }),
+      sub: ml >= goal ? t('{a} L · meta batida', { a: fmtL(ml) }) : isToday ? t('{a} de {b} L', { a: fmtL(ml), b: fmtL(goal) }) : t('Bateu a meta? Toque para marcar'),
       done: ml >= goal,
       pct: Math.min(1, ml / goal),
-      onClick: () => onAgua?.(),
+      onClick: () => (isToday ? onAgua?.() : setWaterGoal()),
     },
     {
       id: 'diet',
       icon: 'food',
-      label: dietYesterday && hour < 12 ? t('Dieta de ontem') : t('Dieta'),
+      label: t('Dieta'),
       sub: dietDone ? t('Segui a dieta') : dietOpen ? t('Seguiu? Toque para marcar') : t('Libera às 20h'),
       done: dietDone,
       locked: !dietOpen && !dietDone,
-      onClick: () => dietOpen && flip(dietKey, 'diet'),
+      onClick: () => dietOpen && flip('diet'),
     },
   ]
   const done = items.filter((i) => i.done).length
   return (
     <section className="card dc">
       <div className="dc-h">
-        <b>{t('Hoje')}</b>
+        <div className="dc-days" role="tablist">
+          {days.map((d) => (
+            <button key={d} type="button" role="tab" aria-selected={sel === d} className={sel === d ? 'on' : ''} onClick={() => setSel(d)}>
+              {label(d)}
+            </button>
+          ))}
+        </div>
         <span className={`dc-count ${done === items.length ? 'all' : ''}`}>{t('{a} de {b}', { a: done, b: items.length })}</span>
       </div>
+      {!isToday && <p className="dc-past">{t('Anotando {d}: marque o que você fez e não conseguiu registrar.', { d: label(sel).toLowerCase() })}</p>}
       <div className="dc-grid">
         {items.map((i) => (
           <button key={i.id} type="button" className={`dc-it ${i.done ? 'on' : ''} ${'locked' in i && i.locked ? 'locked' : ''}`} onClick={i.onClick}>
@@ -383,7 +403,7 @@ function DayChecks({ s, onAgua }: { s: AppState; onAgua?: () => void }) {
               <small>{i.sub}</small>
             </span>
             <span className="dc-tick">{i.done ? <Icon name="check" size={16} stroke={3} /> : 'locked' in i && i.locked ? <Icon name="lock" size={13} /> : null}</span>
-            {'pct' in i && !i.done && (
+            {'pct' in i && !i.done && isToday && (
               <span className="dc-bar">
                 <span style={{ width: `${(i.pct ?? 0) * 100}%` }} />
               </span>
@@ -391,6 +411,11 @@ function DayChecks({ s, onAgua }: { s: AppState; onAgua?: () => void }) {
           </button>
         ))}
       </div>
+      {sel === yKey && !s.daily[yKey] && onCheckin && (
+        <button type="button" className="ghost-btn dc-ci" onClick={() => onCheckin(yKey)}>
+          <Icon name="list" size={18} /> {t('Prestar contas de ontem')}
+        </button>
+      )}
     </section>
   )
 }

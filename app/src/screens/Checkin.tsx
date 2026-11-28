@@ -4,7 +4,7 @@ import { Info, WithInfo } from '../components/Info'
 import { feedback, nudge } from '../psych'
 import { t } from '../i18n'
 import { XP, nextStreakMedal } from '../game'
-import { streak, planMeals, dietSimple, hasTrainPlan } from '../store'
+import { streak, planMeals, dietSimple, hasTrainPlan, parseYmd } from '../store'
 import { type AppState, type DailyLog, type Trained, setState, today, workoutFor } from '../store'
 
 // Escalas de carinha: viram nota 0-10 por baixo, mas a pessoa só toca.
@@ -17,10 +17,11 @@ const FACES = [
 ]
 const nearest = (v: number) => FACES.reduce((a, f) => (Math.abs(f.v - v) < Math.abs(a.v - v) ? f : a)).v
 
-export function Checkin({ s, onClose }: { s: AppState; onClose: () => void }) {
+export function Checkin({ s, onClose, day }: { s: AppState; onClose: () => void; day?: string }) {
   const p = s.profile
-  const key = today()
-  const wk = workoutFor(p, new Date())
+  const key = day ?? today()
+  const late = key !== today()
+  const wk = workoutFor(p, parseYmd(key))
   const prev = s.daily[key]
   const checks = s.checks[key] || {}
   const [f, setF] = useState<DailyLog>(
@@ -115,6 +116,7 @@ export function Checkin({ s, onClose }: { s: AppState; onClose: () => void }) {
           <Info text={t('O resumo honesto do seu dia em 6 perguntas rápidas. Leva menos de 1 minuto. No fim, o treinador responde.')} />
         </span>
       </div>
+      {late && <p className="ci-late">{t('Prestando contas de ontem. Responda sobre o dia de ontem.')}</p>}
 
       <div className="story-body">
         {step === 0 && (
