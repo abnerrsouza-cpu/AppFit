@@ -6,6 +6,7 @@ import { LANGS, t, weekday } from '../i18n'
 import { Integracoes } from './Integracoes'
 import { AvatarPicker } from '../components/AvatarPicker'
 import { PdfImport } from '../components/PdfImport'
+import { DietPaste } from '../components/DietPaste'
 import { RoutineTasks } from '../components/RoutineTasks'
 import { IntroPhotos } from '../components/IntroPhotos'
 import { LoginCta } from '../components/LoginCta'
@@ -448,6 +449,7 @@ function Dieta({ p, upd, pdf }: { p: Profile; upd: Upd; pdf: ReactNode }) {
       ) : (
         <>
           {pdf}
+          <DietPaste p={p} upd={upd} />
           <p className="lead">{t('Ou escreva aqui. Cada refeição vira uma notificação no horário.')}</p>
         </>
       )}
