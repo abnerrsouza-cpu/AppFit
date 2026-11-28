@@ -121,6 +121,8 @@ export interface AppState {
   water?: Record<string, number> // ml de água por dia (total)
   /** primeiro acesso: aulas do app → montar o projetinho → primeiro treino (vazio = concluído) */
   firstRun?: 'aulas' | 'projeto' | 'treino'
+  /** pausa a abertura com fotos ao abrir o app */
+  introOff?: boolean
   trainDoneAt?: Record<string, string> // hora em que marcou o treino do dia (para a notificação de vencedor)
   waterLog?: Record<string, { at: string; ml: number; kind: string }[]> // cada registro de água
   trainAt?: Record<string, string> // horário que a pessoa disse que vai treinar, por dia

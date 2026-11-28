@@ -49,6 +49,7 @@ export default function App() {
   const [pendingNames, setPendingNames] = useState<string[]>([])
   const synced = useRef(false)
   const [intro, setIntro] = useState(true)
+  const introPreview = useRef(false)
   const [openWeekly, setOpenWeekly] = useState(false)
   const [detail, setDetail] = useState<DetailKind>('treinos')
   const [pjSec, setPjSec] = useState<PjSec | undefined>(undefined)
@@ -271,6 +272,11 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [s.onboarded, s.demo])
 
+  // abertura pausada em Perfil: não espera as fotos (o "Ver a abertura" ainda funciona)
+  useEffect(() => {
+    if (intro && s.introOff && !introPreview.current) setIntro(false)
+  }, [intro, s.introOff])
+
   // tela de vitória: quando o treino de hoje passa de "não feito" para "feito" (em qualquer tela)
   const trainedNow = !!s.checks[today()]?.train
   const prevTrained = useRef<boolean | null>(null)
@@ -357,7 +363,17 @@ export default function App() {
       )}
       {victory && <Victory s={s} onClose={() => setVictory(false)} />}
       {s.firstRun === 'treino' && !intro && <FirstWorkout s={s} onDone={() => setTab('inicio')} />}
-      {intro && <Intro s={s} userId={user?.id} hasAvatar={user?.hasAvatar} onDone={() => setIntro(false)} />}
+      {intro && (!s.introOff || introPreview.current) && (
+        <Intro
+          s={s}
+          userId={user?.id}
+          hasAvatar={user?.hasAvatar}
+          onDone={() => {
+            introPreview.current = false
+            setIntro(false)
+          }}
+        />
+      )}
       {s.demo && phase === 'local' && (
         <div className="demo-bar">
           <span className="ttl">
@@ -422,7 +438,7 @@ export default function App() {
       )}
       {tab === 'agua' && <Agua s={s} onBack={() => setTab('inicio')} />}
       {tab === 'ranking' && <Ranking online={!!user} notice={rankNotice} />}
-      {tab === 'menu' && <Menu s={s} user={user} onUser={setUser} onHow={() => setHowAgain(true)} onConquistas={() => setTab('conquistas')} onRanking={() => setTab('ranking')} onPlano={() => setTab('plano')} onAgua={() => setTab('agua')} onAdmin={isAdmin ? () => setTab('admin') : undefined} adminPending={pendingCount} onPreviewIntro={() => setIntro(true)} onLogout={user ? logout : undefined} initialSec={menuSec} onOpened={() => setMenuSec(null)} />}
+      {tab === 'menu' && <Menu s={s} user={user} onUser={setUser} onHow={() => setHowAgain(true)} onConquistas={() => setTab('conquistas')} onRanking={() => setTab('ranking')} onPlano={() => setTab('plano')} onAgua={() => setTab('agua')} onAdmin={isAdmin ? () => setTab('admin') : undefined} adminPending={pendingCount} onPreviewIntro={() => { introPreview.current = true; setIntro(true) }} onLogout={user ? logout : undefined} initialSec={menuSec} onOpened={() => setMenuSec(null)} />}
       {tab === 'admin' && isAdmin && <Admin onPending={(n) => { setPendingCount(n); if (n !== pendingNames.length) setPendingNames([]) }} onBack={() => setTab('menu')} />}
       <Toaster />
       <BottomNav

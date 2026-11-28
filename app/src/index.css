@@ -10789,3 +10789,9 @@ html:has(.app) #root {
 .pj-tiles + .next-step {
   margin-top: 14px;
 }
+.ip-toggle .field-top > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-right: 10px;
+}

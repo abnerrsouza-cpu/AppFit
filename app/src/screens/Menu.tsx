@@ -82,7 +82,7 @@ export function Menu({ s, user = null, onUser, onLogout, onHow, onConquistas, on
           <Info text={t('Peso, altura e objetivo; os horários da sua rotina; e a carta que o treinador usa para te cobrar.')} />
         </span>
         <Row id="perfil" icon="user" title={t('Perfil e medidas')} sub={t('Peso, altura, idade, objetivo')} />
-        <Row id="fotos" icon="camera" title={t('Editar fotos da abertura')} sub={t('"Esse é você" e "Sua referência"')} />
+        <Row id="fotos" icon="camera" title={t('Editar fotos da abertura')} sub={s.introOff ? t('Abertura pausada') : t('"Esse é você" e "Sua referência"')} />
         <Row id="rotina" icon="sun" title={t('Rotina')} sub={t('Acorda {a} · treina {b} · dorme {c}', { a: p.wake, b: p.trainTime, c: p.sleep })} />
         <Row id="carta" icon="quote" title={t('Carta de compromisso')} sub={t('Usada nas cobranças')} />
       </div>

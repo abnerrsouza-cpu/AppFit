@@ -55,6 +55,26 @@ export function IntroPhotos({ s, userId, hasAvatar, onPreview }: { s: AppState; 
     <div className="form">
       <h1 className="ttl">{t('Fotos da abertura')}</h1>
       <p className="lead">{t('São as duas fotos que aparecem toda vez que você abre o app: primeiro você hoje, depois o corpo que você quer.')}</p>
+      <div className="card field ip-toggle">
+        <div className="field-top">
+          <span>
+            <b>{t('Mostrar ao abrir o app')}</b>
+            <small className="muted">{s.introOff ? t('Pausada. O app abre direto na tela Hoje.') : t('As fotos aparecem toda vez que você abre o app.')}</small>
+          </span>
+          <button
+            type="button"
+            className={`switch ${s.introOff ? '' : 'on'}`}
+            aria-pressed={!s.introOff}
+            aria-label={t('Mostrar ao abrir o app')}
+            onClick={() => {
+              setState((x) => ({ ...x, introOff: !x.introOff }))
+              toast(s.introOff ? t('Abertura com fotos ligada') : t('Abertura com fotos pausada'))
+            }}
+          >
+            <i />
+          </button>
+        </div>
+      </div>
       <Slot
         k="me"
         url={me}
